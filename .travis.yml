@@ -1,0 +1,14 @@
+language: python
+python:
+  -"3.6.2"
+before_install:
+  - sudo apt-get update -qq
+#install dependencies
+install: "pip install -r requirements.txt"
+#run tests
+#script: pytest
+#deploy:
+ #provider: heroku
+ #api_key:...
+ #app:
+  #master: app-name-appserver
