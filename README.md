@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/fi-ubers/app-server.svg?branch=master)](https://travis-ci.org/fi-ubers/app-server)
+
 # app-server
 
 Aplicación en python (flask + gunicorn) con API RESTful para el app-server de Fiuber App.
