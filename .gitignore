@@ -1,2 +1,9 @@
 *.pyc
 venv/
+
+*/**/__pycache__/*
+*/**/.cache/*
+
+.coverage
+htmlcov/
+coverage.xml
