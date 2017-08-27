@@ -16,7 +16,7 @@ Para entrar en el entorno virtual usar `source venv/bin/activate`, notar cómo e
 
 ### Levantar el servidor localmente
 
-Estando en el entorno virtual con las dependencias instaladas, se puede levantar el servidor con `gunicorn --bind localhost:5000 wsgi`.
+Estando en el entorno virtual con las dependencias instaladas, se puede levantar el servidor con `gunicorn --bind localhost:5000 wsgi --chdir src/main/`.
 
 ### Levantar el servidor en Heroku
 
