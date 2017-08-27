@@ -6,16 +6,16 @@ api = Api(application)
 
 class Hello(Resource):
     def get(self):
-        print "GET at /"
+        print("GET at /")
         return 'Hello' 
 
 class GoodBye(Resource):
     def get(self):
-        print "GET at /goodbye"
+        print("GET at /goodbye")
         return 'Good Bye'
 
     def post(self):
-        print "POST at /goodbye"
+        print("POST at /goodbye")
         return {'good':'bye'}
 
 api.add_resource(Hello, '/')
