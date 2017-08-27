@@ -1,5 +1,6 @@
 aniso8601==1.2.1
 click==6.7
+coverage==4.4.1
 Flask==0.12.2
 Flask-RESTful==0.3.6
 gunicorn==19.7.1
@@ -8,6 +9,7 @@ Jinja2==2.9.6
 MarkupSafe==1.0
 py==1.4.34
 pytest==3.2.1
+pytest-cov==2.5.1
 python-dateutil==2.6.1
 pytz==2017.2
 six==1.10.0
