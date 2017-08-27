@@ -6,7 +6,7 @@ before_install:
 #install dependencies
 install: "pip install -r requirements.txt"
 #run tests
-#script: pytest
+script: "echo 0"
 #deploy:
  #provider: heroku
  #api_key:...
