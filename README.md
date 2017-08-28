@@ -3,6 +3,8 @@
 [![Build Status](https://travis-ci.org/fi-ubers/app-server.svg?branch=master)](https://travis-ci.org/fi-ubers/app-server)
 [![Coverage Status](https://coveralls.io/repos/github/fi-ubers/app-server/badge.svg?branch=master)](https://coveralls.io/github/fi-ubers/app-server?branch=master)
 
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
 Aplicación en python (flask + gunicorn) con API RESTful para el app-server de Fiuber App.
 
 Leer los issues para una lista de tareas que realizar.
