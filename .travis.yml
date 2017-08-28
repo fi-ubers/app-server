@@ -1,21 +1,14 @@
 language: python
 python:
-  - "3.6"
-
+- '3.6'
 before_install:
-  - sudo apt-get update -qq
-
-#install dependencies
-install: "pip install -r requirements.txt"
-
-#run tests
+- sudo apt-get update -qq
+install: pip install -r requirements.txt
 script:
-        - py.test --cov-report html --cov src/main/ --verbose
-
-after_success:
-        coveralls
-#deploy:
- #provider: heroku
- #api_key:...
- #app:
-  #master: app-name-appserver
+- py.test --cov-report html --cov src/main/ --verbose
+after_success: coveralls
+deploy:
+  provider: heroku
+  app: fiuber-app-server
+  api_key:
+    secure: BE6BgEjeUmujA3P/GDGL+vWl9DGf7lju4sR4n8OxG6sPoJykv0cvDCFEQe7Bv8JutMrsYvItgRNHH+RmWvR2X4UHPQMFa5CPt9FMJNMfnPiJBoz6QjxlJqgWlh4JLu6sQz9M6bV/xGvWQAF7Daomk1arAz65MY8QtII5vrXK9YGtEY0RfBiZPE70MlJq8sSm97uz6lkxG9JyMpLLsGVrchFnFuux8q4tcyB91qk+Dpuas4D50rM1ECYLuSOBBxM0pNSvHcUfmdXG7jQht1RU94sMBPLnyVPRaQurBCPP+zI6/0yJY/DXCtXmpgl8jKNmNbFw60pggO3Kc6Qc4EXMxeLh4U0xfsKPHQPKds7qzK8es372HuzOLkVwHkli0C/yTzrPT1tK6Kql6XLIStP82O4KOQ6SODvZdn+9gngifSGoAQZZS3qRc7F4sOxlmGMOc2VJvM38KIYTuY30lI6TK1TB+21BZjsWtM+7qm4Nb8M9gkq0LWL4t3hJbIu4WvVdjiIlW+revX6qcEc9p8ij8zJkOkkT5k5tU28e/RMKIC/SvwwhEIh+2q43cWyWELZGTfvwiVoxI3lgnnD5PvwrXNTl9Q/nnwaCeSTgs7Jaygx5M1wqyZudf4lqHdQRM1X+JaZOhy2+5AVr0y/zRTjlp/6Nf4Py3WUQqRH9w3vLtYk=

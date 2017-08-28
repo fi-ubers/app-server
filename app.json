@@ -1,6 +1,7 @@
 {
-"name":"Fiuber app-server",
+"name":"fiuber-app-server",
 "description":"A simple Python server recreating small scale Uber service using gunicorn + flask.",
 "repository":"https://github.com/fi-ubers/app-server",
+"website":"https://fiuber-app-server.com/",
 "logo":"https://avatars2.githubusercontent.com/u/31289277?v=4&s=200"
 }
