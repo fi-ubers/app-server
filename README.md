@@ -9,6 +9,8 @@ Aplicación en python (flask + gunicorn) con API RESTful para el app-server de F
 
 Leer los issues para una lista de tareas que realizar.
 
+Connect to... [https://fiuber-app-server.herokuapp.com/](https://fiuber-app-server.herokuapp.com/)
+
 ## Para correr el servidor
 
 Es necesario crear un entorno virtual sobre el que correr el servidor, para ello se utiliza el paquete _virtualenv_ de python (`sudo pip install virtualenv`). Para crear un entorno virtual, estando en la carpeta del proyecto hacer `virtualenv venv`, se puede reemplazar _venv_ por cualquier otro nombre, pero cuidado porque esto crea una carpeta y no se debería agregar a ningún commit (_venv_ ya está en .gitignore).
