@@ -49,7 +49,7 @@ class GreetAdd(Resource):
         id = request.json['user']['id']
 
         for user in users:
-            iaf user['id'] == id:
+            if user['id'] == id:
                 abort(400)
 
         name = request.json['user']['name']
