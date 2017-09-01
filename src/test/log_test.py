@@ -1,10 +1,10 @@
 import sys
 import os.path
-from ..main.Logger import log
+from ..main.Logger import Log
 
 TEST_MSG = "LOG TEST #1"
 
-@log("LOGGER MSG")
+@Log("LOGGER MSG")
 def test():
 	return TEST_MSG
 
