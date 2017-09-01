@@ -1,7 +1,6 @@
 import sys
 import os.path
-sys.path.insert(0, '../main')
-from Logger import log
+from ..main.Logger import log
 
 TEST_MSG = "LOG TEST #1"
 
