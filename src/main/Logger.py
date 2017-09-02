@@ -20,7 +20,7 @@ class Log(object):
 		#Allows the log to be used as a decorator.
 		def wrapper(*args, **kwargs):            
 			return func(*args, **kwargs)
-		print "HOLAAAAAAAa"
+		#print "HOLAAAAAAAa"
 		self.logger.debug("Function {}. MSG: {}".format(str(func.__name__), str(self.message)))
 		return wrapper
 
