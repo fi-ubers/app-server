@@ -1,4 +1,4 @@
-from Logger import Log
+from ..main.Logger import Log
 
 class AuditableBaseMetaClass(type):
 
