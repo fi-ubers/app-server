@@ -12,3 +12,6 @@ class AuditableBaseMetaClass(type):
 class AuditableBaseClass(metaclass=AuditableBaseMetaClass):
 	#__metaclass__=AuditableBaseMetaClass python2.7
 	#TODO: add option to exclude a specific method/funtion from log to avoid performance issues.
+
+	def __init__(self):
+		self.logAll = True
