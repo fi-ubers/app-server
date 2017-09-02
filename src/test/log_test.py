@@ -3,8 +3,10 @@ import os.path
 from ..main.Logger import Log
 
 TEST_MSG = "LOG TEST #1"
+LOGFNAME = "loggingTest.log"
+CONFIG_FILE = "../test/loggingTest.conf"
 
-@Log("LOGGER MSG")
+@Log("LOGGER MSG", "log1", CONFIG_FILE)
 def test():
 	return TEST_MSG
 
@@ -12,10 +14,12 @@ def test():
 class TestLogger(object):
 
 	def testLogCallsFunction(self):
-		assert test() == TEST_MSG
+		testResult = test()
+		assert  testResult == TEST_MSG
 
 	def testLogCreatesLogFile(self):
-		test()
-		assert os.path.exists("testing.log")
+		#TODO: change logging file to test file so as not to
+		#remove actual logging file while testing.		
+		assert os.path.exists(LOGFNAME)
 
 
