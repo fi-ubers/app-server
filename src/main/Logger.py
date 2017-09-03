@@ -17,7 +17,6 @@ class Log(object):
 
 	def __call__(self, func):
 		#Allows the log to be used as a decorator.
-		print("LOGGING")
 		@wraps(func)
 		def wrapper(*args, **kwargs):            
 			return func(*args, **kwargs)
