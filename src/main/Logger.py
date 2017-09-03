@@ -11,7 +11,7 @@ class Log(object):
 	def __init__(self, msg = "", log = LOG_NAME, config = CONFIG_FILE):
 		#TODO: this should only be called once
 		#TODO: dinamically specify logfilename to be inserted in config file
-		logging.config.fileConfig(path.join(path.dirname(path.abspath(__file__)), CONFIG_FILE), disable_existing_loggers=False) 
+		logging.config.fileConfig(path.join(path.dirname(path.abspath(__file__)), config), disable_existing_loggers=False) 
 		#
 		self.logger = logging.getLogger(LOG_NAME)
 		self.message = ("" if(msg != "") else "MSG: ") + msg
