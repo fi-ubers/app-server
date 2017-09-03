@@ -1,6 +1,6 @@
 #from ..main.Logger import Log
 import inspect
-from Logger import Log
+from ..main.Logger import Log
 
 
 class AuditableBaseClass(object):
