@@ -28,7 +28,7 @@ class TestSimpleAPI(object):
         self.app = app.test_client()
         response = self.app.get('/greet')
 
-        response_parsed = json.loads(response.get_data())
+        response_parsed = json.loads(response.get_data().decode("utf-8"))
         assert (response_parsed == expected and response.status_code == 200)
 
 
@@ -43,7 +43,7 @@ class TestSimpleAPI(object):
         response = self.app.post('/greet', data = json.dumps({ "user" : new_user[0] }),
                                 content_type = 'application/json')
 
-        response_parsed = json.loads(response.get_data())
+        response_parsed = json.loads(response.get_data().decode("utf-8"))
         assert (response_parsed == expected and response.status_code == 201)
 
 
@@ -59,7 +59,7 @@ class TestSimpleAPI(object):
         response = self.app.post('/greet', data = json.dumps({ "user" : new_user[0] }),
                                 content_type = 'application/json')
 
-        response_parsed = json.loads(response.get_data())
+        response_parsed = json.loads(response.get_data().decode("utf-8"))
         assert (response_parsed == expected and response.status_code == 400)
 
 
@@ -86,7 +86,7 @@ class TestSimpleAPI(object):
         response = self.app.post('/greet', data = json.dumps({ "user" : new_user[0] }),
                                 content_type = 'application/json')
 
-        response_parsed = json.loads(response.get_data())
+        response_parsed = json.loads(response.get_data().decode("utf-8"))
         assert (response_parsed == expected and response.status_code == 400)
 
 
