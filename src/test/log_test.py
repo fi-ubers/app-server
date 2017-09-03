@@ -5,9 +5,8 @@ from ..main.Logger import Log
 
 TEST_MSG = "LOG TEST #1"
 LOGFNAME = "logging.log"
-#CONFIG_FILE = "../test/loggingTest.conf"
 
-@Log(TEST_MSG)#, "logger1", CONFIG_FILE)
+@Log(TEST_MSG)
 def test():
 	return TEST_MSG
 

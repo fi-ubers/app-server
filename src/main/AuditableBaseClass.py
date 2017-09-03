@@ -1,11 +1,9 @@
-#from ..main.Logger import Log
 import inspect
 from ..main.Logger import Log
 
 LOG_NAME = "logger"
 
 class AuditableBaseClass(object):
-	#__metaclass__=AuditableBaseMetaClass python2.7
 	#TODO: add option to exclude a specific method/funtion from log to avoid performance issues.
 	
 	def __init__(self):
