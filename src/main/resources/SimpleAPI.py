@@ -58,3 +58,18 @@ class GreetAdd(Resource):
         users.append(newUser)
         print("POST at /greet")
         return make_response(jsonify({'user' : newUser}), 201)
+
+    def delete(self):
+        print(request.json)
+        print("DELETE at /greet")
+        if (not request.json or not 'id' in request.json):
+            abort(400, 'request missing id')
+
+        id = request.json['id']
+        candidates = [user for user in users if user['id'] == id]
+        if len(candidates) == 0:
+            abort(404, 'user id not found')
+
+        users.remove(candidates[0])
+        return jsonify({'user': candidates[0]})
+
