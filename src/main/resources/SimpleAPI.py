@@ -1,5 +1,5 @@
 from flask_restful import Resource
-from flask import jsonify, abort, request
+from flask import jsonify, abort, request, make_response
 
 class Hello(Resource):
     def get(self):
@@ -16,7 +16,6 @@ class GoodBye(Resource):
         return {'good':'bye'}
 
 
-
 users = [
         { 'id': 1, 'name': "Juan"},
         { 'id': 2, 'name': "Ale"},
@@ -29,9 +28,8 @@ class Greet(Resource):
         print("GET at /greet/id")
         candidates = [user for user in users if user['id'] == id]
         if len(candidates) == 0:
-            abort(404)
+            abort(404, 'user id not found')
         return jsonify({'greetings': candidates[0]})
-
 
 
 class GreetAdd(Resource):
@@ -42,19 +40,21 @@ class GreetAdd(Resource):
     def post(self):
         print(request.json)
         if (not request.json or not 'user' in request.json):
-            abort(400)
-        if (not 'id' in  request.json['user'] or not 'name' in request.json['user']):
-            abort(400)
+            abort(400, 'request missing user tag')
+        if (not 'id' in  request.json['user']):
+            abort(400, 'request missing id')
+        if (not 'name' in request.json['user']):
+            abort(400, 'request missing name')
 
         id = request.json['user']['id']
 
         for user in users:
             if user['id'] == id:
-                abort(400)
+                abort(400, 'user id already exists')
 
         name = request.json['user']['name']
         newUser = { 'id' : id, 'name' : name }
 
         users.append(newUser)
         print("POST at /greet")
-        return jsonify({'user' : newUser})
+        return make_response(jsonify({'user' : newUser}), 201)
