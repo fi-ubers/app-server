@@ -1,3 +1,4 @@
+import sys
 import logging
 import logging.config
 from os import path
@@ -13,13 +14,18 @@ class Log(object):
 		logging.config.fileConfig(path.join(path.dirname(path.abspath(__file__)), CONFIG_FILE), disable_existing_loggers=False) 
 		#
 		self.logger = logging.getLogger(LOG_NAME)
-		self.message = msg
+		self.message = ("" if(msg != "") else "MSG: ") + msg
 
 	def __call__(self, func):
 		#Allows the log to be used as a decorator.
 		@wraps(func)
 		def wrapper(*args, **kwargs):            
-			return func(*args, **kwargs)
-		self.logger.debug("Function {}. MSG: {}".format(str(func.__name__), str(self.message)))
-		return wrapper
-
+			try:		
+				self.logger.debug("Function/Method {}. {}".format(str(func.__name__), str(self.message)))
+				return func(*args, **kwargs)
+			except:
+				e = sys.exc_info()[0]
+				errorMsg = "An error has ocurred: {}".format(str(e))
+				self.logger.exception(errorMsg)
+				raise
+		return  wrapper 
