@@ -3,13 +3,12 @@ import os.path
 from ..main.Logger import Log
 
 TEST_MSG = "LOG TEST #1"
-LOGFNAME = "loggingTest.log"
-CONFIG_FILE = "../test/loggingTest.conf"
+LOGFNAME = "logging.log"
+#CONFIG_FILE = "../test/loggingTest.conf"
 
-@Log("LOGGER MSG", "log1", CONFIG_FILE)
+@Log(TEST_MSG)#, "logger1", CONFIG_FILE)
 def test():
 	return TEST_MSG
-
 
 class TestLogger(object):
 

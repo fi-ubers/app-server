@@ -1,11 +1,21 @@
+import os.path
 from ..main.AuditableBaseClass import AuditableBaseClass
-import unittest
+from ..main.Logger import Log
 
-class AuditableBaseClassTest:
+LOGFNAME = "logging.log"
 
-	def testAuditableBaseClassMethodIsLogged():
-		abc = AuditableBaseClass()
-		#abc.someMethod = MagicMock(return_value="hello")
-		assert os.path.exists("testing.log")
+class _TestClass(AuditableBaseClass):
+		def saySomething(self, string):
+			return "Hello:" + string
+
+		def saySomethingElse(self):
+			return "Goodbye"
+
+class TestAuditableBaseClass(object):
+
+	def testAuditableBaseClassMethodIsLogged(self):
+		abc = _TestClass()
+		abc.saySomething("abc")
+		assert os.path.exists(LOGFNAME)
 
 
