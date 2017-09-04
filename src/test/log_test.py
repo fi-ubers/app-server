@@ -4,7 +4,7 @@ import pytest
 import datetime
 from src.main.log.Logger import Log
 
-LOGFNAME = "logs/log-"+str(datetime.date.today())+".log"
+LOGFNAME = "tmp/logs/log-"+str(datetime.date.today())+".log"
 CONFIG = "config/loggingTest.conf"
 LOGNAME = "testLogger"
 TEST_MSG = "This is test msg"

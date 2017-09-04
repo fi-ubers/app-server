@@ -8,7 +8,7 @@ import datetime
 
 CONFIG_FILE = "config/logging.conf"
 LOG_NAME = "logger"
-LOG_PATH = "logs/"
+LOG_PATH = "tmp/logs/"
 
 class Log(object):
 	
