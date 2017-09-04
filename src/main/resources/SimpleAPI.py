@@ -32,7 +32,7 @@ class Greet(Resource):
         return jsonify({'greetings': candidates[0]})
 
     def delete(self, id):
-        print(request.json)
+        print(id)
         print("DELETE at /greet/id")
 
         candidates = [user for user in users if user['id'] == id]
