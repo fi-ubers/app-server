@@ -2,6 +2,7 @@ import sys
 import logging
 import logging.config
 import os
+import errno
 from os import path
 from functools import wraps
 import datetime
@@ -17,8 +18,14 @@ class Log(object):
 	def __init__(self, msg = "", config = CONFIG_FILE):
 		#TODO: this should only be called once
 		#TODO: dinamically specify logfilename to be inserted in config file
-		if not os.path.exists(LOG_PATH):
+		try:
 			os.makedirs(LOG_PATH)
+		except OSError as exc:
+			if exc.errno == errno.EEXIST and os.path.isdir(LOG_PATH):
+				pass
+			else:
+				raise
+
 		logging.config.fileConfig(config, defaults={"logfilename": LOG_PATH + "log-"+str(datetime.date.today())+".log"}, disable_existing_loggers=False) 
 		self.message = ("" if(msg != "") else "MSG: ") + msg
 
