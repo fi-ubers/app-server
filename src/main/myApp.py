@@ -1,6 +1,6 @@
 from flask import Flask
 from flask_restful import Resource, Api
-from ..main.log.Logger import Log
+from log.Logger import Log
 
 application = Flask(__name__)
 api = Api(application)

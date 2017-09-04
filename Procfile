@@ -1,1 +1,1 @@
-web: gunicorn src.main.wsgi --chdir src/main/
+web: gunicorn wsgi --chdir src/main/
