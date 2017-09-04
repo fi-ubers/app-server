@@ -1,5 +1,5 @@
 import inspect
-from ...main.log.Logger import Log
+from src.main.log.Logger import Log
 
 class AuditableBaseClass(object):
 	#TODO: add option to exclude a specific method/funtion from log to avoid performance issues.

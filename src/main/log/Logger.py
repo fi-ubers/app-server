@@ -6,9 +6,9 @@ from os import path
 from functools import wraps
 import datetime
 
-CONFIG_FILE = "../../../config/logging.conf"
+CONFIG_FILE = "config/logging.conf"
 LOG_NAME = "logger"
-LOG_PATH = "tmp/log/"
+LOG_PATH = "logs/"
 
 class Log(object):
 	
@@ -19,7 +19,7 @@ class Log(object):
 		#TODO: dinamically specify logfilename to be inserted in config file
 		if not os.path.exists(LOG_PATH):
 			os.makedirs(LOG_PATH)
-		logging.config.fileConfig(path.join(path.dirname(path.abspath(__file__)), config), defaults={"logfilename": LOG_PATH + "log-"+str(datetime.date.today())+".log"}, disable_existing_loggers=False) 
+		logging.config.fileConfig(config, defaults={"logfilename": LOG_PATH + "log-"+str(datetime.date.today())+".log"}, disable_existing_loggers=False) 
 		self.message = ("" if(msg != "") else "MSG: ") + msg
 
 	def __call__(self, func):
