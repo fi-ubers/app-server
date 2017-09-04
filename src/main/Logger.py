@@ -8,7 +8,7 @@ import datetime
 
 CONFIG_FILE = "../../config/logging.conf"
 LOG_NAME = "logger"
-LOG_PATH = "tmp/log/"
+LOG_PATH = "../../logs/"
 
 class Log(object):
 	def __init__(self, msg = "", log = LOG_NAME, config = CONFIG_FILE):

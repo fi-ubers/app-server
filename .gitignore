@@ -8,4 +8,4 @@ venv/
 htmlcov/
 coverage.xml
 
-tmp/
+logs/
