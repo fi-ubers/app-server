@@ -1,8 +1,9 @@
 import os.path
+import datetime
 from ..main.AuditableBaseClass import AuditableBaseClass
 from ..main.Logger import Log
 
-LOGFNAME = "logging.log"
+LOGFNAME = "tmp/log/log-"+str(datetime.date.today())+".log"
 
 class _TestClass(AuditableBaseClass):
 		def saySomething(self, string):

@@ -1,15 +1,18 @@
 from flask import Flask
 from flask_restful import Resource, Api
+from Logger import Log
 
 application = Flask(__name__)
 api = Api(application)
 
 class Hello(Resource):
+    @Log("GET returns Hello")
     def get(self):
         print("GET at /")
         return 'Hello' 
 
 class GoodBye(Resource):
+    @Log("GET returns Good Bye")
     def get(self):
         print("GET at /goodbye")
         return 'Good Bye'

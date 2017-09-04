@@ -1,10 +1,12 @@
 import sys
 import os.path
 import pytest
+import datetime
 from ..main.Logger import Log
+from ..main.Logger import myApp
 
-LOGFNAME = "loggingTest.log"
-CONFIG = "../test/loggingTest.conf"
+LOGFNAME = "tmp/log/log-"+str(datetime.date.today())+".log"
+CONFIG = "../../config/loggingTest.conf"
 LOGNAME = "testLogger"
 TEST_MSG = "This is test msg"
 

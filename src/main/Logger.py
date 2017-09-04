@@ -1,17 +1,22 @@
 import sys
 import logging
 import logging.config
+import os
 from os import path
 from functools import wraps
+import datetime
 
-CONFIG_FILE = "logging.conf"
+CONFIG_FILE = "../../config/logging.conf"
 LOG_NAME = "logger"
+LOG_PATH = "tmp/log/"
 
 class Log(object):
 	def __init__(self, msg = "", log = LOG_NAME, config = CONFIG_FILE):
 		#TODO: this should only be called once
 		#TODO: dinamically specify logfilename to be inserted in config file
-		logging.config.fileConfig(path.join(path.dirname(path.abspath(__file__)), config), disable_existing_loggers=False) 
+		if not os.path.exists(LOG_PATH):
+			os.makedirs(LOG_PATH)
+		logging.config.fileConfig(path.join(path.dirname(path.abspath(__file__)), config), defaults={"logfilename": LOG_PATH + "log-"+str(datetime.date.today())+".log"}, disable_existing_loggers=False) 
 		#
 		self.logger = logging.getLogger(LOG_NAME)
 		self.message = ("" if(msg != "") else "MSG: ") + msg
