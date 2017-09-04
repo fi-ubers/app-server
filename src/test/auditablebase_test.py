@@ -3,7 +3,7 @@ import datetime
 from src.main.log.AuditableBaseClass import AuditableBaseClass
 from src.main.log.Logger import Log
 
-LOGFNAME = "logs/log-"+str(datetime.date.today())+".log"
+LOGFNAME = "tmp/logs/log-"+str(datetime.date.today())+".log"
 
 class _TestClass(AuditableBaseClass):
 		def saySomething(self, string):
