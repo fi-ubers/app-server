@@ -1,4 +1,4 @@
-from ..main import myApp
+from src.main import myApp
 
 class TestMyApp(object):
     def test_hello(self):
