@@ -3,7 +3,6 @@ import os.path
 import pytest
 import datetime
 from ..main.Logger import Log
-from ..main.Logger import myApp
 
 LOGFNAME = "tmp/log/log-"+str(datetime.date.today())+".log"
 CONFIG = "../../config/loggingTest.conf"
