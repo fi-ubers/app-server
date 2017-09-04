@@ -47,32 +47,6 @@ paths:
           description: "OK"
           schema:
             $ref: "#/definitions/UserList"
-
-    delete:
-      tags:
-      - "greet"
-      sumary: "Delete an user by id"
-      description: ""
-      operationId: "removeUser"
-      parameters:
-      - in: "body"
-        name: "id"
-        required: true
-        description: "Id of the usert to delete"
-        type: "integer"
-        format: "int64"
-      produces:
-      - "application/json"
-      responses:
-        200:
-          description: "OK"
-          schema:
-            $ref: "#/definitions/User"
-        404:
-          description: "User not found"
-          schema:
-            $ref: "#/definitions/ApiResponse"
-      
   /greet/{userId}:
     get:
       tags:
@@ -96,6 +70,31 @@ paths:
             $ref: "#/definitions/Greetings"
         404:
           description: "User not found"
+    delete:
+      tags:
+      - "greet"
+      sumary: "Delete an user by id"
+      description: ""
+      operationId: "removeUser"
+      parameters:
+      - in: "path"
+        name: "userId"
+        required: true
+        description: "Id of the usert to delete"
+        type: "integer"
+        format: "int64"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/User"
+        404:
+          description: "User not found"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+      
 
 definitions:
   User:

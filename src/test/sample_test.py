@@ -97,8 +97,7 @@ class TestSimpleAPI(object):
         testAPI.users = fake_users 
 
         self.app = app.test_client()
-        response = self.app.delete('/greet', data = json.dumps({ "id" : 1 }),
-                                content_type = 'application/json')
+        response = self.app.delete('/greet/1')
 
         response_parsed = json.loads(response.get_data())
         assert (response_parsed == expected and response.status_code == 200)
@@ -109,18 +108,6 @@ class TestSimpleAPI(object):
         testAPI.users = fake_users 
 
         self.app = app.test_client()
-        response = self.app.delete('/greet', data = json.dumps({ "invalid" : 2 }),
-                                content_type = 'application/json')
-
-        assert (response.status_code == 400)
-
-    def test_delete_nonexistent_user(self):
-        fake_users = [{ "id" : 1, "name" : "Juan" }]
-
-        testAPI.users = fake_users 
-
-        self.app = app.test_client()
-        response = self.app.delete('/greet', data = json.dumps({ "id" : 2 }),
-                                content_type = 'application/json')
+        response = self.app.delete('/greet/2')
 
         assert (response.status_code == 404)
