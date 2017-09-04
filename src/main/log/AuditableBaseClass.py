@@ -1,7 +1,5 @@
 import inspect
-from ..main.Logger import Log
-
-LOG_NAME = "logger"
+from ...main.log.Logger import Log
 
 class AuditableBaseClass(object):
 	#TODO: add option to exclude a specific method/funtion from log to avoid performance issues.
@@ -12,5 +10,5 @@ class AuditableBaseClass(object):
 	def __getattribute__(self, name):
 		attr = super(AuditableBaseClass, self).__getattribute__(name)
 		if callable(attr) and (attr.__name__ not in self.exclude):
-			attr =  Log("", LOG_NAME).__call__(attr)
+			attr =  Log("").__call__(attr)
 		return attr

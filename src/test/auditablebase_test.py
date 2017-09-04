@@ -1,7 +1,7 @@
 import os.path
 import datetime
-from ..main.AuditableBaseClass import AuditableBaseClass
-from ..main.Logger import Log
+from ..main.log.AuditableBaseClass import AuditableBaseClass
+from ..main.log.Logger import Log
 
 LOGFNAME = "tmp/log/log-"+str(datetime.date.today())+".log"
 
