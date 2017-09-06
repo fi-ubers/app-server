@@ -1,6 +1,12 @@
 from flask_restful import Resource
 from flask import jsonify, abort, request, make_response
 
+from pymongo import MongoClient
+
+db_client = MongoClient("mongodb://juanfresia:testdb@ds123534.mlab.com:23534/fiuber-app-server-testdb")
+db = db_client.get_default_database()
+users = db.users
+
 class Hello(Resource):
     def get(self):
         print("GET at /")
@@ -15,18 +21,10 @@ class GoodBye(Resource):
         print("POST at /goodbye")
         return {'good':'bye'}
 
-
-users = [
-        { 'id': 1, 'name': "Juan"},
-        { 'id': 2, 'name': "Ale"},
-        { 'id': 3, 'name': "Cami"},
-        { 'id': 6, 'name': "Euge"}
-    ]
-
 class Greet(Resource):
     def get(self, id):
         print("GET at /greet/id")
-        candidates = [user for user in users if user['id'] == id]
+        candidates = [user for user in users.find() if user['_id'] == id]
         if len(candidates) == 0:
             abort(404, 'user id not found')
         return jsonify({'greetings': candidates[0]})
@@ -35,19 +33,20 @@ class Greet(Resource):
         print(id)
         print("DELETE at /greet/id")
 
-        candidates = [user for user in users if user['id'] == id]
+        candidates = [user for user in users.find() if user['_id'] == id]
 
         if len(candidates) == 0:
             abort(404, 'user id not found')
 
-        users.remove(candidates[0])
+        users.delete_many({"_id" : candidates[0]['_id']})
         return jsonify({'user': candidates[0]})
 
 
 class GreetAdd(Resource):
     def get(self):
         print("GET at /greet")
-        return jsonify({'users' : users})
+        aux = [user for user in users.find()]
+        return jsonify({'users' : aux})
 
     def post(self):
         print(request.json)
@@ -60,14 +59,14 @@ class GreetAdd(Resource):
 
         id = request.json['user']['id']
 
-        for user in users:
-            if user['id'] == id:
+        for user in users.find():
+            if user['_id'] == id:
                 abort(400, 'user id already exists')
 
         name = request.json['user']['name']
-        newUser = { 'id' : id, 'name' : name }
+        newUser = { '_id' : id, 'name' : name }
 
-        users.append(newUser)
+        users.insert_one(newUser)
         print("POST at /greet")
         return make_response(jsonify({'user' : newUser}), 201)
 
