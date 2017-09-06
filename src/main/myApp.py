@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_restful import Resource, Api
 
-from resources.SimpleAPI import Hello, GoodBye, Greet, GreetAdd
+from src.main.resources.SimpleAPI import Hello, GoodBye, Greet, GreetAdd
 
 application = Flask(__name__)
 api = Api(application)

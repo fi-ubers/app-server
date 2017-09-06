@@ -1,7 +1,7 @@
 import json
 
-from ..main.resources import SimpleAPI as testAPI
-from ..main.myApp import application as app
+from src.main.resources import SimpleAPI as testAPI
+from src.main.myApp import application as app
 
 class TestMyApp(object):
     def test_hello(self):
