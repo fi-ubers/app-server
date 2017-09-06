@@ -4,6 +4,9 @@ venv/
 */**/__pycache__/*
 */**/.cache/*
 
+.cache
 .coverage
 htmlcov/
 coverage.xml
+
+run.sh

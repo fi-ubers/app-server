@@ -1,0 +1,129 @@
+swagger: "2.0"
+info:
+  description: "This is the dummy simpleAPI documentation for fiuber app-server."
+  version: "1.0.0"
+  title: "SimpleAPI dummy"
+host: fiuber-app-server-test.herokuapp.com
+
+tags:
+- name: "greet"
+  description: "Management of users"
+
+schemes:
+- "https"
+
+paths:
+  /greet:
+    post:
+      tags:
+      - "greet"
+      summary: "Add a new user"
+      description: ""
+      operationId: "addUser"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "user"
+        description: "New user data"
+        required: true
+        schema:
+          $ref: "#/definitions/NewUser"
+      responses:
+        400:
+          description: "Invalid input"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+    get:
+      tags:
+      - "greet"
+      summary: "List all users"
+      description: ""
+      operationId: "listUsers"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/UserList"
+  /greet/{userId}:
+    get:
+      tags:
+      - "greet"
+      summary: "Greet user with id userId"
+      description: ""
+      operationId: "getUser"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "userId"
+        in: "path"
+        description: "ID of user to return"
+        required: true
+        type: "integer"
+        format: "int64"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/Greetings"
+        404:
+          description: "User not found"
+    delete:
+      tags:
+      - "greet"
+      sumary: "Delete an user by id"
+      description: ""
+      operationId: "removeUser"
+      parameters:
+      - in: "path"
+        name: "userId"
+        required: true
+        description: "Id of the usert to delete"
+        type: "integer"
+        format: "int64"
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/User"
+        404:
+          description: "User not found"
+          schema:
+            $ref: "#/definitions/ApiResponse"
+      
+
+definitions:
+  User:
+    type: "object"
+    properties:
+      id:
+        type: "integer"
+        format: "int64"
+      name:
+        type: "string"
+  NewUser:
+    type: "object"
+    properties:
+      user:
+        $ref: "#/definitions/User"
+  UserList:
+    type: "object"
+    properties:
+      users:
+        type: "array"
+        items:
+          $ref: "#/definitions/User"
+  Greetings:
+    type: "object"
+    properties:
+      greetings:
+        $ref: "#/definitions/User"
+  ApiResponse:
+    type: "object"
+    properties:
+      message:
+        type: "string"
