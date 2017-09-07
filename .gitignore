@@ -7,6 +7,8 @@ venv/
 .cache
 .coverage
 htmlcov/
+html/
+latex/
 coverage.xml
 
 run.sh
