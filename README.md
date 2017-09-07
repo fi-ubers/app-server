@@ -35,7 +35,7 @@ Para poder probar los distintos endpoints de la API se puede utilizar un navegad
 
 Donde _tipo_ es POST, GET, etc; _data_ son los datos a mandar en la request (un string representando un .json o '' para no enviar nada). 
 
-##Para generar la documentacion del código fuente
+## Para generar la documentación del código fuente
 
 Ingresar el siguiente comando en la consola, desde el directorio raíz de la aplicación:
 
