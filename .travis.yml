@@ -1,9 +1,11 @@
 language: python
 python:
 - '2.7.9'
+cache: pip
 before_install:
 - sudo apt-get update -qq
-install: pip install -r requirements.txt
+install: 
+- pip install -r requirements.txt
 script:
 - py.test --cov-report html --cov=src.main src/test/ --verbose
 after_success: coveralls
