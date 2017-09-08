@@ -1,9 +1,13 @@
 from flask_restful import Resource
 from flask import jsonify, abort, request, make_response
 
+import os
 from pymongo import MongoClient
 
-db_client = MongoClient("mongodb://juanfresia:testdb@ds123534.mlab.com:23534/fiuber-app-server-testdb")
+if os.environ.has_key('MONGODB_URL'):
+    db_client = MongoClient(os.environ['MONGODB_URL'])
+else:
+    db_client = MongoClient("mongodb://127.0.0.1:27017/test")
 db = db_client.get_default_database()
 users = db.users
 
