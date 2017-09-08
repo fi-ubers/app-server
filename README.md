@@ -21,11 +21,19 @@ Para entrar en el entorno virtual usar `source venv/bin/activate`, notar cómo e
 
 ### Levantar el servidor localmente
 
-Estando en el entorno virtual con las dependencias instaladas, se puede levantar el servidor con `gunicorn --bind localhost:5000 wsgi --chdir src/main/`.
+#### Base de datos MongoDB
+
+Es necesario tener corriendo una base de datos local si se quiere poder levantar el servido localmente. Para hacerlo hay que previamente tener instalado [MongoDB Community Edition](https://docs.mongodb.com/tutorials/install-mongodb-on-ubuntu/).
+
+Una vez que se haya instalado, se deberá correr el servicio en segundo plano mediante `sudo service mongod start`.
+
+Estando en el entorno virtual con las dependencias instaladas, se puede levantar el servidor con `gunicorn --bind localhost:5000 src.main.wsgi`.
+
+Nota: alternativamente a levantar una base de datos local, se puede setear una variable de entorno `MONGODB_URL` con la dirección de un base de datos remota (e.g. mlab), incluyendo en la misma la autenticación.
 
 ### Levantar el servidor en Heroku
 
-*WIP*
+Sencillamente se debe hacer `git push heroku +HEAD:master` para deployear en heroku la branch actual. Nótese que se utiliza _heroku_ como remote, por lo tanto deberá estar configurado como tal. Usar `git remote -v` para ver la lista de remotes, y `git remote add` para agregar el remote con nombre heroku.
 
 ## Para realizar requests por consolas
 
@@ -42,4 +50,3 @@ Ingresar el siguiente comando en la consola, desde el directorio raíz de la apl
 $ make
 
 Los archivos de documentación se generarán automáticamente en la carpeta docs/documentation. Allí se podrá encontrar el subdirectorio correspondiente a cada formato disponible para visualizar la documentación (latex, html, etc.). Para visualizar la documentación en formato html, se debe ingresar a docs/documentation/html y seleccionar el archivo index.html. Para la documentación en latex, ingresar al directorio docs/documentation/latex y nuevamente ingresar el comando $make en la consola. Se generará un archivo .pdf con la documentación de la aplicación.
- 
