@@ -6,6 +6,7 @@ from pymongo import MongoClient
 
 if os.environ.has_key('MONGODB_URL'):
     db_client = MongoClient(os.environ['MONGODB_URL'])
+    print("Using remote database")
 else:
     db_client = MongoClient("mongodb://127.0.0.1:27017/test")
 db = db_client.get_default_database()
