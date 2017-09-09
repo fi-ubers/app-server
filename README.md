@@ -43,5 +43,10 @@ Para poder probar los distintos endpoints de la API se puede utilizar un navegad
 
 Donde _tipo_ es POST, GET, etc; _data_ son los datos a mandar en la request (un string representando un .json o '' para no enviar nada). 
 
+## Para generar la documentación del código fuente
 
-	  
+Ingresar el siguiente comando en la consola, desde el directorio raíz de la aplicación:
+
+$ make
+
+Los archivos de documentación se generarán automáticamente en la carpeta docs/documentation. Allí se podrá encontrar el subdirectorio correspondiente a cada formato disponible para visualizar la documentación (latex, html, etc.). Para visualizar la documentación en formato html, se debe ingresar a docs/documentation/html y seleccionar el archivo index.html. Para la documentación en latex, ingresar al directorio docs/documentation/latex y nuevamente ingresar el comando $make en la consola. Se generará un archivo .pdf con la documentación de la aplicación.

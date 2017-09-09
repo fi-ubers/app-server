@@ -1,3 +1,8 @@
+"""@package SimpleAPI
+Documentation for this module.
+More details.
+"""
+
 from flask_restful import Resource
 from flask import jsonify, abort, request, make_response
 
@@ -13,11 +18,17 @@ db = db_client.get_default_database()
 users = db.users
 
 class Hello(Resource):
+    """This class initializes a resource named Hello.
+    It can be called through GET.
+    """
     def get(self):
         print("GET at /")
         return 'Hello' 
 
 class GoodBye(Resource):
+    """This class initializes a resource named Goodbye.
+    It can be called through GET and POST.
+    """
     def get(self):
         print("GET at /goodbye")
         return 'Good Bye'
@@ -27,6 +38,10 @@ class GoodBye(Resource):
         return {'good':'bye'}
 
 class Greet(Resource):
+    """This class initializes a resource named Greet.
+    It can be called through GET and DELETE.
+    """
+
     def get(self, id):
         print("GET at /greet/id")
         candidates = [user for user in users.find() if user['_id'] == id]
@@ -48,6 +63,10 @@ class Greet(Resource):
 
 
 class GreetAdd(Resource):
+    """This class initializes a resource named GreetAdd.
+    It can be called through GET and POST.
+    """
+
     def get(self):
         print("GET at /greet")
         aux = [user for user in users.find()]
