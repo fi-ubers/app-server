@@ -27,7 +27,7 @@ Es necesario tener corriendo una base de datos local si se quiere poder levantar
 
 Una vez que se haya instalado, se deberá correr el servicio en segundo plano mediante `sudo service mongod start`.
 
-Estando en el entorno virtual con las dependencias instaladas, se puede levantar el servidor con `gunicorn --bind localhost:5000 src.main.wsgi`.
+Estando en el entorno virtual con las dependencias instaladas, se puede levantar el servidor con `gunicorn src.main.wsgi`.
 
 Nota: alternativamente a levantar una base de datos local, se puede setear una variable de entorno `MONGODB_URL` con la dirección de un base de datos remota (e.g. mlab), incluyendo en la misma la autenticación.
 
