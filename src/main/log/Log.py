@@ -4,8 +4,8 @@ import errno
 import logging.config
 import datetime
 
-LOGCONF = "../../config/logging/logging.conf"
-LOGDIR = "../../tmp/logs/"
+LOGCONF = "../../../config/logging/logging.conf"
+LOGDIR = "../../../tmp/logs/"
 
 class Logger():
 	
