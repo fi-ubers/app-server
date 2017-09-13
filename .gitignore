@@ -4,9 +4,13 @@ venv/
 */**/__pycache__/*
 */**/.cache/*
 
+.cache
 .coverage
 htmlcov/
+html/
+latex/
 coverage.xml
 
 tmp/
 logs/
+run.sh

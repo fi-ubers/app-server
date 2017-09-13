@@ -1,0 +1,5 @@
+PROJECT_NAME	=	"Fiuber App-server"
+PROJECT_NUMBER	=	"1.0"
+INPUT		= 	"src/main/resources"
+OUTPUT_DIRECTORY= 	"docs/documentation"
+
