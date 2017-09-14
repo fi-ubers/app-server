@@ -10,7 +10,7 @@ import os
 from pymongo import MongoClient
 from src.main.log.Log import Logger
 
-if os.environ.has_key('MONGODB_URL'):
+if 'MONGODB_URL' in os.environ:
     db_client = MongoClient(os.environ['MONGODB_URL'])
     print("Using remote database")
 else:
