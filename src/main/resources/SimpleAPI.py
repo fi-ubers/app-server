@@ -8,6 +8,7 @@ from flask import jsonify, abort, request, make_response
 
 import os
 from pymongo import MongoClient
+from src.main.log.Log import Logger
 
 if os.environ.has_key('MONGODB_URL'):
     db_client = MongoClient(os.environ['MONGODB_URL'])
@@ -23,6 +24,7 @@ class Hello(Resource):
     """
     def get(self):
         print("GET at /")
+        Logger.getLogger().debug("Hello Logger")
         return 'Hello' 
 
 class GoodBye(Resource):
@@ -31,6 +33,7 @@ class GoodBye(Resource):
     """
     def get(self):
         print("GET at /goodbye")
+        Logger.getLogger().debug("Good Bye Logger")
         return 'Good Bye'
 
     def post(self):

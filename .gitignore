@@ -11,4 +11,6 @@ html/
 latex/
 coverage.xml
 
+tmp/
+logs/
 run.sh
