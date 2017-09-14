@@ -49,6 +49,7 @@ class Greet(Resource):
         print("GET at /greet/id")
         candidates = [user for user in users.find() if user['_id'] == id]
         if len(candidates) == 0:
+            Logger.getLogger().error("Attempted to retrieve user with non-existent id.")
             abort(404, 'user id not found')
         return jsonify({'greetings': candidates[0]})
 
@@ -59,8 +60,9 @@ class Greet(Resource):
         candidates = [user for user in users.find() if user['_id'] == id]
 
         if len(candidates) == 0:
+            Logger.getLogger().error("Attempted to delete user with non-existent id.")
             abort(404, 'user id not found')
-
+        Logger.getLogger().info("Successfully deleted user.")
         users.delete_many({"_id" : candidates[0]['_id']})
         return jsonify({'user': candidates[0]})
 
@@ -78,16 +80,20 @@ class GreetAdd(Resource):
     def post(self):
         print(request.json)
         if (not request.json or not 'user' in request.json):
+            Logger.getLogger().error("Missing user data to create user.")
             abort(400, 'request missing user tag')
         if (not 'id' in  request.json['user']):
+            Logger.getLogger().error("Attempted to create user without id.")
             abort(400, 'request missing id')
         if (not 'name' in request.json['user']):
+            Logger.getLogger().error("Attempted to create user without name.")
             abort(400, 'request missing name')
 
         id = request.json['user']['id']
 
         for user in users.find():
             if user['_id'] == id:
+                Logger.getLogger().error("Attempted to create user with existing id.")
                 abort(400, 'user id already exists')
 
         name = request.json['user']['name']
