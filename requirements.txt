@@ -16,6 +16,7 @@ idna==2.6
 ipaddress==1.0.18
 itsdangerous==0.24
 Jinja2==2.9.6
+json-logging-py==0.2
 MarkupSafe==1.0
 py==1.4.34
 pycparser==2.18

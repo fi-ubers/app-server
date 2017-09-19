@@ -1,6 +1,5 @@
 from flask import Flask
 from flask_restful import Resource, Api
-from src.main.log.Log import Logger
 
 from src.main.resources.SimpleAPI import Hello, GoodBye, Greet, GreetAdd
 

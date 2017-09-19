@@ -27,7 +27,7 @@ Es necesario tener corriendo una base de datos local si se quiere poder levantar
 
 Una vez que se haya instalado, se deberá correr el servicio en segundo plano mediante `sudo service mongod start`.
 
-Estando en el entorno virtual con las dependencias instaladas, se puede levantar el servidor con `gunicorn src.main.wsgi`.
+Estando en el entorno virtual con las dependencias instaladas, se puede levantar el servidor con `make run`. Esto corre el comando `gunicorn --config config/gunicorn.conf --log-config config/logging.conf src.main.wsgi` seteando una variable de entorno `GUNICRON_BIND` que indica sobre qué puerto correr (ver makefile).
 
 Nota: alternativamente a levantar una base de datos local, se puede setear una variable de entorno `MONGODB_URL` con la dirección de un base de datos remota (e.g. mlab), incluyendo en la misma la autenticación.
 
@@ -50,3 +50,19 @@ Ingresar el siguiente comando en la consola, desde el directorio raíz de la apl
 $ make
 
 Los archivos de documentación se generarán automáticamente en la carpeta docs/documentation. Allí se podrá encontrar el subdirectorio correspondiente a cada formato disponible para visualizar la documentación (latex, html, etc.). Para visualizar la documentación en formato html, se debe ingresar a docs/documentation/html y seleccionar el archivo index.html. Para la documentación en latex, ingresar al directorio docs/documentation/latex y nuevamente ingresar el comando $make en la consola. Se generará un archivo .pdf con la documentación de la aplicación.
+
+
+
+### Uso de docker
+
+Se debe tener instalado [Docker Community Edition](https://docs.docker.com/engine/installation/#server) y configurado para poder [correrlo sin sudo](https://docs.docker.com/engine/installation/linux/linux-postinstall/).
+
+El archivo Dockerfile contiene toda la información sobre cómo generar el container. Usar los tasks `docker_build`, `docker_run` y `docker_stop` para crear una imágen, correr y detener un container.
+
+Algunos comandos útiles para ver el estado de las imágenes/containers son:
+
+Para crear una imagen a partir del Dockerfile en el directorio actual (notar el . al final del comando): `docker build -t image_name .`
+
+Para crear un container a partir de una imagen ya creada usar: `docker container --name container_name -d -p 5000:8000 image_name`. El flag --name le da un nombre user friendly para poder referenciarlo luego; -d hace que se corra en segundo plano y -p mapea un puerto del host con algún puerto expuesto por el container.
+
+Para listar todas las imágenes creadas: `docker images`. Para listar todos los containers corriendo `docker container ls`. Para detener un container `docker stop container_name` y para eliminar completamente un container `docker container rm container_name`.
