@@ -1,6 +1,9 @@
 from flask import Flask
 from flask_restful import Resource, Api
 
+from src.main.mongodb.MongoHandler import MongoHandler
+appdb = MongoHandler()
+
 from src.main.resources.SimpleAPI import Hello, GoodBye, Greet, GreetAdd
 
 application = Flask(__name__)

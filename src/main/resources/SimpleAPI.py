@@ -8,15 +8,7 @@ from flask import jsonify, abort, request, make_response
 
 import os
 import logging as logger
-from pymongo import MongoClient
-
-if 'MONGODB_URL' in os.environ:
-    db_client = MongoClient(os.environ['MONGODB_URL'])
-    print("Using remote database")
-else:
-    db_client = MongoClient("mongodb://127.0.0.1:27017/test")
-db = db_client.get_default_database()
-users = db.users
+from src.main.myApp import appdb
 
 class Hello(Resource):
     """This class initializes a resource named Hello.
@@ -44,10 +36,12 @@ class Greet(Resource):
     """This class initializes a resource named Greet.
     It can be called through GET and DELETE.
     """
+    def __init__(self):
+        self.users = appdb.getCollection("users")
 
     def get(self, id):
         print("GET at /greet/id")
-        candidates = [user for user in users.find() if user['_id'] == id]
+        candidates = [user for user in self.users.find() if user['_id'] == id]
         if len(candidates) == 0:
             logger.getLogger().error("Attempted to retrieve user with non-existent id.")
             abort(404, 'user id not found')
@@ -57,13 +51,13 @@ class Greet(Resource):
         print(id)
         print("DELETE at /greet/id")
 
-        candidates = [user for user in users.find() if user['_id'] == id]
+        candidates = [user for user in self.users.find() if user['_id'] == id]
 
         if len(candidates) == 0:
             logger.getLogger().error("Attempted to delete user with non-existent id.")
             abort(404, 'user id not found')
         logger.getLogger().info("Successfully deleted user.")
-        users.delete_many({"_id" : candidates[0]['_id']})
+        self.users.delete_many({"_id" : candidates[0]['_id']})
         return jsonify({'user': candidates[0]})
 
 
@@ -71,11 +65,13 @@ class GreetAdd(Resource):
     """This class initializes a resource named GreetAdd.
     It can be called through GET and POST.
     """
+    def __init__(self):
+        self.users = appdb.getCollection("users")
 
     def get(self):
         print("GET at /greet")
         logger.getLogger().info("GET at /greet")
-        aux = [user for user in users.find()]
+        aux = [user for user in self.users.find()]
         return jsonify({'users' : aux})
 
     def post(self):
@@ -92,7 +88,7 @@ class GreetAdd(Resource):
 
         id = request.json['user']['id']
 
-        for user in users.find():
+        for user in self.users.find():
             if user['_id'] == id:
                 logger.getLogger().error("Attempted to create user with existing id.")
                 abort(400, 'user id already exists')
@@ -100,7 +96,7 @@ class GreetAdd(Resource):
         name = request.json['user']['name']
         newUser = { '_id' : id, 'name' : name }
 
-        users.insert_one(newUser)
+        self.users.insert_one(newUser)
         print("POST at /greet")
         return make_response(jsonify({'user' : newUser}), 201)
 
