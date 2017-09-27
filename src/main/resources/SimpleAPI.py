@@ -8,7 +8,8 @@ from flask import jsonify, abort, request, make_response
 
 import os
 import logging as logger
-from src.main.myApp import appdb
+
+from src.main.mongodb import MongoController
 
 class Hello(Resource):
     """This class initializes a resource named Hello.
@@ -37,7 +38,7 @@ class Greet(Resource):
     It can be called through GET and DELETE.
     """
     def __init__(self):
-        self.users = appdb.getCollection("users")
+        self.users = MongoController.getCollection("users")
 
     def get(self, id):
         print("GET at /greet/id")
@@ -66,7 +67,7 @@ class GreetAdd(Resource):
     It can be called through GET and POST.
     """
     def __init__(self):
-        self.users = appdb.getCollection("users")
+        self.users = MongoController.getCollection("users")
 
     def get(self):
         print("GET at /greet")
