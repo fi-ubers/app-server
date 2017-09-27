@@ -7,12 +7,12 @@ DOCKER_NAME = app-server-img
 DOCKER_CONTAINER_NAME = app-server
 DOCKER_FLAGS = --name ${DOCKER_CONTAINER_NAME} -p 27017:27017 -p 5000:8000
 
-GUNICORN_BIND = 8000
+GUNICORN_BIND = :5000
 
 
 run: logs/mylog.log
 	@echo "Make sure mongod service is running (sudo service mongod start)"
-	@export GUNICORN_BIND=${GUNICORN_BIND}
+	@export GUNICORN_BIND=$(GUNICORN_BIND)
 	gunicorn --config config/gunicorn.conf --log-config config/logging.conf src.main.wsgi
 
 

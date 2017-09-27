@@ -6,6 +6,9 @@ FROM python:2.7-slim
 WORKDIR /app
 ADD . /app
 
+RUN mkdir -p /app/logs
+RUN touch /app/logs/mylog.log
+
 # Install dependencies
 RUN pip install -r requirements.txt
 
@@ -14,7 +17,8 @@ EXPOSE 8000
 EXPOSE 27017
 
 # Define environment variables with
-ENV MONGODB_URL "mongodb://juanfresia:testdb@ds123534.mlab.com:23534/fiuber-app-server-testdb"
+# ENV MONGODB_URL "mongodb://juanfresia:testdb@ds123534.mlab.com:23534/fiuber-app-server-testdb"
+# ENV VARIABLE value
 
 # Run app when de container launches
 ENTRYPOINT ["/usr/local/bin/gunicorn", "--log-config", "config/logging.conf", "-b", ":8000", "src.main.wsgi"]
