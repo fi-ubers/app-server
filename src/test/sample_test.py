@@ -23,8 +23,11 @@ from mock import Mock
 from src.main.mongodb import MongoController
 MongoController.getCollection = Mock(return_value = UserCollectionMock())
 
-
 from src.main.resources import SimpleAPI as testAPI
+## This mock should be provisory... until validateToken function is taken
+## to another module.
+testAPI.validateToken = Mock(return_Value = True)
+
 from src.main.myApp import application as app
 
 class TestMyApp(object):
