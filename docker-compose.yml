@@ -1,0 +1,25 @@
+version: '2.1'
+
+services:
+  db:
+    container_name: mongodatabase
+    image: mongo:3.0.2
+    ports:
+      - '27017:27017'
+    volumes:
+      - './db/mongo:/data/db'
+    command: mongod --smallfiles
+
+  app-server:
+    container_name: app-server
+    build: .
+    ports:
+      - '5000:8000'
+    environment:
+      - MONGODB_URL=mongodb://mongodatabase:27017/test
+    volumes:
+      - '.:/src/main'
+    links:
+      - db
+    depends_on:
+      - db
