@@ -19,3 +19,13 @@ db = db_client.get_default_database()
 
 def getCollection(collectionName):
 	return db[collectionName]
+
+
+"""
+.find() --- returns [{object}]
+.delete_many(condition)
+.insert_one(object)
+
+
+"""
+
