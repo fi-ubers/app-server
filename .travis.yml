@@ -1,15 +1,13 @@
-sudo:required
+sudo: required
 language: python
 services:
   - docker
 before_install:
--docker run -d --name=server-01 -p 127.0.0.2:80:80 -v $PWD/config/test-container/db.json:/data/db.json clue/json-server
--docker ps -a
--docker start server-01
+  - docker run -d --name=server-01 -p 127.0.0.2:80:80 -v $PWD/config/test-container/db.json:/data/db.json clue/json-server
+  - docker ps -a
+  - docker start server-01
 python:
 - '2.7.9'
-before_install:
-- sudo apt-get update -qq
 install: pip install -r requirements.txt
 script:
 - py.test --cov-report html --cov=src.main src/test/ --verbose
