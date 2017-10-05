@@ -1,0 +1,58 @@
+{
+  "posts": [
+    { "id": 1, "title": "json-server", "author": "typicode" }
+  ],
+  "comments": [
+    { "id": 1, "body": "some comment", "postId": 1 }
+  ],
+  "profile": { "name": "typicode" },
+  "users":{
+
+	  "metadata": {
+	    "count": 0,
+	    "total": 0,
+	    "next": "string",
+	    "prev": "string",
+	    "first": "string",
+	    "last": "string",
+	    "version": "string"
+	  },
+	  "users": [
+	    {
+	      "id": "string",
+	      "_ref": "string",
+	      "applicationOwner": "string",
+	      "type": "string",
+	      "cars": [
+	        {
+	          "id": "string",
+	          "_ref": "string",
+	          "owner": "string",
+	          "properties": [
+	            {
+	              "name": "string",
+	              "value": "string"
+	            }
+	          ]
+	        }
+	      ],
+	      "username": "string",
+	      "name": "string",
+	      "surname": "string",
+	      "country": "string",
+	      "email": "string",
+	      "birthdate": "string",
+	      "images": [
+	        "string"
+	      ],
+	      "balance": [
+	        {
+	          "currency": "string",
+	          "value": 0
+	        }
+	      ]
+	    }
+	  ]
+
+  }
+}
