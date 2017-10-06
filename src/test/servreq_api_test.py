@@ -1,14 +1,14 @@
-import requests
+import os
 import json
+import mock
+import requests
+from src.main.com import ServerRequest
 
-USER_END ="http://172.17.0.2:80/posts"
 headers = {'Content-Type' : 'application/json'}
 
 class TestServerRequest():
 
-	def test(self):
-		expected = [  {'id': 1,'title': 'json-server','author': 'typicode' }]
-		r = requests.get(USER_END, headers=headers)
-		assert ( r.json() == expected )
-
-
+	@mock.patch.dict(os.environ, {"SS_URL": "http://172.17.0.2:80"})
+	def test_getusers_returns_userlist(self):
+		expected_email = "voldyvoldy@hotmail.com"
+		assert(ServerRequest.getUsers()[0]["email"] == "voldyvoldy@hotmail.com" )

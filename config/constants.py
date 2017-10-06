@@ -1,4 +1,4 @@
-SS_URI = "http://demo2680725.mockable.io/" #"sharedserverurl"
+SS_URI = "http://172.17.0.2:80" #TODO: modify to "sharedserverurl"
 
 UPDATE_CONFLICT = 409
 SUCCESS = 200

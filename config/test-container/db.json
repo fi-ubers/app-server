@@ -6,7 +6,7 @@
     { "id": 1, "body": "some comment", "postId": 1 }
   ],
   "profile": { "name": "typicode" },
-  "users":{
+  "users": {
 
 	  "metadata": {
 	    "count": 0,
@@ -19,36 +19,36 @@
 	  },
 	  "users": [
 	    {
-	      "id": "string",
-	      "_ref": "string",
-	      "applicationOwner": "string",
-	      "type": "string",
+	      "id": "1",
+	      "_ref": "1234",
+	      "applicationOwner": "admin",
+	      "type": "driver",
 	      "cars": [
 	        {
-	          "id": "string",
-	          "_ref": "string",
-	          "owner": "string",
+	          "id": "1",
+	          "_ref": "2345",
+	          "owner": "FIUBER",
 	          "properties": [
 	            {
-	              "name": "string",
-	              "value": "string"
+	              "name": "Baby",
+	              "value": "4000"
 	            }
 	          ]
 	        }
 	      ],
-	      "username": "string",
-	      "name": "string",
-	      "surname": "string",
-	      "country": "string",
-	      "email": "string",
-	      "birthdate": "string",
+	      "username": "Voldemort",
+	      "name": "Tom",
+	      "surname": "Riddle",
+	      "country": "England",
+	      "email": "voldyvoldy@hotmail.com",
+	      "birthdate": "6-1",
 	      "images": [
-	        "string"
+	        "imageurl"
 	      ],
 	      "balance": [
 	        {
-	          "currency": "string",
-	          "value": 0
+	          "currency": "Galleon",
+	          "value": 1
 	        }
 	      ]
 	    }

@@ -3,11 +3,15 @@ Implements API methods that allow user related
 transactions and requests to be sent to the Shared 
 Server.
 """
-
+import os
+import requests
 import logging as logger
-#import config.constants as constants
+import config.constants as constants
 
-#USER_END = constants.SS_URI + "/users"
+if not "SS_URL" in os.environ:
+	os.environ["SS_URL"] = constants.SS_URI
+
+USER_END = "/users"
 #CARS = "/cars"
 #TRANSACT_ENDPOINT = "/transactions"
 #TRIPS_ENDPOINT = "/trips"
@@ -24,12 +28,13 @@ def validateUser(user_js):
 		logger.getLogger().debug("User no valid!!")
 		return None 
 
-#"""Returns a list of all the users and their information in json format."""
-#def getUsers():
-#	r = requests.get(USER_END)
-#	if (r.status_code != constants.SUCCESS):
-#		raise Exception("Shared Server returned error: %d"%(r.status_code))
-#	return request.get_json()['users']
+"""Returns a list of all the users and their information in json format."""
+def getUsers():
+	r = requests.get(os.environ["SS_URL"] + USER_END)
+	if (r.status_code != constants.SUCCESS):
+		raise Exception("Shared Server returned error: %d"%(r.status_code))
+	print("RESPONSE:{}".format(r.json()))
+	return r.json()["users"]
 
 #"""Attempts to perform a request. If the request is rejected because of a reference missmatch, the 
 #operation will be repeated until successfully completed or until a maximum number of attempts is 
