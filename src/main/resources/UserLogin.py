@@ -146,3 +146,32 @@ class UsersList(Resource):
 
 		return ResponseMaker.response(501, {'users' : aux})
 
+
+
+
+
+class UserLogout(Resource):
+	def post(self):
+		print(request.json)
+		logger.getLogger().debug("POST at /users")
+		logger.getLogger().debug(request.json)
+
+		if not "UserToken" in request.headers:
+			return ResponseMaker.response(400, "Bad request - missing token")
+		token = request.headers['UserToken']
+
+		result = TokenGenerator.validateToken(token)
+
+		# (mongodb) Return all logged in users.
+		users_online = MongoController.getCollection("online")
+
+		user = [user for user in users_online.find() if (user['username'] == result[1]['username'])]
+		print(user)
+		if (len(user) == 0):
+			return ResponseMaker.response(404, "User not found")
+
+		users_online.delete_many(user[0]);
+		
+		return ResponseMaker.response(200, { 'users' : user[0] } )
+
+
