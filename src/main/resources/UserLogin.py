@@ -32,16 +32,18 @@ class UserLogin(Resource):
 		logger.getLogger().debug(request.json)
 
 		# (validate-data) Validate user data
+
 		# (shared-server) First ask shared server for credentials validation
 		server_response = ServerRequest.validateUser(request.json)
-		if not server_response:
+
+		if not server_response[0]:
 			return ResponseMaker.response(418, 'I\' m a teapot and your credentials are not valid!')
-		print(server_response)
+		print("USER VALIDATED: " + str(server_response[1]))
 		logger.getLogger().debug("Credentials are valid, server responsed with user")
 
 		# (token-generation) Generate a new UserToken for that user
 		token = "AAAABBBBCCCC"
-		server_response["token"] = token
+		server_response[1]["token"] = token
 
 		# (mongodb) If credentials are valid, add user to active users table
 		"""
@@ -96,7 +98,10 @@ class UsersList(Resource):
 		logger.getLogger().debug(request.json)
 
 		# (validate-data) Validate user data
+
 		# (shared-server) Send new user data to shared server.
+		ServerRequest.createUser(request.json)
+
 		return ResponseMaker.response(501, "Not implemented")
 
 	""" Handler to get a list of all users.

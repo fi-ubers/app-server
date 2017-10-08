@@ -11,6 +11,7 @@ import logging as logger
 
 from src.main.mongodb import MongoController
 from src.main.com import ResponseMaker
+from src.main.com import ServerRequest
 
 def validateToken(response):
 	if not "UserToken" in request.headers:
@@ -117,4 +118,21 @@ class GreetAdd(Resource):
 		self.users.insert_one(newUser)
 		print("POST at /greet")
 		return make_response(jsonify({'user' : newUser}), 201)
+
+
+class UserGetAll(Resource):
+	
+	def get(self):
+		return ServerRequest.getUsers()
+
+class UserGetById(Resource):
+			
+	def get(self, id):
+		return ServerRequest.getUser(id)	
+		
+	def put(self, id):
+		return ServerRequest.updateUser(request.json)		
+	
+	def delete(self, id):
+		return ServerRequest.deleteUser(id)
 
