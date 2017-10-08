@@ -99,7 +99,10 @@ Returns True if the credentials were invalid, returns False otherwise.
 """
 #TESTED
 def validateUser(user_js):
-	userInfo = {"username" : user_js['username'], "password" : user_js['password'], "facebookAuthToken" : user_js['authToken'] }
+	userInfo = {"username" : user_js['username'], "password" : user_js['password'], "facebookAuthToken" : user_js['fbToken'] }
+
+	userInfo["_id"] = 14
+	return (True, userInfo)
 
 	r = requests.post(USER_END + "/validate", data = json.dumps(userInfo), headers=headers)
 	if (r.status_code == constants.PARAMERR):

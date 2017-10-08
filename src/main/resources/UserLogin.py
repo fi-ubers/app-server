@@ -41,19 +41,21 @@ class UserLogin(Resource):
 		print("USER VALIDATED: " + str(server_response[1]))
 		logger.getLogger().debug("Credentials are valid, server responsed with user")
 
+		user_js = server_response[1];
+
 		# (token-generation) Generate a new UserToken for that user
-		token = "AAAABBBBCCCC"
-		server_response[1]["token"] = token
+		token = TokenGenerator.generateToken(server_response[1]);
+		user_js["token"] = token
 
 		# (mongodb) If credentials are valid, add user to active users table
-		"""
+		
 		users_online = MongoController.getCollection("online")
 		for user in users_online.find():
-			if user["_id"] == server_response["_id"]:
+			if user["_id"] == server_response[1]["_id"]:
 				users_online.delete_many({"_id" : user["_id"]}) 
-		users_online.insert_one(server_response)
-		"""
-		return ResponseMaker.response(200, token)
+		users_online.insert_one(server_response[1])
+		
+		return ResponseMaker.response(200, { "user" : server_response ,"token" : token })
 
 
 class UsersList(Resource):
@@ -121,9 +123,26 @@ class UsersList(Resource):
 		}
 	"""
 	def get(self):
-
 		# (validate-token) Validate user token
-		# (mongodb) Return all logged in users.
+		if not "UserToken" in request.headers:
+			return ResponseMaker.response(400, "Bad request - missing token")
+		token = request.headers['UserToken']
 
-		return ResponseMaker.response(501, "Not implemented")
+		result = TokenGenerator.validateToken(token)
+
+		if not result[0]:
+			return ResponseMaker.response(403, "Forbidden")
+
+		username = result[1]
+
+		# Token is valid, time to get the users
+		print(username)
+		logger.getLogger().debug(username)
+
+		# (mongodb) Return all logged in users.
+		users_online = MongoController.getCollection("online")
+
+		aux = [user for user in users_online.find()]
+
+		return ResponseMaker.response(501, {'users' : aux})
 
