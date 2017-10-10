@@ -44,10 +44,12 @@ def getUsers():
 """
 def getUser(userId):
 	r = requests.get(USER_END + "/" + str(userId) + QUERY_TOKEN, headers=headers)
+
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
-		raise Exception("Shared Server returned error: %d"%(r.status_code))
-	return r.json()["user"]
+		return (r.status_code, r.json());
+
+	return (r.status_code, r.json()["user"])
 
 
 """Attempts to perform a request. If the request is rejected because of a reference missmatch, the 
@@ -111,11 +113,10 @@ Returns False if the user id does not match any user id.
 """
 def deleteUser(userId):
 	r = requests.delete(USER_END + "/" + str(userId) + QUERY_TOKEN, headers=headers)
-	if (r.status_code == constants.NOT_FOUND):
-		return (False, r.status_code)
+
 	if (r.status_code != constants.DELETE_SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
-		raise Exception("Shared Server returned error: %d"%(r.status_code))
+		return (False, r.status_code)
 	return (True, r.status_code)
 
 

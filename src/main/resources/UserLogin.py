@@ -189,7 +189,12 @@ class UserById(Resource):
 
 		if len(candidates) == 0:
 			#If not available in local data-base, ask Shared-Server for user info.
-			candidates = [ ServerRequest.getUser(id) ]
+			(status, response) = ServerRequest.getUser(id)
+			
+			if (status != constants.SUCCESS):
+				return ResponseMaker.response(status, response["message"])
+			
+			candidates = [ response ]
 			candidates[0]['_id'] = candidates[0].pop('id')
 			self.users.insert_one(candidates[0])
 
@@ -231,26 +236,29 @@ class UserById(Resource):
 		
 	def delete(self, id):
 		print(id)
-		print("DELETE at /greet/id")
+		print("DELETE at /users/id")
 
-		(valid, decoded) = TokenGenerator.validateToken(request)
+		if not "UserToken" in request.headers:
+			return ResponseMaker.response(400, "Bad request - missing token")
 
+		token = request.headers['UserToken']
+
+		(valid, decoded) = TokenGenerator.validateToken(token)
+
+		print(decoded)
 		if not valid or (decoded['_id'] != id):
 			return ResponseMaker.response(constants.FORBIDDEN, "Forbidden")
 
-		try:
-			#Ask Shared-Server to delete this user
-			delete_success, status_code = ServerRequest.deleteUser(user['_id'])
-			if delete_success:
-				#Delete in local data-base
-				candidates = [user for user in self.users.find() if user['_id'] == id]
-				self.users.delete_many({"_id" : candidates[0]['_id']})
-				logger.getLogger().info("Successfully deleted user.")			
-			else:
-				logger.getLogger().error("Attempted to delete user with non-existent id.")
-			return ResponseMaker.response(constants.NOT_FOUND, "User not found!")
-		except Exception, e:
-			logger.getLogger().error("User delete operation was unsuccessful." + str(e))
-			return ResponseMaker.response(status_code, str(e))	
-		return make_response(jsonify({'user': candidates[0]}), 200)
+		#Ask Shared-Server to delete this user
+		delete_success, status_code = ServerRequest.deleteUser(id)
+		if delete_success:
+			#Delete in local data-base
+			candidates = [user for user in self.users.find() if user['_id'] == id]
+			self.users.delete_many({"_id" : id })
+			logger.getLogger().info("Successfully deleted user.")			
+		else:
+			logger.getLogger().error("Attempted to delete user with non-existent id.")
+			return ResponseMaker.response(status_code, "Delete error")	
+
+		return ResponseMaker.response(constants.SUCCESS, { 'users' : candidates })
 
