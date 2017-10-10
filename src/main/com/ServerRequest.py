@@ -12,12 +12,14 @@ import config.constants as constants
 if not "SS_URL" in os.environ:
 	os.environ["SS_URL"] = constants.SS_URI
 
-USER_END = os.environ["SS_URL"] + "/users"
+APP_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwianRpIjoiNTZhYWVlZWMtNGQ1Yy00NjEwLTgwMzYtN2EwYTA3YTViYzAyIiwiZXhwIjoxNTA4MDk1NzQ2LCJpYXQiOjE1MDc2NjU2Njd9.4V3AAWuex2wCZJYdePm-k8Xp8yQYVYp8imBOlCVMDEs'
+USER_END = os.environ["SS_URL"] + "/users" 
+QUERY_TOKEN = "?token=" + APP_TOKEN
 #CARS = "/cars"
 #TRANSACT_ENDPOINT = "/transactions"
 #TRIPS_ENDPOINT = "/trips"
 
-headers = {'Content-Type' : 'application/json', 'CamiToken' : 'ELTOKENDECAMI'}
+headers = {'Content-Type' : 'application/json'}
 MAX_ATTEMPTS = 10
 
 #""" Asks shared server to validate user credentials"""
@@ -31,7 +33,7 @@ MAX_ATTEMPTS = 10
 
 """Returns a list of all the users and their information in json format."""
 def getUsers():
-	r = requests.get(USER_END, headers=headers)
+	r = requests.get(USER_END + QUERY_TOKEN, headers=headers)
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		raise Exception("Shared Server returned error: %d"%(r.status_code))
@@ -41,7 +43,7 @@ def getUsers():
 """Receives a user id. Returns the information of the user that matches that id in json format.
 """
 def getUser(userId):
-	r = requests.get(USER_END + "/" + str(userId), headers=headers)
+	r = requests.get(USER_END + "/" + str(userId) + QUERY_TOKEN, headers=headers)
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		raise Exception("Shared Server returned error: %d"%(r.status_code))
@@ -69,7 +71,7 @@ def _permformUpdate(f, endpoint, updatedEntityName, updatedEntity):
 Returns False if the user id does not match any user id or _ref value is invalid.
 Returns True if the user info was successfully updated."""
 def updateUser(user_js):
-	endpoint = USER_END + "/" + user_js["_id"]
+	endpoint = USER_END + "/" + user_js["_id"] + QUERY_TOKEN
 	r = _permformUpdate(lambda ep, u: requests.put(ep, json.dumps(u), headers=headers), endpoint, "user", user_js)
 	if (r.status_code == constants.NOT_FOUND):
 		return (False, r.json()['message'])
@@ -80,7 +82,7 @@ def updateUser(user_js):
 """ Asks shared server to create a new user"""
 def createUser(user_js):
 	user_js["_ref"] = ""
-	r = requests.post(USER_END, data = json.dumps(user_js), headers=headers)
+	r = requests.post(USER_END + QUERY_TOKEN, data = json.dumps(user_js), headers=headers)
 	if (r.status_code != constants.CREATE_SUCCESS):
 		raise Exception("Shared Server returned error: %d"%(r.status_code))
 	print("CREATED RESPONSE:" + str(r.json()))
@@ -94,19 +96,18 @@ def validateUser(user_js):
 	#userInfo = {"_username" : user_js['username'], "password" : user_js['password'], "facebookAuthToken" : user_js['fbToken'] }
 	#return (True, userInfo)
 
-	r = requests.post(USER_END + "/validate", data = json.dumps(userInfo), headers=headers)
-	if (r.status_code == constants.PARAMERR):
-		return (False, r.json['message'])
+	print(user_js)
+	r = requests.post(USER_END + "/validate" + QUERY_TOKEN, data = json.dumps(user_js), headers=headers)
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
-		raise Exception("Shared Server returned error: %d"%(r.status_code))
+		return (False, r)
 	return (True, r.json()['user'])
 
 """Receives a user id and attempts to delete it. Returns True if the user exists and is correctly deleted.
 Returns False if the user id does not match any user id.
 """
 def deleteUser(userId):
-	r = requests.delete(USER_END + "/" + str(userId), headers=headers)
+	r = requests.delete(USER_END + "/" + str(userId) + QUERY_TOKEN, headers=headers)
 	if (r.status_code == constants.NOT_FOUND):
 		return (False, r.status_code)
 	if (r.status_code != constants.DELETE_SUCCESS):

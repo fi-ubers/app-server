@@ -6,7 +6,7 @@ def generateToken(user):
 	print(user)
 	payload = {}
 	payload['username'] = user['username']
-	payload['_id'] = user['id']
+	payload['_id'] = user['_id']
 	token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
 	return token
 
