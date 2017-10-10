@@ -108,7 +108,7 @@ class UserById(Resource):
 		except Exception, e:
 			logger.getLogger().error("User delete operation was unsuccessful." + str(e))
 			return ResponseMaker.response(status_code, str(e))	
-		return jsonify({'user': candidates[0]})
+		return make_response(jsonify({'user': candidates[0]}), 200)
 
 
 class GreetAdd(Resource):

@@ -3,10 +3,10 @@ FROM python:2.7-slim
 
 # Set the working directory to /app
 # and copy the local contents into the container at /app
-WORKDIR /app
 ADD ./src /app/src
 ADD ./config /app/config
 ADD ./requirements.txt /app/requirements.txt
+WORKDIR /app
 
 RUN mkdir -p /app/logs
 RUN touch /app/logs/mylog.log
@@ -20,4 +20,5 @@ EXPOSE 27017
 
 
 # Run app when de container launches
-ENTRYPOINT ["/usr/local/bin/gunicorn", "--log-config", "config/logging.conf", "-b", ":8000", "src.main.wsgi"]
+#ENTRYPOINT ["/usr/local/bin/gunicorn", "--log-config", "config/logging.conf", "-b", ":8000", "src.main.wsgi"]
+ENTRYPOINT ["py.test"]

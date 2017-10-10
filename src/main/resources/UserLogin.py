@@ -31,8 +31,6 @@ class UserLogin(Resource):
 		logger.getLogger().debug("POST at /users/login")
 		logger.getLogger().debug(request.json)
 
-		# (validate-data) Validate user data
-
 		# (shared-server) First ask shared server for credentials validation
 		server_response = ServerRequest.validateUser(request.json)
 
@@ -147,9 +145,6 @@ class UsersList(Resource):
 		return ResponseMaker.response(501, {'users' : aux})
 
 
-
-
-
 class UserLogout(Resource):
 	def post(self):
 		print(request.json)
@@ -174,4 +169,84 @@ class UserLogout(Resource):
 		
 		return ResponseMaker.response(200, { 'users' : user[0] } )
 
+
+class UserById(Resource):
+	"""This class initializes a resource named UserById which allows
+	the user to perform operations Consult(GET), Update(PUT) and Removal(DELETE)
+	through	the user id.
+	"""		
+	def __init__(self):
+		self.users = MongoController.getCollection("online")
+
+	def get(self, id):
+		if not validateToken(request):
+			return ResponseMaker.response(constants.FORBIDDEN, "Forbidden")
+
+		print("GET at /user/id")
+		candidates = [user for user in self.users.find() if user['_id'] == id]
+
+		if len(candidates) == 0:
+			#If not available in local data-base, ask Shared-Server for user info.
+			candidates = [ ServerRequest.getUser(id) ]
+			self.users.insert_one(candidates[0])
+
+		if len(candidates) == 0:		
+			logger.getLogger().error("Attempted to retrieve user with non-existent id.")
+			return ResponseMaker.response(constants.NOT_FOUND, "User id not found:" + str(e))
+
+		return jsonify({'users': candidates[0]})
+
+
+	def put(self, id):
+
+		print(id)
+		print("PUT at /user/id")
+		(valid, decoded) = validateToken(request)
+
+		if not valid or (decoded['_id'] != id):
+			return ResponseMaker.response(constants.FORBIDDEN, "Forbidden")
+
+		try:
+			#Ask Shared-Server to update this user
+			success, updated_user = ServerRequest.updateUser(request.json)		
+			if success:
+				#Update in local data-base
+				self.users.update({updated_user['_id']}, updated_user) # ???
+				logger.getLogger().info("Successfully updated user")
+				return ResponseMaker.response(constants.SUCCESS, "User updated successfully!")
+			return ResponseMaker.response(constants.NOT_FOUND, "User not found!")	
+		except ValueError, e:
+			logger.getLogger().error(str(e))
+			return ResponseMaker.response(constants.UPDATE_CONFLICT, "User update failed:" + str(e))
+		except requests.exceptions.Timeout:	
+			logger.getLogger().error(str(e))	
+			return ResponseMaker.response(constants.REQ_TIMEOUT, "User update failed:" + str(e))
+		except Exception, e:
+			logger.getLogger().error(str(e))
+			return ResponseMaker.response(constants.FORBIDDEN, "Forbidden")		
+		
+	def delete(self, id):
+		print(id)
+		print("DELETE at /greet/id")
+
+		(valid, decoded) = validateToken(request)
+
+		if not valid or (decoded['_id'] != id):
+			return ResponseMaker.response(constants.FORBIDDEN, "Forbidden")
+
+		try:
+			#Ask Shared-Server to delete this user
+			delete_success, status_code = ServerRequest.deleteUser(user['_id'])
+			if delete_success:
+				#Delete in local data-base
+				candidates = [user for user in self.users.find() if user['_id'] == id]
+				self.users.delete_many({"_id" : candidates[0]['_id']})
+				logger.getLogger().info("Successfully deleted user.")			
+			else:
+				logger.getLogger().error("Attempted to delete user with non-existent id.")
+			return ResponseMaker.response(constants.NOT_FOUND, "User not found!")
+		except Exception, e:
+			logger.getLogger().error("User delete operation was unsuccessful." + str(e))
+			return ResponseMaker.response(status_code, str(e))	
+		return make_response(jsonify({'user': candidates[0]}), 200)
 

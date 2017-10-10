@@ -17,7 +17,7 @@ USER_END = os.environ["SS_URL"] + "/users"
 #TRANSACT_ENDPOINT = "/transactions"
 #TRIPS_ENDPOINT = "/trips"
 
-headers = {'Content-Type' : 'application/json'}
+headers = {'Content-Type' : 'application/json', 'CamiToken' : 'ELTOKENDECAMI'}
 MAX_ATTEMPTS = 10
 
 #""" Asks shared server to validate user credentials"""
@@ -31,7 +31,7 @@ MAX_ATTEMPTS = 10
 
 """Returns a list of all the users and their information in json format."""
 def getUsers():
-	r = requests.get(USER_END)
+	r = requests.get(USER_END, headers=headers)
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		raise Exception("Shared Server returned error: %d"%(r.status_code))
@@ -41,7 +41,7 @@ def getUsers():
 """Receives a user id. Returns the information of the user that matches that id in json format.
 """
 def getUser(userId):
-	r = requests.get(USER_END + "/" + str(userId))
+	r = requests.get(USER_END + "/" + str(userId), headers=headers)
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		raise Exception("Shared Server returned error: %d"%(r.status_code))
@@ -56,7 +56,7 @@ def _permformUpdate(f, endpoint, updatedEntityName, updatedEntity):
 	attempts = 0
 	while (r.status_code == constants.UPDATE_CONFLICT) and (attempts < MAX_ATTEMPTS):
 		print ("UPDATE FAILED, RETRYING...")
-		newData = json.loads(requests.get(endpoint).text)
+		newData = json.loads(requests.get(endpoint, headers=headers).text)
 		updatedEntity["_ref"] = newData[updatedEntityName]["_ref"]
 		r = f(endpoint, updatedEntity)
 		attempts += 1
@@ -69,7 +69,7 @@ def _permformUpdate(f, endpoint, updatedEntityName, updatedEntity):
 Returns False if the user id does not match any user id or _ref value is invalid.
 Returns True if the user info was successfully updated."""
 def updateUser(user_js):
-	endpoint = USER_END + "/" + user_js["id"]
+	endpoint = USER_END + "/" + user_js["_id"]
 	r = _permformUpdate(lambda ep, u: requests.put(ep, json.dumps(u), headers=headers), endpoint, "user", user_js)
 	if (r.status_code == constants.NOT_FOUND):
 		return (False, r.json()['message'])
@@ -80,7 +80,7 @@ def updateUser(user_js):
 """ Asks shared server to create a new user"""
 def createUser(user_js):
 	user_js["_ref"] = ""
-	r = requests.post(os.environ["SS_URL"] + USER_END, data = json.dumps(user_js), headers=headers)
+	r = requests.post(USER_END, data = json.dumps(user_js), headers=headers)
 	if (r.status_code != constants.CREATE_SUCCESS):
 		raise Exception("Shared Server returned error: %d"%(r.status_code))
 	print("CREATED RESPONSE:" + str(r.json()))
@@ -90,10 +90,9 @@ def createUser(user_js):
 Returns True if the credentials were invalid, returns False otherwise.
 """
 def validateUser(user_js):
-	userInfo = {"username" : user_js['username'], "password" : user_js['password'], "facebookAuthToken" : user_js['fbToken'] }
 
-	userInfo["_id"] = 14
-	return (True, userInfo)
+	#userInfo = {"_username" : user_js['username'], "password" : user_js['password'], "facebookAuthToken" : user_js['fbToken'] }
+	#return (True, userInfo)
 
 	r = requests.post(USER_END + "/validate", data = json.dumps(userInfo), headers=headers)
 	if (r.status_code == constants.PARAMERR):
@@ -107,7 +106,7 @@ def validateUser(user_js):
 Returns False if the user id does not match any user id.
 """
 def deleteUser(userId):
-	r = requests.delete(USER_END + "/" + str(userId))
+	r = requests.delete(USER_END + "/" + str(userId), headers=headers)
 	if (r.status_code == constants.NOT_FOUND):
 		return (False, r.status_code)
 	if (r.status_code != constants.DELETE_SUCCESS):
