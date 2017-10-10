@@ -8,6 +8,7 @@ from flask import jsonify, abort, request, make_response
 from src.main.com import ResponseMaker, ServerRequest, TokenGenerator
 
 from src.main.mongodb import MongoController
+import config.constants as constants
 
 import os
 import logging as logger
@@ -101,12 +102,13 @@ class UsersList(Resource):
 		logger.getLogger().debug("POST at /users")
 		logger.getLogger().debug(request.json)
 
-		# (validate-data) Validate user data
-
 		# (shared-server) Send new user data to shared server.
-		ServerRequest.createUser(request.json)
+		(status, response) = ServerRequest.createUser(request.json)
+	
+		if (status != constants.CREATE_SUCCESS):
+			return ResponseMaker.response(status, response['message'])
 
-		return ResponseMaker.response(501, "Not implemented")
+		return ResponseMaker.response(status, response)
 
 	""" Handler to get a list of all users.
 	Requieres: user token in the header.

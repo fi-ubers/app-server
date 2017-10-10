@@ -81,12 +81,15 @@ def updateUser(user_js):
 
 """ Asks shared server to create a new user"""
 def createUser(user_js):
-	user_js["_ref"] = ""
+	#user_js["_ref"] = ""
+
 	r = requests.post(USER_END + QUERY_TOKEN, data = json.dumps(user_js), headers=headers)
+
 	if (r.status_code != constants.CREATE_SUCCESS):
-		raise Exception("Shared Server returned error: %d"%(r.status_code))
+		return (r.status_code, r.json())
+
 	print("CREATED RESPONSE:" + str(r.json()))
-	return r.json()["user"]
+	return (r.status_code, r.json()["user"])
 
 """Receives a user represented by a json structure and validates its credentials.
 Returns True if the credentials were invalid, returns False otherwise.
