@@ -1,6 +1,14 @@
 version: '2.1'
 
 services:
+  shared-server-mock:
+    container_name: testserver-01
+    image: clue/json-server:latest
+    ports:
+      - '127.17.0.2:1777:1777'
+    volumes:
+      - './config/test-container/db.json:/data/db.json'
+
   db:
     container_name: mongodatabase
     image: mongo:3.0.2
@@ -23,3 +31,4 @@ services:
       - db
     depends_on:
       - db
+      - shared-server-mock

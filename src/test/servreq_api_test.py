@@ -8,7 +8,7 @@ headers = {'Content-Type' : 'application/json'}
 
 class TestServerRequest():
 
-	@mock.patch.dict(os.environ, {"SS_URL": "http://172.17.0.2:80"})
+	@mock.patch.dict(os.environ, {"SS_URL": "http://localhost:1777"})
 	def test_getusers_returns_userlist(self):
 		expected_email = "voldyvoldy@hotmail.com"
 		assert(ServerRequest.getUsers()[0]["email"] == "voldyvoldy@hotmail.com" )

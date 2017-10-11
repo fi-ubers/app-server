@@ -8,6 +8,7 @@ from flask import jsonify, abort, request, make_response
 from src.main.com import ResponseMaker, ServerRequest, TokenGenerator
 
 from src.main.mongodb import MongoController
+import config.constants as constants
 
 import os
 import logging as logger
@@ -31,31 +32,33 @@ class UserLogin(Resource):
 		logger.getLogger().debug("POST at /users/login")
 		logger.getLogger().debug(request.json)
 
-		# (validate-data) Validate user data
-
 		# (shared-server) First ask shared server for credentials validation
-		server_response = ServerRequest.validateUser(request.json)
+		(valid, response) = ServerRequest.validateUser(request.json)
+		print(valid, response)
 
-		if not server_response[0]:
-			return ResponseMaker.response(418, 'I\' m a teapot and your credentials are not valid!')
-		print("USER VALIDATED: " + str(server_response[1]))
+		if not valid:
+			logger.getLogger().debug('Error 418: I\' m a teapot and your credentials are not valid!')
+			return ResponseMaker.response(response.status_code, "Shared server error")
+		print("USER VALIDATED: " + str(response))
 		logger.getLogger().debug("Credentials are valid, server responsed with user")
 
-		user_js = server_response[1];
+		user_js = response;
+		user_js['_id'] = user_js.pop('id')
+		print(user_js)
 
 		# (token-generation) Generate a new UserToken for that user
-		token = TokenGenerator.generateToken(server_response[1]);
+		token = TokenGenerator.generateToken(response);
 		user_js["token"] = token
 
 		# (mongodb) If credentials are valid, add user to active users table
 		
 		users_online = MongoController.getCollection("online")
 		for user in users_online.find():
-			if user["_id"] == server_response[1]["_id"]:
+			if user["_id"] == response["_id"]:
 				users_online.delete_many({"_id" : user["_id"]}) 
-		users_online.insert_one(server_response[1])
+		users_online.insert_one(response)
 		
-		return ResponseMaker.response(200, { "user" : server_response ,"token" : token })
+		return ResponseMaker.response(200, { "user" : response, "token" : token })
 
 
 class UsersList(Resource):
@@ -99,12 +102,13 @@ class UsersList(Resource):
 		logger.getLogger().debug("POST at /users")
 		logger.getLogger().debug(request.json)
 
-		# (validate-data) Validate user data
-
 		# (shared-server) Send new user data to shared server.
-		ServerRequest.createUser(request.json)
+		(status, response) = ServerRequest.createUser(request.json)
+	
+		if (status != constants.CREATE_SUCCESS):
+			return ResponseMaker.response(status, response['message'])
 
-		return ResponseMaker.response(501, "Not implemented")
+		return ResponseMaker.response(status, response)
 
 	""" Handler to get a list of all users.
 	Requieres: user token in the header.
@@ -126,23 +130,135 @@ class UsersList(Resource):
 		# (validate-token) Validate user token
 		if not "UserToken" in request.headers:
 			return ResponseMaker.response(400, "Bad request - missing token")
+
+		token = request.headers['UserToken']
+
+		(valid, response) = TokenGenerator.validateToken(token)
+
+		if not valid:
+			return ResponseMaker.response(403, "Forbidden")
+
+		print(response)
+
+		# (mongodb) Return all logged in users.
+		users_online = MongoController.getCollection("online")
+		aux = [user for user in users_online.find()]
+
+		return ResponseMaker.response(200, {'users' : aux})
+
+
+class UserLogout(Resource):
+	def post(self):
+		print(request.json)
+		logger.getLogger().debug("POST at /users")
+		logger.getLogger().debug(request.json)
+
+		if not "UserToken" in request.headers:
+			return ResponseMaker.response(400, "Bad request - missing token")
 		token = request.headers['UserToken']
 
 		result = TokenGenerator.validateToken(token)
 
-		if not result[0]:
-			return ResponseMaker.response(403, "Forbidden")
-
-		username = result[1]
-
-		# Token is valid, time to get the users
-		print(username)
-		logger.getLogger().debug(username)
-
 		# (mongodb) Return all logged in users.
 		users_online = MongoController.getCollection("online")
 
-		aux = [user for user in users_online.find()]
+		user = [user for user in users_online.find() if (user['username'] == result[1]['username'])]
+		print(user)
+		if (len(user) == 0):
+			return ResponseMaker.response(404, "User not found")
 
-		return ResponseMaker.response(501, {'users' : aux})
+		users_online.delete_many(user[0]);
+		
+		return ResponseMaker.response(200, { 'users' : user[0] } )
+
+
+class UserById(Resource):
+	"""This class initializes a resource named UserById which allows
+	the user to perform operations Consult(GET), Update(PUT) and Removal(DELETE)
+	through	the user id.
+	"""		
+	def __init__(self):
+		self.users = MongoController.getCollection("online")
+
+	def get(self, id):
+		if not TokenGenerator.validateToken(request):
+			return ResponseMaker.response(constants.FORBIDDEN, "Forbidden")
+
+		print("GET at /user/id")
+		candidates = [user for user in self.users.find() if user['_id'] == id]
+
+		if len(candidates) == 0:
+			#If not available in local data-base, ask Shared-Server for user info.
+			(status, response) = ServerRequest.getUser(id)
+			
+			if (status != constants.SUCCESS):
+				return ResponseMaker.response(status, response["message"])
+			
+			candidates = [ response ]
+			candidates[0]['_id'] = candidates[0].pop('id')
+			self.users.insert_one(candidates[0])
+
+		if len(candidates) == 0:		
+			logger.getLogger().error("Attempted to retrieve user with non-existent id.")
+			return ResponseMaker.response(constants.NOT_FOUND, "User id not found:" + str(e))
+
+		print(candidates)
+		return jsonify({'users': candidates[0]})
+
+
+	def put(self, id):
+
+		print(id)
+		print("PUT at /user/id")
+		(valid, decoded) = TokenGenerator.validateToken(request)
+
+		if not valid or (decoded['_id'] != id):
+			return ResponseMaker.response(constants.FORBIDDEN, "Forbidden")
+
+		try:
+			#Ask Shared-Server to update this user
+			success, updated_user = ServerRequest.updateUser(request.json)		
+			if success:
+				#Update in local data-base
+				self.users.update({updated_user['_id']}, updated_user) # ???
+				logger.getLogger().info("Successfully updated user")
+				return ResponseMaker.response(constants.SUCCESS, "User updated successfully!")
+			return ResponseMaker.response(constants.NOT_FOUND, "User not found!")	
+		except ValueError, e:
+			logger.getLogger().error(str(e))
+			return ResponseMaker.response(constants.UPDATE_CONFLICT, "User update failed:" + str(e))
+		except requests.exceptions.Timeout:	
+			logger.getLogger().error(str(e))	
+			return ResponseMaker.response(constants.REQ_TIMEOUT, "User update failed:" + str(e))
+		except Exception, e:
+			logger.getLogger().error(str(e))
+			return ResponseMaker.response(constants.FORBIDDEN, "Forbidden")		
+		
+	def delete(self, id):
+		print(id)
+		print("DELETE at /users/id")
+
+		if not "UserToken" in request.headers:
+			return ResponseMaker.response(400, "Bad request - missing token")
+
+		token = request.headers['UserToken']
+
+		(valid, decoded) = TokenGenerator.validateToken(token)
+
+		print(decoded)
+		if not valid or (decoded['_id'] != id):
+			return ResponseMaker.response(constants.FORBIDDEN, "Forbidden")
+
+		#Ask Shared-Server to delete this user
+		delete_success, status_code = ServerRequest.deleteUser(id)
+		if delete_success:
+			#Delete in local data-base
+			candidates = [user for user in self.users.find() if user['_id'] == id]
+			self.users.delete_many({"_id" : id })
+			logger.getLogger().info("Successfully deleted user.")			
+		else:
+			logger.getLogger().error("Attempted to delete user with non-existent id.")
+			return ResponseMaker.response(status_code, "Delete error")	
+
+		return ResponseMaker.response(constants.SUCCESS, { 'users' : candidates })
 

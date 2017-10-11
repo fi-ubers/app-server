@@ -51,6 +51,40 @@
 	          "value": 1
 	        }
 	      ]
+	    },
+	    {
+	      "_id": "3",
+	      "_ref": "1234",
+	      "applicationOwner": "admin",
+	      "type": "driver",
+	      "cars": [
+	        {
+	          "id": "1",
+	          "_ref": "2345",
+	          "owner": "FIUBER",
+	          "properties": [
+	            {
+	              "name": "Baby",
+	              "value": "4000"
+	            }
+	          ]
+	        }
+	      ],
+	      "username": "vader",
+	      "name": "Anakin",
+	      "surname": "Skywalker",
+	      "country": "Tatoine",
+	      "email": "vader@hotmail.com",
+	      "birthdate": "6-1",
+	      "images": [
+	        "imageurl"
+	      ],
+	      "balance": [
+	        {
+	          "currency": "Galleon",
+	          "value": 1
+	        }
+	      ]
 	    }
 	  ]
 

@@ -130,6 +130,7 @@ class DriversList(Resource):
 			return ResponseMaker.response(constants.NOT_FOUND, "There are no available drivers at the moment.")
 		return jsonify({'drivers': drivers})
 
+
 class GreetAdd(Resource):
 	"""This class initializes a resource named GreetAdd.
 	It can be called through GET and POST.

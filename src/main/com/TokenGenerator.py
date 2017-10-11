@@ -6,12 +6,13 @@ def generateToken(user):
 	print(user)
 	payload = {}
 	payload['username'] = user['username']
+	payload['_id'] = user['_id']
 	token = jwt.encode(payload, SECRET_KEY, algorithm='HS256')
 	return token
 
 def validateToken(token):
 	try:
 		decoded = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
-	except:
-		return (False, "Invalid")
+	except Exception, e:
+		return (False, "Invalid token: " + str(e) )
 	return (True, decoded)
