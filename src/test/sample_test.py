@@ -45,6 +45,8 @@ default_db = [{
 MOCK_TOKEN = '?token=untokendementira'
 MOCK_URL = 'http://172.17.0.2:80'
 
+MOCK_TOKEN_VALIDATION = (True, {"username" : "juanasda", "_id" : 1})
+
 from src.main.com import ServerRequest, TokenGenerator
 
 class UserCollectionMock(object):
@@ -82,17 +84,33 @@ class FakeGet(object):
 		print("El mock funcionaaa")
 		self.url = url
 		self.headers = headers
-		self.data = default_db
+		self.db = default_db
 		self.status_code = 0
 		if (self.url == MOCK_URL + '/users/2' + MOCK_TOKEN):
 			self.status_code = 200
 
 	def json(self):
 		if (self.url == MOCK_URL + '/users/2' + MOCK_TOKEN):
-			print(self.url)
-			return {'user' : self.data[2]}
+			return {'user' : self.db[2]}
 		return {'message' : "Esto es un mensaje del mock"}
 
+
+class FakePost(object):
+	def __init__(self, url, headers={}, data=''):
+		self.url = url
+		self.db = default_db
+		if (self.url == MOCK_URL + '/users' + MOCK_TOKEN):
+			self.status_code = 201
+		self.data = data
+		print(self.data)
+
+	def json(self):
+		if (self.url == MOCK_URL + '/users' + MOCK_TOKEN):
+			ret = json.loads(self.data)
+			ret['_id'] = 7
+			return { "user" : ret }
+
+		return {'message' : 'Esto es un mensaje del mock' }
 
 
 class TestUsersLogin(object):
@@ -105,7 +123,7 @@ class TestUsersLogin(object):
 		response_parsed = json.loads(response.get_data())
 		assert (response_parsed["message"]== expected and response.status_code == 400)
 
-	@patch('src.main.com.TokenGenerator.validateToken', return_value=(True, {"username" : "juanasda", "_id" : 1}))
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
 	def test_getall_users_authorized(self, validateTokenMock):
 		expected = default_db[0:2]
 
@@ -117,7 +135,7 @@ class TestUsersLogin(object):
 		assert (response_parsed['message']['users'] == expected and response.status_code == 200)
 
 
-	@patch('src.main.com.TokenGenerator.validateToken', return_value=(True, {"username" : "juanasda", "_id" : 1}))
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
 	def test_get_user_by_id_in_app(self, validateTokenMock):
 		expected = default_db[0]
 
@@ -128,7 +146,8 @@ class TestUsersLogin(object):
 		print(response_parsed)
 		assert (response_parsed['users'] == expected and response.status_code == 200)
 
-	@patch('src.main.com.TokenGenerator.validateToken', return_value=(True, {"username" : "juanasda", "_id" : 1}))
+
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
 	@patch('src.main.com.ServerRequest.requests.get', side_effect=FakeGet)
 	def test_get_user_by_id_in_shared(self, validateTokenMock, FakeGet):
 		expected = default_db[2]
@@ -143,20 +162,21 @@ class TestUsersLogin(object):
 		assert (response_parsed['users'] == expected and response.status_code == 200)
 
 
-
-
-"""
-	@patch('src.main.com.ServerRequest.requests.get', side_effect=FakeGet)
-	def test_users(self, FakeGet):
-		expected = { "users" : [ { "_id" : 1, "name" : "Juan" } ] }
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
+	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
+	def test_register_new_user(self, validateTokenMock, FakeGet):
+		expected = {"birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@gmail.com",
+					"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito" }
 
 		self.app = app.test_client()
-		response = self.app.get('/users/199')
+		response = self.app.post('/users', headers={"UserToken" : "A fake token"}, data = json.dumps(expected), content_type='application/json')
 
+		print(response)
+
+		expected["_id"] = 7
 		response_parsed = json.loads(response.get_data())
 		print(response_parsed)
-		assert (response_parsed == expected and response.status_code == 200)
-"""
+		assert (response_parsed['message'] == expected and response.status_code == 201)
 
 """
 	def test_insert_success(self):
