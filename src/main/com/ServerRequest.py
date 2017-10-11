@@ -50,6 +50,7 @@ def getUser(userId):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		return (r.status_code, r.json());
 
+
 	return (r.status_code, r.json()["user"])
 
 
@@ -74,7 +75,7 @@ def _permformUpdate(f, endpoint, updatedEntityName, updatedEntity):
 Returns False if the user id does not match any user id or _ref value is invalid.
 Returns True if the user info was successfully updated."""
 def updateUser(user_js):
-	endpoint = USER_END + "/" + user_js["_id"] + QUERY_TOKEN
+	endpoint = USER_END + "/" + str(user_js["_id"]) + QUERY_TOKEN
 	r = _permformUpdate(lambda ep, u: requests.put(ep, json.dumps(u), headers=headers), endpoint, "user", user_js)
 	if (r.status_code == constants.NOT_FOUND):
 		return (False, r.json()['message'])

@@ -42,74 +42,6 @@ class GoodBye(Resource):
 		print("POST at /goodbye")
 		return {'good':'bye'}
 
-class UserById(Resource):
-	"""This class initializes a resource named UserById which allows
-	the user to perform operations Consult(GET), Update(PUT) and Removal(DELETE)
-	through	the user id.
-	"""		
-	def __init__(self):
-		self.users = MongoController.getCollection("users")
-
-	def get(self, id):
-		if not validateToken(request):
-			return ResponseMaker.response(constants.FORBIDDEN, "Forbidden")
-
-		print("GET at /greet/id")
-		candidates = [user for user in self.users.find() if user['_id'] == id]
-		if len(candidates) == 0:
-			#If not available in local data-base, ask Shared-Server for user info.
-			candidates = [ ServerRequest.getUser(id) ]
-			self.users.insert_one(candidates[0])
-		if len(candidates) == 0:			
-			logger.getLogger().error("Attempted to retrieve user with non-existent id.")
-			return ResponseMaker.response(constants.NOT_FOUND, "User id not found:" + str(e))
-		return jsonify({'greetings': candidates[0]})
-
-	def put(self, id):
-		if not validateToken(request):
-			return ResponseMaker.response(constants.FORBIDDEN, "Forbidden")
-		try:
-			#Ask Shared-Server to update this user
-			success, updated_user = ServerRequest.updateUser(request.json)		
-			if success:
-				#Update in local data-base
-				self.users.update({updated_user['_id']}, updated_user)
-				logger.getLogger().info("Successfully updated user")
-				return ResponseMaker.response(constants.SUCCESS, "User updated successfully!")
-			return ResponseMaker.response(constants.NOT_FOUND, "User not found!")	
-		except ValueError, e:
-			logger.getLogger().error(str(e))
-			return ResponseMaker.response(constants.UPDATE_CONFLICT, "User update failed:" + str(e))
-		except requests.exceptions.Timeout:	
-			logger.getLogger().error(str(e))	
-			return ResponseMaker.response(constants.REQ_TIMEOUT, "User update failed:" + str(e))
-		except Exception, e:
-			logger.getLogger().error(str(e))
-			return ResponseMaker.response(constants.FORBIDDEN, "Forbidden")		
-		
-	def delete(self, id):
-		if not validateToken(request):
-			return ResponseMaker.response(constants.FORBIDDEN, "Forbidden")
-
-		print(id)
-		print("DELETE at /greet/id")
-
-		try:
-			#Ask Shared-Server to delete this user
-			delete_success, status_code = ServerRequest.deleteUser(user['_id'])
-			if delete_success:
-				#Delete in local data-base
-				candidates = [user for user in self.users.find() if user['_id'] == id]
-				self.users.delete_many({"_id" : candidates[0]['_id']})
-				logger.getLogger().info("Successfully deleted user.")			
-			else:
-				logger.getLogger().error("Attempted to delete user with non-existent id.")
-			return ResponseMaker.response(constants.NOT_FOUND, "User not found!")
-		except Exception, e:
-			logger.getLogger().error("User delete operation was unsuccessful." + str(e))
-			return ResponseMaker.response(status_code, str(e))	
-		return jsonify({'user': candidates[0]})
-
 class DriversList(Resource):
 	"""Allows the user to get information specific to drivers.
 	"""
@@ -129,7 +61,7 @@ class DriversList(Resource):
 		if len(drivers) == 0:
 			return ResponseMaker.response(constants.NOT_FOUND, "There are no available drivers at the moment.")
 		return jsonify({'drivers': drivers})
-
+	
 
 class GreetAdd(Resource):
 	"""This class initializes a resource named GreetAdd.

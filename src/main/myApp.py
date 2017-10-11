@@ -3,7 +3,7 @@ from flask_restful import Resource, Api
 
 import src.main.mongodb.MongoController
 
-from src.main.resources.SimpleAPI import Hello, GoodBye, GreetAdd
+from src.main.resources.SimpleAPI import Hello, GoodBye, GreetAdd, DriversList
 from src.main.resources.UserLogin import UserLogin, UsersList, UserLogout, UserById
 
 application = Flask(__name__)
