@@ -49,6 +49,7 @@ def getUser(userId):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		return (r.status_code, r.json());
 
+
 	return (r.status_code, r.json()["user"])
 
 
