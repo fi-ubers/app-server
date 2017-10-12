@@ -11,6 +11,7 @@ from src.main.mongodb import MongoController
 import config.constants as constants
 
 import os
+import requests
 import logging as logger
 
 class UserLogin(Resource):
@@ -210,21 +211,27 @@ class UserById(Resource):
 
 		print(id)
 		print("PUT at /user/id")
-		(valid, decoded) = TokenGenerator.validateToken(request)
+
+		if not "UserToken" in request.headers:
+			return ResponseMaker.response(400, "Bad request - missing token")
+
+		token = request.headers['UserToken']
+		(valid, decoded) = TokenGenerator.validateToken(token)
 
 		if not valid or (decoded['_id'] != id):
 			return ResponseMaker.response(constants.FORBIDDEN, "Forbidden")
-
 		try:
 			#Ask Shared-Server to update this user
-			success, updated_user = ServerRequest.updateUser(request.json)		
+			success, updated_user = ServerRequest.updateUser(request.json)	
+			print("UPDATE:" + str(success) + "," + str(updated_user))	
 			if success:
 				#Update in local data-base
-				self.users.update({updated_user['_id']}, updated_user) # ???
+				self.users.update({'_id':updated_user['id']}, updated_user,  upsert= True) # ???
 				logger.getLogger().info("Successfully updated user")
 				return ResponseMaker.response(constants.SUCCESS, "User updated successfully!")
 			return ResponseMaker.response(constants.NOT_FOUND, "User not found!")	
 		except ValueError, e:
+			print("VALUE ERROR")
 			logger.getLogger().error(str(e))
 			return ResponseMaker.response(constants.UPDATE_CONFLICT, "User update failed:" + str(e))
 		except requests.exceptions.Timeout:	

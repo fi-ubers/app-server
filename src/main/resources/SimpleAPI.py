@@ -42,6 +42,27 @@ class GoodBye(Resource):
 		print("POST at /goodbye")
 		return {'good':'bye'}
 
+class DriversList(Resource):
+	"""Allows the user to get information specific to drivers.
+	"""
+	def __init__(self):
+		self.users = MongoController.getCollection("users")
+
+	def get(self):
+		if not validateToken(request):
+			return ResponseMaker.response(constants.FORBIDDEN, "Forbidden")
+
+		drivers = [user for user in self.users.find() if user['type'] == "driver"] #TODO: check availability
+		
+		#If not available in local data-base, ask Shared-Server for user info.
+		#drivers = [ ServerRequest.getUsers() ] get available drivers from Shared Server asychronously(?
+		#bring them and insert them into the local database
+		#self.users.insertMany(drivers)
+		if len(drivers) == 0:
+			return ResponseMaker.response(constants.NOT_FOUND, "There are no available drivers at the moment.")
+		return jsonify({'drivers': drivers})
+	
+
 class GreetAdd(Resource):
 	"""This class initializes a resource named GreetAdd.
 	It can be called through GET and POST.

@@ -12,6 +12,7 @@ import config.constants as constants
 if not "SS_URL" in os.environ:
 	os.environ["SS_URL"] = constants.SS_URI
 
+CARS_END = "/cars"
 APP_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwianRpIjoiNTZhYWVlZWMtNGQ1Yy00NjEwLTgwMzYtN2EwYTA3YTViYzAyIiwiZXhwIjoxNTA4MDk1NzQ2LCJpYXQiOjE1MDc2NjU2Njd9.4V3AAWuex2wCZJYdePm-k8Xp8yQYVYp8imBOlCVMDEs'
 USER_END = os.environ["SS_URL"] + "/users" 
 QUERY_TOKEN = "?token=" + APP_TOKEN
@@ -74,7 +75,7 @@ def _permformUpdate(f, endpoint, updatedEntityName, updatedEntity):
 Returns False if the user id does not match any user id or _ref value is invalid.
 Returns True if the user info was successfully updated."""
 def updateUser(user_js):
-	endpoint = USER_END + "/" + user_js["_id"] + QUERY_TOKEN
+	endpoint = USER_END + "/" + str(user_js["_id"]) + QUERY_TOKEN
 	r = _permformUpdate(lambda ep, u: requests.put(ep, json.dumps(u), headers=headers), endpoint, "user", user_js)
 	if (r.status_code == constants.NOT_FOUND):
 		return (False, r.json()['message'])
@@ -119,5 +120,63 @@ def deleteUser(userId):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		return (False, r.status_code)
 	return (True, r.status_code)
+
+"""Receives a user id and returns a list of all the cars owned by that user
+"""
+def getUserCars(userId):
+	r = requests.get(USER_END + "/" + str(userId) + CARS_END)
+	if (r.status_code != constants.SUCCESS):
+		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
+		raise Exception("Shared Server returned error: %d"%(r.status_code))
+	return r.json()["cars"]
+
+
+""" Receives a user id, a car owner and a dictionary containing the properties of the car
+with the following layout:
+{
+  'name': 'brandName',
+  'value': 'plateNumber'
+}
+Attempts to create a new car with the information given. 
+Returns a car object on successful creation.
+"""
+def createUserCar(userId, carId, owner, properties):
+	car_js["id"] = str(carId)
+	car_js["_ref"] = ""
+	car_js["owner"] = str(owner)
+	car_js["properties"] = str([properties])
+	r = requests.post(os.environ["SS_URL"] + USER_END + "/" + str(userId) + CARS_END, data = json.dumps(car_js), headers=headers)
+	if (r.status_code != constants.CREATE_SUCCESS):
+		raise Exception("Shared Server returned error: %d"%(r.status_code))
+#	print("CREATED RESPONSE:" + str(r.json()))
+	return r.json()["car"]
+
+
+"""Receives a user id and attempts to delete it. Returns True if the user exists and is correctly deleted.
+Returns False if the user id does not match any user id.
+"""
+def deleteUserCar(userId, carId):
+	r = requests.delete(os.environ["SS_URL"] + USER_END + "/" + str(userId) + CARS_END + "/" + str(carId))
+	if (r.status_code == constants.NOT_FOUND):
+		return (False, r.status_code)
+	if (r.status_code != constants.DELETE_SUCCESS):
+		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
+		raise Exception("Shared Server returned error: %d"%(r.status_code))
+	return (True, r.status_code)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
