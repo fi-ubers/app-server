@@ -39,7 +39,7 @@ class UserLogin(Resource):
 
 		if not valid:
 			logger.getLogger().debug('Error 418: I\' m a teapot and your credentials are not valid!')
-			return ResponseMaker.response(response.status_code, "Shared server error")
+			return ResponseMaker.response_error(response.status_code, "Shared server error")
 		print("USER VALIDATED: " + str(response))
 		logger.getLogger().debug("Credentials are valid, server responsed with user")
 
@@ -49,7 +49,7 @@ class UserLogin(Resource):
 
 		# (token-generation) Generate a new UserToken for that user
 		token = TokenGenerator.generateToken(response);
-		user_js["token"] = token
+		# user_js["token"] = token
 
 		# (mongodb) If credentials are valid, add user to active users table
 		
@@ -59,7 +59,7 @@ class UserLogin(Resource):
 				users_online.delete_many({"_id" : user["_id"]}) 
 		users_online.insert_one(response)
 		
-		return ResponseMaker.response(200, { "user" : response, "token" : token })
+		return ResponseMaker.response_object(200, ['user', 'token'], [user_js, token])
 
 
 class UsersList(Resource):
@@ -105,11 +105,13 @@ class UsersList(Resource):
 
 		# (shared-server) Send new user data to shared server.
 		(status, response) = ServerRequest.createUser(request.json)
-	
-		if (status != constants.CREATE_SUCCESS):
-			return ResponseMaker.response(status, response['message'])
 
-		return ResponseMaker.response(status, response)
+		if (status != constants.CREATE_SUCCESS):
+			return ResponseMaker.response_error(status, response['message'])
+		user = response
+		user['_id'] = user.pop('id')
+
+		return ResponseMaker.response_object(status, ['user'], [user])
 
 	""" Handler to get a list of all users.
 	Requieres: user token in the header.
@@ -128,16 +130,17 @@ class UsersList(Resource):
 		}
 	"""
 	def get(self):
+		logger.getLogger().debug("GET at /users")
 		# (validate-token) Validate user token
 		if not "UserToken" in request.headers:
-			return ResponseMaker.response(400, "Bad request - missing token")
+			return ResponseMaker.response_error(400, "Bad request - missing token")
 
 		token = request.headers['UserToken']
 
 		(valid, response) = TokenGenerator.validateToken(token)
 
 		if not valid:
-			return ResponseMaker.response(403, "Forbidden")
+			return ResponseMaker.response_error(403, "Forbidden")
 
 		print(response)
 
@@ -145,7 +148,7 @@ class UsersList(Resource):
 		users_online = MongoController.getCollection("online")
 		aux = [user for user in users_online.find()]
 
-		return ResponseMaker.response(200, {'users' : aux})
+		return ResponseMaker.response_object(200, ['users'], [aux])
 
 
 class UserLogout(Resource):
@@ -155,7 +158,7 @@ class UserLogout(Resource):
 		logger.getLogger().debug(request.json)
 
 		if not "UserToken" in request.headers:
-			return ResponseMaker.response(400, "Bad request - missing token")
+			return ResponseMaker.response_error(400, "Bad request - missing token")
 		token = request.headers['UserToken']
 
 		result = TokenGenerator.validateToken(token)
@@ -166,11 +169,11 @@ class UserLogout(Resource):
 		user = [user for user in users_online.find() if (user['username'] == result[1]['username'])]
 		print(user)
 		if (len(user) == 0):
-			return ResponseMaker.response(404, "User not found")
+			return ResponseMaker.response_error(404, "User not found")
 
 		users_online.delete_many(user[0]);
 		
-		return ResponseMaker.response(200, { 'users' : user[0] } )
+		return ResponseMaker.response_object(200, ['user'] [user[0]] )
 
 
 class UserById(Resource):
@@ -183,7 +186,7 @@ class UserById(Resource):
 
 	def get(self, id):
 		if not "UserToken" in request.headers:
-			return ResponseMaker.response(400, "Bad request - missing token")
+			return ResponseMaker.response_error(400, "Bad request - missing token")
 
 		token = request.headers['UserToken']
 
@@ -198,7 +201,7 @@ class UserById(Resource):
 			(status, response) = ServerRequest.getUser(id)
 			
 			if (status != constants.SUCCESS):
-				return ResponseMaker.response(status, response["message"])
+				return ResponseMaker.response_error(status, response["message"])
 			
 			candidates = [ response ]
 			candidates[0]['_id'] = candidates[0].pop('id')
@@ -206,10 +209,10 @@ class UserById(Resource):
 
 		if len(candidates) == 0:		
 			logger.getLogger().error("Attempted to retrieve user with non-existent id.")
-			return ResponseMaker.response(constants.NOT_FOUND, "User id not found:" + str(e))
+			return ResponseMaker.response_error(constants.NOT_FOUND, "User id not found:" + str(e))
 
 		print(candidates)
-		return jsonify({'users': candidates[0]})
+		return ResponseMaker.response_object(200, ['user'], [candidates[0]])
 
 
 	def put(self, id):
@@ -218,13 +221,13 @@ class UserById(Resource):
 		print("PUT at /user/id")
 
 		if not "UserToken" in request.headers:
-			return ResponseMaker.response(400, "Bad request - missing token")
+			return ResponseMaker.response_error(400, "Bad request - missing token")
 
 		token = request.headers['UserToken']
 		(valid, decoded) = TokenGenerator.validateToken(token)
 
 		if not valid or (decoded['_id'] != id):
-			return ResponseMaker.response(constants.FORBIDDEN, "Forbidden")
+			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
 		try:
 			#Ask Shared-Server to update this user
 			success, updated_user = ServerRequest.updateUser(request.json)	
@@ -233,25 +236,25 @@ class UserById(Resource):
 				#Update in local data-base
 				self.users.update({'_id':updated_user['id']}, updated_user,  upsert= True) # ???
 				logger.getLogger().info("Successfully updated user")
-				return ResponseMaker.response(constants.SUCCESS, "User updated successfully!")
-			return ResponseMaker.response(constants.NOT_FOUND, "User not found!")	
+				return ResponseMaker.response_error(constants.SUCCESS, "User updated successfully!")
+			return ResponseMaker.response_error(constants.NOT_FOUND, "User not found!")	
 		except ValueError, e:
 			print("VALUE ERROR")
 			logger.getLogger().error(str(e))
-			return ResponseMaker.response(constants.UPDATE_CONFLICT, "User update failed:" + str(e))
+			return ResponseMaker.response_error(constants.UPDATE_CONFLICT, "User update failed:" + str(e))
 		except requests.exceptions.Timeout:	
 			logger.getLogger().error(str(e))	
-			return ResponseMaker.response(constants.REQ_TIMEOUT, "User update failed:" + str(e))
+			return ResponseMaker.response_error(constants.REQ_TIMEOUT, "User update failed:" + str(e))
 		except Exception, e:
 			logger.getLogger().error(str(e))
-			return ResponseMaker.response(constants.FORBIDDEN, "Forbidden")		
+			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")		
 		
 	def delete(self, id):
 		print(id)
 		print("DELETE at /users/id")
 
 		if not "UserToken" in request.headers:
-			return ResponseMaker.response(400, "Bad request - missing token")
+			return ResponseMaker.response_error(400, "Bad request - missing token")
 
 		token = request.headers['UserToken']
 
@@ -259,7 +262,7 @@ class UserById(Resource):
 
 		print(decoded)
 		if not valid or (decoded['_id'] != id):
-			return ResponseMaker.response(constants.FORBIDDEN, "Forbidden")
+			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
 
 		#Ask Shared-Server to delete this user
 		delete_success, status_code = ServerRequest.deleteUser(id)
@@ -270,7 +273,7 @@ class UserById(Resource):
 			logger.getLogger().info("Successfully deleted user.")			
 		else:
 			logger.getLogger().error("Attempted to delete user with non-existent id.")
-			return ResponseMaker.response(status_code, "Delete error")	
+			return ResponseMaker.response_error(status_code, "Delete error")	
 
-		return ResponseMaker.response(constants.SUCCESS, { 'users' : candidates })
+		return ResponseMaker.response_object(constants.SUCCESS, ['user'], candidates)
 
