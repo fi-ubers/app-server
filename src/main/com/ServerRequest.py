@@ -13,7 +13,8 @@ if not "SS_URL" in os.environ:
 	os.environ["SS_URL"] = constants.SS_URI
 
 CARS_END = "/cars"
-APP_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwianRpIjoiNTZhYWVlZWMtNGQ1Yy00NjEwLTgwMzYtN2EwYTA3YTViYzAyIiwiZXhwIjoxNTA4MDk1NzQ2LCJpYXQiOjE1MDc2NjU2Njd9.4V3AAWuex2wCZJYdePm-k8Xp8yQYVYp8imBOlCVMDEs'
+APP_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwianRpIjoiMDA5NzllMmMtMmRhOC00MTMwLWE5OWEtZTkxOTVlYjUxZmZhIiwiZXhwIjoxNTA4MjY3ODU5LCJpYXQiOjE1MDc4MzYzNDZ9.5NWbfzCY5vA17331z9fT6FQV2WCyrt7E3ZBrn3II13A'
+#APP_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwianRpIjoiNTZhYWVlZWMtNGQ1Yy00NjEwLTgwMzYtN2EwYTA3YTViYzAyIiwiZXhwIjoxNTA4MDk1NzQ2LCJpYXQiOjE1MDc2NjU2Njd9.4V3AAWuex2wCZJYdePm-k8Xp8yQYVYp8imBOlCVMDEs'
 USER_END = os.environ["SS_URL"] + "/users" 
 QUERY_TOKEN = "?token=" + APP_TOKEN
 #CARS = "/cars"
@@ -105,6 +106,8 @@ def validateUser(user_js):
 
 	print(user_js)
 	r = requests.post(USER_END + "/validate" + QUERY_TOKEN, data = json.dumps(user_js), headers=headers)
+	print(r)
+	print(r.json())
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		return (False, r)

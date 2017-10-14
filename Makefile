@@ -7,7 +7,7 @@ DOCKER_NAME = app-server-img
 DOCKER_CONTAINER_NAME = app-server
 DOCKER_FLAGS = --name ${DOCKER_CONTAINER_NAME} -p 27017:27017 -p 5000:8000
 
-GUNICORN_BIND = --bind :5000
+GUNICORN_BIND = --bind :5002
 
 
 run: logs/mylog.log

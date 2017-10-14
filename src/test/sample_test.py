@@ -1,53 +1,30 @@
 import json
 
-
-default_db = [{
-			"_id": 3,
-			"birthdate": "17-10-1993",
-			"country": "Georgia",
-			"email": "euge@euge.com",
-			"images": [
-				"No tengo imagen"
-				],
-			"name": "Euge",
-			"surname": "Mariotti",
-			"type": "driver",
-			"username": "euge"
-		},
-		{
-			"_id": 1,
-			"birthdate": "18-7-1994",
-			"country": "Norway",
-			"email": "juanma@mail.jm",
-			"images": [
-				"No tengo imagen"
-				],
-			"name": "Juan",
-			"surname": "Fresia",
-			"type": "passenger",
-			"username": "juan"
-		},
-		{
-			"_id": 2,
-			"id" : 2,
-			"birthdate": "6-10-1996",
-			"country": "Norway",
-			"email": "juanpa@mail.jp",
-			"images": [
-				"No tengo imagen"
-				],
-			"name": "Pablo",
-			"surname": "Fresia",
-			"type": "passenger",
-			"username": "juanp"
-		}]
-
-MOCK_TOKEN = '?token=untokendementira'
-MOCK_URL = 'http://172.17.0.2:80'
-
-MOCK_TOKEN_VALIDATION = (True, {"username" : "juanasda", "_id" : 1})
-
 from src.main.com import ServerRequest, TokenGenerator
+
+
+
+user1 = {"_id": 1, "birthdate": "18-7-1994", "country": "Norway",
+		 "email": "juanma@mail.jm", "images": [ "No tengo imagen" ],
+		 "name": "Juan", "surname": "Fresia", "type": "passenger",
+		 "username": "juan" }
+
+user2 = {"_id": 2, "id": 2, "birthdate": "6-10-1996", "country": "Norway",
+		 "email": "juanpa@mail.jp", "images": ["No tengo imagen"],
+		 "name": "Pablo", "surname": "Fresia", "type": "passenger",
+		 "username": "juanpi"}
+
+user3 = {"_id": 3, "birthdate": "17-10-1993", "country": "Georgia",
+		 "email": "euge@euge.com", "images": [ "No tengo imagen"	],
+		 "name": "Euge",	"surname": "Mariotti", "type": "driver",
+		 "username": "euge" }
+
+default_db = [user1, user2, user3]
+
+MOCK_URL = 'http://172.17.0.2:80'
+MOCK_TOKEN = '?token=untokendementira'
+MOCK_TOKEN_VALIDATION = (True, {"username" : "juan", "_id" : 1})
+
 
 class UserCollectionMock(object):
 	def __init__(self):
@@ -73,6 +50,7 @@ from src.main.mongodb import MongoController
 MongoController.getCollection = Mock(return_value = UserCollectionMock())
 
 
+
 from src.main.resources import UserLogin
 from src.main.myApp import application as app
 from src.main.com import ServerRequest, TokenGenerator
@@ -81,36 +59,39 @@ ServerRequest.QUERY_TOKEN = MOCK_TOKEN
 
 class FakeGet(object):
 	def __init__(self, url, headers={}):
-		print("El mock funcionaaa")
 		self.url = url
 		self.headers = headers
 		self.db = default_db
 		self.status_code = 0
+
 		if (self.url == MOCK_URL + '/users/2' + MOCK_TOKEN):
 			self.status_code = 200
+			self.response = {'code' : self.status_code, 'users' : self.db[1] }
+		else:
+			self.response = {"code" : 666, 'message' : 'Mocking error'}
 
 	def json(self):
-		if (self.url == MOCK_URL + '/users/2' + MOCK_TOKEN):
-			return {'user' : self.db[2]}
-		return {'message' : "Esto es un mensaje del mock"}
+		return self.response
 
 
 class FakePost(object):
 	def __init__(self, url, headers={}, data=''):
 		self.url = url
 		self.db = default_db
-		if (self.url == MOCK_URL + '/users' + MOCK_TOKEN):
-			self.status_code = 201
 		self.data = data
-		print(self.data)
 
-	def json(self):
 		if (self.url == MOCK_URL + '/users' + MOCK_TOKEN):
 			ret = json.loads(self.data)
-			ret['_id'] = 7
-			return { "user" : ret }
+			ret['id'] = 6
+			self.status_code = 201
+			self.response = { "code" : self.status_code, "user" : ret }
+		else:
+			self.response = {"code" : 666, 'message' : 'Mocking error'}
 
-		return {'message' : 'Esto es un mensaje del mock' }
+	def json(self):
+		return self.response
+
+
 
 
 class TestUsersLogin(object):
@@ -121,7 +102,9 @@ class TestUsersLogin(object):
 		response = self.app.get('/users')
 
 		response_parsed = json.loads(response.get_data())
-		assert (response_parsed["message"]== expected and response.status_code == 400)
+		assert(response.status_code == 400)
+		assert(response_parsed["message"] == expected)
+		assert(response_parsed["code"] == 400)
 
 	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
 	def test_getall_users_authorized(self, validateTokenMock):
@@ -132,7 +115,9 @@ class TestUsersLogin(object):
 
 		response_parsed = json.loads(response.get_data())
 		print(response_parsed)
-		assert (response_parsed['message']['users'] == expected and response.status_code == 200)
+		assert(response.status_code == 200)
+		assert(response_parsed['users'] == expected)
+		assert(response_parsed['code'] == 200)
 
 
 	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
@@ -140,11 +125,13 @@ class TestUsersLogin(object):
 		expected = default_db[0]
 
 		self.app = app.test_client()
-		response = self.app.get('/users/3', headers={"UserToken" : "A fake token"})
+		response = self.app.get('/users/1', headers={"UserToken" : "A fake token"})
 
 		response_parsed = json.loads(response.get_data())
 		print(response_parsed)
-		assert (response_parsed['users'] == expected and response.status_code == 200)
+		assert(response.status_code == 200)
+		assert(response_parsed['user'] == expected)
+		assert(response_parsed['code'] == 200)
 
 
 	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
@@ -153,19 +140,28 @@ class TestUsersLogin(object):
 		expected = default_db[2]
 
 		self.app = app.test_client()
-		response = self.app.get('/users/2', headers={"UserToken" : "A fake token"})
-
-		print(response)
+		response = self.app.get('/users/3', headers={"UserToken" : "A fake token"})
 
 		response_parsed = json.loads(response.get_data())
 		print(response_parsed)
-		assert (response_parsed['users'] == expected and response.status_code == 200)
+		assert(response.status_code == 200)
+		assert(response_parsed['user'] == expected)
+		assert(response_parsed['code'] == 200)
 
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
+	def test_get_user_by_id_non_existent(self, validateTokenMock):
+		self.app = app.test_client()
+		response = self.app.get('/users/7', headers={"UserToken" : "A fake token"})
+
+		response_parsed = json.loads(response.get_data())
+		print(response_parsed)
+		assert(response.status_code == 404)
+		assert(response_parsed['code'] == 404)
 
 	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
 	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
 	def test_register_new_user(self, validateTokenMock, FakeGet):
-		expected = {"birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@gmail.com",
+		expected = {"birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@gmail.com", "password" : "hola9876",
 					"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito" }
 
 		self.app = app.test_client()
@@ -173,10 +169,14 @@ class TestUsersLogin(object):
 
 		print(response)
 
-		expected["_id"] = 7
+		expected["_id"] = 6
+		expected.pop("password")
+
 		response_parsed = json.loads(response.get_data())
 		print(response_parsed)
-		assert (response_parsed['message'] == expected and response.status_code == 201)
+		assert(response.status_code == 201)
+		assert(response_parsed['message'] == expected)
+		assert(response_parsed['code'] == 201)
 
 """
 	def test_insert_success(self):

@@ -182,9 +182,14 @@ class UserById(Resource):
 		self.users = MongoController.getCollection("online")
 
 	def get(self, id):
-		if not TokenGenerator.validateToken(request):
-			return ResponseMaker.response(constants.FORBIDDEN, "Forbidden")
+		if not "UserToken" in request.headers:
+			return ResponseMaker.response(400, "Bad request - missing token")
 
+		token = request.headers['UserToken']
+
+		(valid, decoded) = TokenGenerator.validateToken(token)
+
+		print(decoded)
 		print("GET at /user/id")
 		candidates = [user for user in self.users.find() if user['_id'] == id]
 
