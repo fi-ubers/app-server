@@ -1,6 +1,3 @@
-SS_URI = "http://127.0.0.1:5000/api" ##"http://172.17.0.2:80" #"https://fiuber-shared-server.herokuapp.com/api"
-#SS_URI = "http://172.17.0.2:80"
-
 UPDATE_CONFLICT = 409
 SUCCESS = 200
 CREATE_SUCCESS = 201

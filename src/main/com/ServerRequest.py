@@ -9,31 +9,24 @@ import requests
 import logging as logger
 import config.constants as constants
 
+SS_URI = "http://127.0.0.1:5000/api" ##"http://172.17.0.2:80" #"https://fiuber-shared-server.herokuapp.com/api"
 if not "SS_URL" in os.environ:
 	os.environ["SS_URL"] = constants.SS_URI
 
-DEFAULT_APP_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwianRpIjoiMDA5NzllMmMtMmRhOC00MTMwLWE5OWEtZTkxOTVlYjUxZmZhIiwiZXhwIjoxNTA4MjY3ODU5LCJpYXQiOjE1MDc4MzYzNDZ9.5NWbfzCY5vA17331z9fT6FQV2WCyrt7E3ZBrn3II13A'
+DEFAULT_APP_TOKEN = 'Sorry, there is no token'
 if not "APP_TOKEN" in os.environ:
 	os.environ["APP_TOKEN"] = DEFAULT_APP_TOKEN
 
 CARS_END = "/cars"
 USER_END = os.environ["SS_URL"] + "/users" 
 QUERY_TOKEN = "?token=" + os.environ["APP_TOKEN"]
+
 #CARS = "/cars"
 #TRANSACT_ENDPOINT = "/transactions"
 #TRIPS_ENDPOINT = "/trips"
 
 headers = {'Content-Type' : 'application/json'}
 MAX_ATTEMPTS = 10
-
-#""" Asks shared server to validate user credentials"""
-#def validateUser(user_js):
-#	if user_js['password'] == "1234":
-#		logger.getLogger().debug("User found!!")
-#		return { "_id" : 1, "username" : "juan", "birthdate": "18/07/1994", "firstname" : "Juan"}
-#	else:
-#		logger.getLogger().debug("User no valid!!")
-#		return None 
 
 """Returns a list of all the users and their information in json format."""
 def getUsers():
@@ -102,9 +95,6 @@ def createUser(user_js):
 Returns True if the credentials were invalid, returns False otherwise.
 """
 def validateUser(user_js):
-
-	#userInfo = {"_username" : user_js['username'], "password" : user_js['password'], "facebookAuthToken" : user_js['fbToken'] }
-	#return (True, userInfo)
 
 	print(user_js)
 	r = requests.post(USER_END + "/validate" + QUERY_TOKEN, data = json.dumps(user_js), headers=headers)

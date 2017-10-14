@@ -182,68 +182,10 @@ class TestUsersLogin(object):
 		assert(response_parsed['code'] == 201)
 
 """
+Some tests to add in the future:
 	def test_insert_success(self):
-		MongoController.getCollection().reset()
-		new_user = { "id" : 2, "name" : "Ale" }
-		expected = { "user" : { "_id" : 2, "name" : "Ale" } }
-
-		self.app = app.test_client()
-		response = self.app.post('/greet', data = json.dumps({ "user" : new_user }),
-				content_type = 'application/json')
-
-		response_parsed = json.loads(response.get_data())
-		assert (response_parsed == expected and response.status_code == 201)
-
-
 	def test_insert_duplicate(self):
-		MongoController.getCollection().reset()
-		new_user = [{ "id" : 1, "name" : "Ale" }]
-		expected = { "message" : "user id already exists" }
-
-		self.app = app.test_client()
-		response = self.app.post('/greet', data = json.dumps({ "user" : new_user[0] }),
-				content_type = 'application/json')
-
-		response_parsed = json.loads(response.get_data())
-		assert (response_parsed == expected and response.status_code == 400)
-
-
-	def test_get_nonexistent_user(self):
-		MongoController.getCollection().reset()
-		self.app = app.test_client()
-		response = self.app.get('/greet/2')
-
-		assert (response.status_code == 404)
-
-
 	def test_post_missing_id(self):
-		MongoController.getCollection().reset()
-		new_user = [{ "name" : "Ale" }]
-		expected = { "message" : "request missing id" }
-
-		self.app = app.test_client()
-		response = self.app.post('/greet', data = json.dumps({ "user" : new_user[0] }),
-				content_type = 'application/json')
-
-		response_parsed = json.loads(response.get_data())
-		assert (response_parsed == expected and response.status_code == 400)
-
-
 	def test_remove_success(self):
-		MongoController.getCollection().reset()
-		fake_users = [{ "_id" : 1, "name" : "Juan" }]
-		expected = { "user" : fake_users[0] }
-
-		self.app = app.test_client()
-		response = self.app.delete('/greet/1')
-
-		response_parsed = json.loads(response.get_data())
-		assert (response_parsed == expected and response.status_code == 200)
-
 	def test_delete_invalid(self):
-		MongoController.getCollection().reset()
-		self.app = app.test_client()
-		response = self.app.delete('/greet/2')
-
-		assert (response.status_code == 404)
 """
