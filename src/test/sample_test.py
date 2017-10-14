@@ -84,6 +84,7 @@ class FakePost(object):
 		if (self.url == MOCK_URL + '/users' + MOCK_TOKEN):
 			ret = json.loads(self.data)
 			ret['id'] = 6
+			ret.pop('password')
 			self.status_code = 201
 			self.response = { "code" : self.status_code, "user" : ret }
 		else:
@@ -141,7 +142,7 @@ class TestUsersLogin(object):
 		expected = default_db[2]
 
 		self.app = app.test_client()
-		esponse = self.app.get('/users/3', headers={"UserToken" : "A fake token"})
+		response = self.app.get('/users/3', headers={"UserToken" : "A fake token"})
 
 		response_parsed = json.loads(response.get_data())
 		print(response_parsed)
