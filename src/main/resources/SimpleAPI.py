@@ -27,7 +27,7 @@ class Hello(Resource):
 	def get(self):
 		print("GET at /")
 		logger.getLogger().debug("Hello Logger")
-		return 'Hello' 
+		return 'Welcome! App-server is up and running!'
 
 class GoodBye(Resource):
 	"""This class initializes a resource named Goodbye.

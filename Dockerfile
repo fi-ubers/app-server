@@ -16,9 +16,9 @@ RUN pip install -r requirements.txt
 
 # Make port 8000 available to the world outside this container
 EXPOSE 8000
+EXPOSE 5000
 EXPOSE 27017
 
-
 # Run app when de container launches
-#ENTRYPOINT ["/usr/local/bin/gunicorn", "--log-config", "config/logging.conf", "-b", ":8000", "src.main.wsgi"]
-ENTRYPOINT ["py.test"]
+ENTRYPOINT ["/usr/local/bin/gunicorn", "--log-config", "config/logging.conf", "-b", ":8000", "src.main.wsgi"]
+#ENTRYPOINT ["py.test"]

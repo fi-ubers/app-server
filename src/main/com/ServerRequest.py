@@ -9,9 +9,9 @@ import requests
 import logging as logger
 import config.constants as constants
 
-SS_URI = "http://127.0.0.1:5000/api" ##"http://172.17.0.2:80" #"https://fiuber-shared-server.herokuapp.com/api"
+SS_URI = "http://127.0.0.1:5000/api"
 if not "SS_URL" in os.environ:
-	os.environ["SS_URL"] = constants.SS_URI
+	os.environ["SS_URL"] = SS_URI
 
 DEFAULT_APP_TOKEN = 'Sorry, there is no token'
 if not "APP_TOKEN" in os.environ:
@@ -97,6 +97,7 @@ Returns True if the credentials were invalid, returns False otherwise.
 def validateUser(user_js):
 
 	print(user_js)
+	print(USER_END)
 	r = requests.post(USER_END + "/validate" + QUERY_TOKEN, data = json.dumps(user_js), headers=headers)
 	print(r)
 	print(r.json())

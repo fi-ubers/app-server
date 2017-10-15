@@ -18,6 +18,7 @@ user3 = {"_id": 3, "id" : 3,  "birthdate": "17-10-1993", "country": "Georgia",
 
 default_db = [user1, user2, user3]
 
+V1_URL = '/v1/api'
 MOCK_URL = 'http://172.17.0.2:80'
 MOCK_TOKEN = '?token=untokendementira'
 MOCK_TOKEN_VALIDATION = (True, {"username" : "juan", "_id" : 1})
@@ -54,6 +55,12 @@ from src.main.myApp import application as app
 
 ServerRequest.QUERY_TOKEN = MOCK_TOKEN
 
+"""
+This mock classes are to override ServerRequest.request methods.
+With the @patch decorator it is posible to make request.get() return
+the next fake object; so it can perform an url check and mutate
+to simulate different endpoints on the shared server.
+"""
 class FakeGet(object):
 	def __init__(self, url, headers={}):
 		self.url = url
@@ -72,7 +79,6 @@ class FakeGet(object):
 
 	def json(self):
 		return self.response
-
 
 class FakePost(object):
 	def __init__(self, url, headers={}, data=''):
@@ -101,7 +107,7 @@ class TestUsersLogin(object):
 	def test_getall_users_unauthorized(self):
 		expected = "Bad request - missing token"
 		self.app = app.test_client()
-		response = self.app.get('/users')
+		response = self.app.get(V1_URL + '/users')
 
 		response_parsed = json.loads(response.get_data())
 		assert(response.status_code == 400)
@@ -113,7 +119,7 @@ class TestUsersLogin(object):
 		expected = default_db[0:2]
 
 		self.app = app.test_client()
-		response = self.app.get('/users', headers={"UserToken" : "A fake token"})
+		response = self.app.get(V1_URL + '/users', headers={"UserToken" : "A fake token"})
 
 		response_parsed = json.loads(response.get_data())
 		print(response_parsed)
@@ -127,7 +133,7 @@ class TestUsersLogin(object):
 		expected = default_db[0]
 
 		self.app = app.test_client()
-		response = self.app.get('/users/1', headers={"UserToken" : "A fake token"})
+		response = self.app.get(V1_URL + '/users/1', headers={"UserToken" : "A fake token"})
 
 		response_parsed = json.loads(response.get_data())
 		print(response_parsed)
@@ -142,7 +148,7 @@ class TestUsersLogin(object):
 		expected = default_db[2]
 
 		self.app = app.test_client()
-		response = self.app.get('/users/3', headers={"UserToken" : "A fake token"})
+		response = self.app.get(V1_URL + '/users/3', headers={"UserToken" : "A fake token"})
 
 		response_parsed = json.loads(response.get_data())
 		print(response_parsed)
@@ -154,7 +160,7 @@ class TestUsersLogin(object):
 	@patch('src.main.com.ServerRequest.requests.get', side_effect=FakeGet)
 	def test_get_user_by_id_non_existent(self, validateTokenMock, FakeGet):
 		self.app = app.test_client()
-		response = self.app.get('/users/7', headers={"UserToken" : "A fake token"})
+		response = self.app.get(V1_URL + '/users/7', headers={"UserToken" : "A fake token"})
 
 		response_parsed = json.loads(response.get_data())
 		print(response_parsed)
@@ -168,7 +174,7 @@ class TestUsersLogin(object):
 					"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito" }
 
 		self.app = app.test_client()
-		response = self.app.post('/users', headers={"UserToken" : "A fake token"}, data = json.dumps(expected), content_type='application/json')
+		response = self.app.post(V1_URL + '/users', headers={"UserToken" : "A fake token"}, data = json.dumps(expected), content_type='application/json')
 
 		print(response)
 
