@@ -173,7 +173,7 @@ class UserLogout(Resource):
 
 		users_online.delete_many(user[0]);
 		
-		return ResponseMaker.response_object(200, ['user'] [user[0]] )
+		return ResponseMaker.response_object(200, ['user'], [user[0]] )
 
 
 class UserById(Resource):
