@@ -2,8 +2,6 @@ sudo: required
 language: python
 services:
   - docker
-before_install:
-  - make run
 python:
 - '2.7.9'
 install: pip install -r requirements.txt
