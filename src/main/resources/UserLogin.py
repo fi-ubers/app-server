@@ -154,7 +154,7 @@ class UsersList(Resource):
 class UserLogout(Resource):
 	def post(self):
 		print(request.json)
-		logger.getLogger().debug("POST at /users")
+		logger.getLogger().debug("POST at /users/logout")
 		logger.getLogger().debug(request.json)
 
 		if not "UserToken" in request.headers:
@@ -185,6 +185,7 @@ class UserById(Resource):
 		self.users = MongoController.getCollection("online")
 
 	def get(self, id):
+		logger.getLogger().debug("GET at /users/" + str(id))
 		if not "UserToken" in request.headers:
 			return ResponseMaker.response_error(400, "Bad request - missing token")
 
@@ -219,6 +220,7 @@ class UserById(Resource):
 
 		print(id)
 		print("PUT at /user/id")
+		logger.getLogger().debug("PUT at /users/" + str(id))
 
 		if not "UserToken" in request.headers:
 			return ResponseMaker.response_error(400, "Bad request - missing token")
@@ -252,6 +254,7 @@ class UserById(Resource):
 	def delete(self, id):
 		print(id)
 		print("DELETE at /users/id")
+		logger.getLogger().debug("DELETE at /users/" + str(id))
 
 		if not "UserToken" in request.headers:
 			return ResponseMaker.response_error(400, "Bad request - missing token")
