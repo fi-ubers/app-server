@@ -4,6 +4,8 @@ SECRET_KEY = 'red_fox'
 
 def generateToken(user):
 	print(user)
+	if (not user) or (not 'username' in user) or (not '_id' in user):
+		raise Exception("Invalid user: missing fields")
 	payload = {}
 	payload['username'] = user['username']
 	payload['_id'] = user['_id']
