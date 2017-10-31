@@ -240,10 +240,17 @@ class TestUsersLogin(object):
 
 	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
 	@patch('src.main.com.ServerRequest.requests.delete', side_effect=FakeDelete)
-	def test_delete_user_success(self, validateTokenMock, FakeDelete):
+	def test_delete_user_by_id_success(self, validateTokenMock, FakeDelete):
 		self.app = app.test_client()
 		response = self.app.delete(V1_URL + '/users/1', headers={'UserToken' : "A fake token"}, content_type='application/json')
 		assert(response.status_code == 204)
+
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
+	@patch('src.main.com.ServerRequest.requests.delete', side_effect=FakeDelete)
+	def test_delete_user_by_id_forbidden(self, validateTokenMock, FakeDelete):
+		self.app = app.test_client()
+		response = self.app.delete(V1_URL + '/users/9', headers={'UserToken' : "A fake token"})
+		assert(response.status_code == 403)
 
 """
 Some tests to add in the future:
