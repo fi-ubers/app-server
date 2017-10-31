@@ -248,8 +248,9 @@ class UserById(Resource):
 			logger.getLogger().error(str(e))	
 			return ResponseMaker.response_error(constants.REQ_TIMEOUT, "User update failed:" + str(e))
 		except Exception as e:
-			#logger.getLogger().error(str(e))
-			print("HELLOOOO " + str(e))
+			logger.getLogger().error(str(e))
+			#print("HELLOOOO " + str(e))
+		        #traceback.print_exc(file=sys.stdout)
 			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")		
 		
 	def delete(self, id):
