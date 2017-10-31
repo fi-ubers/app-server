@@ -59,7 +59,7 @@ class UserLogin(Resource):
 				users_online.delete_many({"_id" : user["_id"]}) 
 		users_online.insert_one(response)
 		
-		return ResponseMaker.response_object(200, ['user', 'token'], [user_js, token])
+		return ResponseMaker.response_object(constants.SUCCESS, ['user', 'token'], [user_js, token])
 
 
 class UsersList(Resource):
@@ -133,14 +133,14 @@ class UsersList(Resource):
 		logger.getLogger().debug("GET at /users")
 		# (validate-token) Validate user token
 		if not "UserToken" in request.headers:
-			return ResponseMaker.response_error(400, "Bad request - missing token")
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing token")
 
 		token = request.headers['UserToken']
 
 		(valid, response) = TokenGenerator.validateToken(token)
 
 		if not valid:
-			return ResponseMaker.response_error(403, "Forbidden")
+			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
 
 		print(response)
 
@@ -148,7 +148,7 @@ class UsersList(Resource):
 		users_online = MongoController.getCollection("online")
 		aux = [user for user in users_online.find()]
 
-		return ResponseMaker.response_object(200, ['users'], [aux])
+		return ResponseMaker.response_object(constants.SUCCESS, ['users'], [aux])
 
 
 class UserLogout(Resource):
@@ -158,7 +158,7 @@ class UserLogout(Resource):
 		logger.getLogger().debug(request.json)
 
 		if not "UserToken" in request.headers:
-			return ResponseMaker.response_error(400, "Bad request - missing token")
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing token")
 		token = request.headers['UserToken']
 
 		result = TokenGenerator.validateToken(token)
@@ -169,11 +169,11 @@ class UserLogout(Resource):
 		user = [user for user in users_online.find() if (user['username'] == result[1]['username'])]
 		print(user)
 		if (len(user) == 0):
-			return ResponseMaker.response_error(404, "User not found")
+			return ResponseMaker.response_error(constants.NOT_FOUND, "User not found")
 
 		users_online.delete_many(user[0]);
 		
-		return ResponseMaker.response_object(200, ['user'], [user[0]] )
+		return ResponseMaker.response_object(constants.SUCCESS, ['user'], [user[0]] )
 
 
 class UserById(Resource):
@@ -187,7 +187,7 @@ class UserById(Resource):
 	def get(self, id):
 		logger.getLogger().debug("GET at /users/" + str(id))
 		if not "UserToken" in request.headers:
-			return ResponseMaker.response_error(400, "Bad request - missing token")
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing token")
 
 		token = request.headers['UserToken']
 
@@ -213,7 +213,7 @@ class UserById(Resource):
 			return ResponseMaker.response_error(constants.NOT_FOUND, "User id not found:" + str(e))
 
 		print(candidates)
-		return ResponseMaker.response_object(200, ['user'], [candidates[0]])
+		return ResponseMaker.response_object(constants.SUCCESS, ['user'], [candidates[0]])
 
 
 	def put(self, id):
@@ -223,7 +223,7 @@ class UserById(Resource):
 		logger.getLogger().debug("PUT at /users/" + str(id))
 
 		if not "UserToken" in request.headers:
-			return ResponseMaker.response_error(400, "Bad request - missing token")
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing token")
 
 		token = request.headers['UserToken']
 		(valid, decoded) = TokenGenerator.validateToken(token)
@@ -247,8 +247,9 @@ class UserById(Resource):
 		except requests.exceptions.Timeout:	
 			logger.getLogger().error(str(e))	
 			return ResponseMaker.response_error(constants.REQ_TIMEOUT, "User update failed:" + str(e))
-		except Exception, e:
-			logger.getLogger().error(str(e))
+		except Exception as e:
+			#logger.getLogger().error(str(e))
+			print("HELLOOOO " + str(e))
 			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")		
 		
 	def delete(self, id):
@@ -257,7 +258,7 @@ class UserById(Resource):
 		logger.getLogger().debug("DELETE at /users/" + str(id))
 
 		if not "UserToken" in request.headers:
-			return ResponseMaker.response_error(400, "Bad request - missing token")
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing token")
 
 		token = request.headers['UserToken']
 
@@ -278,5 +279,101 @@ class UserById(Resource):
 			logger.getLogger().error("Attempted to delete user with non-existent id.")
 			return ResponseMaker.response_error(status_code, "Delete error")	
 
-		return ResponseMaker.response_object(constants.SUCCESS, ['user'], candidates)
+		return ResponseMaker.response_object(constants.DELETE_SUCCESS, ['user'], candidates)
+
+class Cars(Resource):
+
+	def __init__(self):
+		self.users = MongoController.getCollection("online")
+
+	"""Receives a userId and returns a list of all the cars owned by that user.
+	"""
+	def get(self, userId):
+		logger.getLogger().debug("GET at /users/userId/cars" + str(id))
+		if not "UserToken" in request.headers:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing token")
+
+		token = request.headers['UserToken']
+
+		(valid, decoded) = TokenGenerator.validateToken(token)
+
+		print(decoded)
+		if not valid or (decoded['_id'] != id):
+			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
+
+		print("GET at /user/id")
+		
+		cars = self.users.findOne({ _id: userId })['cars']
+		try:
+			if (len(cars) == 0):
+				status_code, cars = ServerRequest.getUserCars(userId)
+		except Exception, e:
+			return ResponseMaker.response_error(status_code, "User id did not match any existing users.")			
+		return ResponseMaker.response_object(constants.SUCCESS, ['cars'], cars)
+	
+	"""Receives a user id. Creates a car associated to the identified user with the information
+	provided for the car, which must have the following layout:
+	{
+	  'name': 'brandName',
+	  'value': 'plateNumber'
+	}		
+	"""
+	def post(self, userId):
+		print(request.json)
+		logger.getLogger().debug("POST at /users/cars")
+		logger.getLogger().debug(request.json)
+		
+		carInfo = request.json
+
+		#Create car at shared server.
+		(status, response) = ServerRequest.createUserCar(userId, carInfo["id"], carInfo["owner"], carInfo["properties"])
+		
+		if (status != constants.CREATE_SUCCESS):
+			return ResponseMaker.response_error(status, response['message'])
+		
+		#Update local database
+		car = response
+		car['_id'] = car.pop('id')
+
+		return ResponseMaker.response_object(status, ['car'], [car])
+
+
+class CarsById(Resource):
+	"""This class initializes a resource named CarsById which allows
+	the user to perform operations Consult(GET), Update(PUT) and Removal(DELETE)
+	through user and car ids.
+	"""		
+
+	def __init__(self):
+		self.users = MongoController.getCollection("online")
+
+	def get(self, userId, carId):
+		logger.getLogger().debug("GET at /users/userId/cars/carId" + str(id))
+		if not "UserToken" in request.headers:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing token")
+
+		token = request.headers['UserToken']
+
+		(valid, decoded) = TokenGenerator.validateToken(token)
+
+		print(decoded)
+		if not valid or (decoded['_id'] != id):
+			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
+
+		print("GET at /user/id")
+		
+		car = self.users.findOne({ _id: userId, cars:{id: carId}})['car']
+		try:
+			if (len(car) == 0):
+				status_code, car = ServerRequest.getUserCar(userId, carId)
+		except Exception, e:
+			return ResponseMaker.response_error(status_code, "User and car Ids did not match any existing vehicles.")			
+		return ResponseMaker.response_object(constants.SUCCESS, ['car'], car)
+		
+	def put(self, userId, car):
+		raise NotImplemented
+
+	def delete(self, userId, carId):
+		raise NotImplemented
+
 

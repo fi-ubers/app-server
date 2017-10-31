@@ -100,7 +100,40 @@ class FakePost(object):
 		return self.response
 
 
+class FakePut(object):
+	def __init__(self, url, headers={}, data=''):
+		self.url = url
+		self.db = default_db
+		self.data = data
+		self.status_code = 0
 
+		if (self.url == MOCK_URL + '/users/1' + MOCK_TOKEN):
+			ret = json.loads(self.data)
+			ret['id'] = 1
+			self.status_code = 200
+			self.response = { "code" : self.status_code, "user" : ret }
+		else:
+			self.response = {"code" : 666, 'message' : 'Mocking error'}
+
+	def json(self):
+		return self.response
+
+
+class FakeDelete(object):
+	def __init__(self, url, headers={}):
+		self.url = url
+		self.db = default_db
+		self.headers = headers
+		self.status_code = 0
+
+		if (self.url == MOCK_URL + '/users/1' + MOCK_TOKEN):
+			self.status_code = 204
+			self.response = { "code" : self.status_code, 'message' : 'delete successful'}
+		else:
+			self.response = {"code" : 666, 'message' : 'Mocking error'}
+
+	def json(self):
+		return self.response
 
 class TestUsersLogin(object):
 	
@@ -186,6 +219,31 @@ class TestUsersLogin(object):
 		assert(response.status_code == 201)
 		assert(response_parsed['user'] == expected)
 		assert(response_parsed['code'] == 201)
+
+#	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
+#	@patch('src.main.com.ServerRequest.requests.put', side_effect=FakePut)
+#	def test_modify_user_success(self, validateTokenMock, FakePut):
+#		expected = {"_id":1, "_ref": 123, "birthdate": "18-7-1994", "country": "Russia", "email": "juanma@mail.jm", "images": [ "No tengo imagen" ], "name": "Juan", "surname": "Fresia", "type": "passenger", "username": "juan" }
+
+#		self.app = app.test_client()
+#		response = self.app.put(V1_URL + '/users/1', headers={'UserToken' : "A fake token"}, data = json.dumps(expected), content_type='application/json')
+		
+#		expected["id"] = 1
+
+#		response_parsed = json.loads(response.get_data())
+#		print(response_parsed)
+
+#		assert(response.status_code == 200)
+#		assert(response_parsed['user'] == expected)
+#		assert(response_parsed['code'] == 200)
+
+
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
+	@patch('src.main.com.ServerRequest.requests.delete', side_effect=FakeDelete)
+	def test_delete_user_success(self, validateTokenMock, FakeDelete):
+		self.app = app.test_client()
+		response = self.app.delete(V1_URL + '/users/1', headers={'UserToken' : "A fake token"}, content_type='application/json')
+		assert(response.status_code == 204)
 
 """
 Some tests to add in the future:

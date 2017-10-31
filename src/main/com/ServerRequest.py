@@ -117,14 +117,25 @@ def deleteUser(userId):
 		return (False, r.status_code)
 	return (True, r.status_code)
 
-"""Receives a user id and returns a list of all the cars owned by that user
+"""Receives a user id and returns a list of all the cars owned by that user.
 """
 def getUserCars(userId):
 	r = requests.get(USER_END + "/" + str(userId) + CARS_END)
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		raise Exception("Shared Server returned error: %d"%(r.status_code))
-	return r.json()["cars"]
+	return (r.status_code, r.json()["cars"])
+
+"""Receives a user id and a car id. Returns the information of the car with
+matching id that belongs to the identified user.
+"""
+def getUserCar(userId, carId):
+	r = requests.get(USER_END + "/" + str(userId) + CARS_END + "/" + str(carId))
+	if (r.status_code != constants.SUCCESS):
+		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
+		raise Exception("Shared Server returned error: %d"%(r.status_code))
+	return (r.status_code, r.json()["car"])
+	
 
 
 """ Receives a user id, a car owner and a dictionary containing the properties of the car
