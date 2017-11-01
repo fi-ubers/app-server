@@ -101,6 +101,9 @@ class FakePost(object):
 			if ret["email"] == "fakemail@error.com":
 				self.status_code = 400
 				self.response = {"code" : self.status_code, 'message' : 'Unknown Error'}				
+			else:
+				self.status_code = 200
+				self.response = { "code" : self.status_code, "user" : ret, "token" : MOCK_TOKEN }	
 		else:
 			self.response = {"code" : 666, 'message' : 'Mocking error'}
 
@@ -279,13 +282,26 @@ class TestUsersLogin(object):
 
 	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
 	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
-	def test_validate_user_success(self, validateTokenMock, FakePost):
+	def test_validate_user_error(self, validateTokenMock, FakePost):
 		expected = {"birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@error.com", "password" : "hola9876",
 					"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito" }
 
 		self.app = app.test_client()
 		response = self.app.post(V1_URL + '/users/login', headers={'UserToken' : "A fake token"}, data = json.dumps(expected), content_type='application/json')
 		assert(response.status_code == 400)
+
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
+	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
+	def test_validate_user_success(self, validateTokenMock, FakePost):
+		expected = {"id":20, "birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@success.com", "password" : "hola9876",
+					"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito" }
+
+		self.app = app.test_client()
+		response = self.app.post(V1_URL + '/users/login', headers={'UserToken' : "A fake token"}, data = json.dumps(expected), content_type='application/json')
+		response_parsed = json.loads(response.get_data())
+		expected["_id"] = expected.pop("id")
+		assert(response.status_code == 200)
+		assert(response_parsed['user'] == expected)
 
 """
 Some tests to add in the future:
