@@ -129,7 +129,7 @@ def getUserCars(userId):
 matching id that belongs to the identified user.
 """
 def getUserCar(userId, carId):
-	r = requests.get(USER_END + "/" + str(userId) + CARS_END + "/" + str(carId))
+	r = requests.get(USER_END + "/" + str(userId) + CARS_END + "/" + str(carId) + QUERY_TOKEN, headers=headers)
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		raise Exception("Shared Server returned error: %d"%(r.status_code))

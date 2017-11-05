@@ -70,6 +70,12 @@ class FakeGet(object):
 		elif (self.url == MOCK_URL + '/users/3'):
 			self.status_code = 500 
 			self.response = {"code" : 500, 'message' : 'Unexpected error'}
+		elif (self.url == MOCK_URL + '/users/1/cars/12' + MOCK_TOKEN):
+			self.status_code = 200
+			self.response = {'code' : self.status_code, "car" : self.db[0]["cars"][0]}
+		elif (self.url == MOCK_URL + '/users/3/cars/17' + MOCK_TOKEN):
+			self.status_code = 500
+			self.response = {'code' : self.status_code, "message" : "Unexpected error"}
 		else:
 			self.response = {"code" : 666, 'message' : 'Mocking error'}
 
@@ -181,6 +187,45 @@ class TestCarsCRUD(object):
 		response = self.app.post(V1_URL + '/users/2/cars', headers={"UserToken" : "A fake token"}, data = json.dumps(expected), content_type='application/json')
 		response_parsed = json.loads(response.get_data())
 
+		assert(response.status_code == 500)
+		assert(response_parsed["message"] == "Unexpected error")
+
+
+
+
+
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_2)
+	def test_get_car_by_id_unauthorized(self, validateTokenMock):
+		self.app = app.test_client()
+		response = self.app.get(V1_URL + '/users/1/cars/12', headers={"UserToken" : "A fake token"})
+		response_parsed = json.loads(response.get_data())
+		assert(response.status_code == 403)
+
+
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
+	@patch('src.main.com.ServerRequest.requests.get', side_effect=FakeGet)
+	def test_get_car_by_id_success(self, validateTokenMock, FakeGet):
+		expected = default_db[0]["cars"][0]["properties"][0]
+
+		self.app = app.test_client()
+		response = self.app.get(V1_URL + '/users/1/cars/12', headers={"UserToken" : "A fake token"})
+
+		response_parsed = json.loads(response.get_data())
+		print(response_parsed)
+		assert(response.status_code == 200)
+		assert(response_parsed['car'] == expected)
+
+
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_3)
+	@patch('src.main.com.ServerRequest.requests.get', side_effect=FakeGet)
+	def test_get_car_by_id_error(self, validateTokenMock, FakeGet):
+		expected = default_db[0]["cars"][0]["properties"][0]
+
+		self.app = app.test_client()
+		response = self.app.get(V1_URL + '/users/3/cars/17', headers={"UserToken" : "A fake token"})
+
+		response_parsed = json.loads(response.get_data())
+		print(response_parsed)
 		assert(response.status_code == 500)
 		assert(response_parsed["message"] == "Unexpected error")
 

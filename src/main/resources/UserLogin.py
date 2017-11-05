@@ -373,7 +373,7 @@ class CarsById(Resource):
 		self.users = MongoController.getCollection("online")
 
 	def get(self, userId, carId):
-		logger.getLogger().debug("GET at /users/userId/cars/carId" + str(id))
+		logger.getLogger().debug("GET at /users/"+str(userId)+"/carId/" + str(carId))
 		if not "UserToken" in request.headers:
 			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing token")
 
@@ -382,18 +382,18 @@ class CarsById(Resource):
 		(valid, decoded) = TokenGenerator.validateToken(token)
 
 		print(decoded)
-		if not valid or (decoded['_id'] != id):
+		if not valid or (decoded['_id'] != userId):
 			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
-
-		print("GET at /user/id")
 		
-		car = self.users.findOne({ '_id': userId, cars:{'_id': carId}})['car']
+		car = []#[ car for car in self.users.find( { $and: [ { "_id": { $eq : userId} }, { "cars._id": { $eq : carId } } ] } , { cars : 1 } ) if car["_id"]==carId ]
+		
 		try:
 			if (len(car) == 0):
 				status_code, car = ServerRequest.getUserCar(userId, carId)
+			return ResponseMaker.response_object(constants.SUCCESS, ['car'], car["properties"])
 		except Exception, e:
-			return ResponseMaker.response_error(status_code, "User and car Ids did not match any existing vehicles.")			
-		return ResponseMaker.response_object(constants.SUCCESS, ['car'], car)
+			return ResponseMaker.response_error(constants.ERROR,  "Unexpected error")			
+		
 		
 	def put(self, userId, car):
 		raise NotImplemented
@@ -424,8 +424,6 @@ class CarsById(Resource):
 			else:
 				logger.getLogger().error("Attempted to delete car with non-existent id.")
 				return ResponseMaker.response_error(status_code, "Delete error")	
-
-			
 
 		except Exception, e:
 			return ResponseMaker.response_error(constants.ERROR, "Unexpected error")			
