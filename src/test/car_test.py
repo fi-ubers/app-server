@@ -76,6 +76,26 @@ class FakeGet(object):
 	def json(self):
 		return self.response
 
+
+class FakePost(object):
+	def __init__(self, url, headers={}, data=''):
+		self.url = url
+		self.db = default_db
+		self.data = data
+		self.status_code = 0
+		if (self.url == MOCK_URL + "/users/1/cars" + MOCK_TOKEN):
+			self.status_code = 201
+			self.response = {"code" : self.status_code, "car" : json.loads(self.data)}
+		elif (self.url == MOCK_URL + "/users/2/cars" + MOCK_TOKEN):
+			self.status_code = 500
+			self.response = {"code" : self.status_code, "message" : "Unexpected error"}
+		else:
+			self.response = {"code" : 666, 'message' : 'Mocking error'}
+
+	def json(self):
+		return self.response
+
+
 class TestCarsCRUD(object):
 
 	def test_getall_user_cars_unauthorized(self):
@@ -105,83 +125,40 @@ class TestCarsCRUD(object):
 		response = self.app.get(V1_URL + '/users/1/cars', headers={"UserToken" : "A fake token"})
 
 		response_parsed = json.loads(response.get_data())
-		print(response_parsed)
 		assert(response.status_code == 200)
 		assert(response_parsed['cars'] == expected['cars'][0])
 
-#	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
-#	def test_get_user_by_id_in_app(self, validateTokenMock):
-#		expected = default_db[0]
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
+	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
+	def test_register_new_car_success(self, validateTokenMock, FakePost):
+		expected = {"name": "Ferrari", "value": "HBP111" }
+		self.app = app.test_client()
+		response = self.app.post(V1_URL + '/users/1/cars', headers={"UserToken" : "A fake token"}, data = json.dumps(expected), content_type='application/json')
 
-#		self.app = app.test_client()
-#		response = self.app.get(V1_URL + '/users/1', headers={"UserToken" : "A fake token"})
+		response_parsed = json.loads(response.get_data())
+		assert(response.status_code == 201)
+		assert(response_parsed["car"]["properties"][0] == expected)
 
-#		response_parsed = json.loads(response.get_data())
-#		print(response_parsed)
-#		assert(response.status_code == 200)
-#		assert(response_parsed['user'] == expected)
-#		assert(response_parsed['code'] == 200)
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
+	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
+	def test_register_new_car_unauthorized(self, validateTokenMock, FakePost):
+		expected = {"name": "Ferrari", "value": "HBP111" }
+		self.app = app.test_client()
+		response = self.app.post(V1_URL + '/users/2/cars', headers={"UserToken" : "A fake token"}, data = json.dumps(expected), content_type='application/json')
+		response_parsed = json.loads(response.get_data())
+
+		assert(response.status_code == 403)
+		assert(response_parsed["message"] == "Forbidden")
 
 
-#	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_3)
-#	@patch('src.main.com.ServerRequest.requests.get', side_effect=FakeGet)
-#	def test_get_user_by_id_in_shared(self, validateTokenMock, FakeGet):
-#		expected = default_db[2]
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_2)
+	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
+	def test_register_new_car_fail(self, validateTokenMock, FakePost):
+		expected = {"name": "Ferrari", "value": "HBP111" }
+		self.app = app.test_client()
+		response = self.app.post(V1_URL + '/users/2/cars', headers={"UserToken" : "A fake token"}, data = json.dumps(expected), content_type='application/json')
+		response_parsed = json.loads(response.get_data())
 
-#		self.app = app.test_client()
-
-#		response = self.app.get(V1_URL + '/users/3', headers={"UserToken" : "A fake token"})
-
-#		response_parsed = json.loads(response.get_data())
-#		print(response_parsed)
-#		assert(response.status_code == 200)
-#		assert(response_parsed['user'] == expected)
-#		assert(response_parsed['code'] == 200)
-
-#	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_7)
-#	@patch('src.main.com.ServerRequest.requests.get', side_effect=FakeGet)
-#	def test_get_user_by_id_non_existent(self, validateTokenMock, FakeGet):
-#		self.app = app.test_client()
-#		response = self.app.get(V1_URL + '/users/7', headers={"UserToken" : "A fake token"})
-
-#		response_parsed = json.loads(response.get_data())
-#		print(response_parsed)
-#		assert(response.status_code == 404)
-#		assert(response_parsed['code'] == 404)
-
-#	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
-#	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
-#	def test_register_new_car(self, validateTokenMock, FakeGet):
-#		expected = {"birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@success.com", "password" : "hola9876",
-#					"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito" }
-
-#		self.app = app.test_client()
-#		response = self.app.post(V1_URL + '/users', headers={"UserToken" : "A fake token"}, data = json.dumps(expected), content_type='application/json')
-
-#		print(response)
-
-#		expected["_id"] = 6
-#		expected.pop("password")
-
-#		response_parsed = json.loads(response.get_data())
-#		print(response_parsed)
-#		assert(response.status_code == 201)
-#		assert(response_parsed['user'] == expected)
-#		assert(response_parsed['code'] == 201)
-
-#	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
-#	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
-#	def test_register_new_car_fail(self, validateTokenMock, FakeGet):
-#		expected = {"birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@error.com", "password" : "hola9876",
-#					"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito" }
-
-#		self.app = app.test_client()
-#		response = self.app.post(V1_URL + '/users', headers={"UserToken" : "A fake token"}, data = json.dumps(expected), content_type='application/json')
-
-#		print(response)
-
-#		response_parsed = json.loads(response.get_data())
-#		print(response_parsed)
-#		assert(response.status_code == 500)
-#		assert(response_parsed['code'] == 500)
+		assert(response.status_code == 500)
+		assert(response_parsed["message"] == "Unexpected error")
 

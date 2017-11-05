@@ -335,18 +335,32 @@ class Cars(Resource):
 		logger.getLogger().debug("POST at /users/cars")
 		logger.getLogger().debug(request.json)
 		
-		#Create car at shared server.
-		(status, response) = ServerRequest.createUserCar(id, request.json)
-		
-		if (status != constants.CREATE_SUCCESS):
-			return ResponseMaker.response_error(status, response['message'])
-		
-		#Update local database
-		car = response
-		car['_id'] = car.pop('id')
+		try:
 
-		return ResponseMaker.response_object(status, ['car'], [car])
+			if not "UserToken" in request.headers:
+				return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing token")
 
+			token = request.headers['UserToken']
+
+			(valid, decoded) = TokenGenerator.validateToken(token)
+
+			print(decoded)
+			if not valid or (decoded['_id'] != id):
+				return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
+
+			#Create car at shared server.
+			(status, response) = ServerRequest.createUserCar(id, request.json)
+		
+			if (status != constants.CREATE_SUCCESS):
+				return ResponseMaker.response_error(status, response["message"])
+			#Update local database
+			car = response
+			car["_id"] = car.pop("id")
+			#self.users.update({"_id": id}, { $push: { "cars": car } })
+			return ResponseMaker.response_object(status, ["car"], [car])
+
+		except Exception, e:
+			return ResponseMaker.response_error(constants.ERROR, "Unexpected error")			
 
 class CarsById(Resource):
 	"""This class initializes a resource named CarsById which allows

@@ -155,7 +155,6 @@ def createUserCar(userId, carProperties):
 	if (r.status_code != constants.CREATE_SUCCESS):
 		raise Exception("Shared Server returned error: %d"%(r.status_code))
 	return (r.status_code, r.json()["car"])
-	#return (201, carInfo)
 
 """Receives a user id and attempts to delete it. Returns True if the user exists and is correctly deleted.
 Returns False if the user id does not match any user id.
