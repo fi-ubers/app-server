@@ -17,6 +17,7 @@ api.add_resource(UserById, V1_URL + '/users/<int:id>')
 api.add_resource(UserLogin, V1_URL + '/users/login')
 api.add_resource(UserLogout, V1_URL + '/users/logout')
 api.add_resource(UsersList, V1_URL + '/users')
+api.add_resource(Cars, V1_URL + '/users/<int:id>/cars')
 #api.add_resource(DriversList, V1_URL + '/users/drivers')
 
 api.add_resource(GreetAdd, '/greet')

@@ -16,5 +16,5 @@ def validateToken(token):
 	try:
 		decoded = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
 	except Exception, e:
-		return (False, "Invalid token: " + str(e) )
+		return (False, "Invalid token: " + str(e))
 	return (True, decoded)

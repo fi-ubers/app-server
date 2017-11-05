@@ -1,5 +1,6 @@
 import json
 import os
+import jwt
 
 user1 = {"_id": 1, "birthdate": "18-7-1994", "country": "Norway",
 		 "email": "juanma@mail.jm", "images": [ "No tengo imagen" ],
@@ -21,7 +22,10 @@ default_db = [user1, user2, user3]
 V1_URL = '/v1/api'
 MOCK_URL = 'http://172.17.0.2:80'
 MOCK_TOKEN = '?token=untokendementira'
-MOCK_TOKEN_VALIDATION = (True, {"username" : "juan", "_id" : 1})
+MOCK_TOKEN_VALIDATION_1 = (True, {"username" : "juan", "_id" : 1})
+MOCK_TOKEN_VALIDATION_2 = (True, {"username" : "juanpi", "_id" : 2})
+MOCK_TOKEN_VALIDATION_3 = (True, {"username" : "euge", "_id" : 3})
+MOCK_TOKEN_VALIDATION_7 = (True, {"username" : "luis", "_id" : 7})
 
 os.environ['SS_URL'] = MOCK_URL
 
@@ -140,6 +144,9 @@ class FakeDelete(object):
 		if (self.url == MOCK_URL + '/users/1' + MOCK_TOKEN):
 			self.status_code = 204
 			self.response = { "code" : self.status_code, 'message' : 'delete successful'}
+		if (self.url == MOCK_URL + '/users/2' + MOCK_TOKEN):
+			self.status_code = 404
+			self.response = { "code" : self.status_code, 'message' : 'non-existent id'}
 		else:
 			self.response = {"code" : 666, 'message' : 'Mocking error'}
 
@@ -158,7 +165,7 @@ class TestUsersLogin(object):
 		assert(response_parsed["message"] == expected)
 		assert(response_parsed["code"] == 400)
 
-	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
 	def test_getall_users_authorized(self, validateTokenMock):
 		expected = default_db[0:2]
 
@@ -172,7 +179,7 @@ class TestUsersLogin(object):
 		assert(response_parsed['code'] == 200)
 
 
-	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
 	def test_get_user_by_id_in_app(self, validateTokenMock):
 		expected = default_db[0]
 
@@ -186,12 +193,13 @@ class TestUsersLogin(object):
 		assert(response_parsed['code'] == 200)
 
 
-	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_3)
 	@patch('src.main.com.ServerRequest.requests.get', side_effect=FakeGet)
 	def test_get_user_by_id_in_shared(self, validateTokenMock, FakeGet):
 		expected = default_db[2]
 
 		self.app = app.test_client()
+
 		response = self.app.get(V1_URL + '/users/3', headers={"UserToken" : "A fake token"})
 
 		response_parsed = json.loads(response.get_data())
@@ -200,7 +208,7 @@ class TestUsersLogin(object):
 		assert(response_parsed['user'] == expected)
 		assert(response_parsed['code'] == 200)
 
-	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_7)
 	@patch('src.main.com.ServerRequest.requests.get', side_effect=FakeGet)
 	def test_get_user_by_id_non_existent(self, validateTokenMock, FakeGet):
 		self.app = app.test_client()
@@ -211,7 +219,7 @@ class TestUsersLogin(object):
 		assert(response.status_code == 404)
 		assert(response_parsed['code'] == 404)
 
-	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
 	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
 	def test_register_new_user(self, validateTokenMock, FakeGet):
 		expected = {"birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@success.com", "password" : "hola9876",
@@ -231,7 +239,7 @@ class TestUsersLogin(object):
 		assert(response_parsed['user'] == expected)
 		assert(response_parsed['code'] == 201)
 
-	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
 	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
 	def test_register_new_user_fail(self, validateTokenMock, FakeGet):
 		expected = {"birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@error.com", "password" : "hola9876",
@@ -248,7 +256,7 @@ class TestUsersLogin(object):
 		assert(response_parsed['code'] == 500)
 
 
-#	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
+#	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
 #	@patch('src.main.com.ServerRequest.requests.put', side_effect=FakePut)
 #	def test_modify_user_success(self, validateTokenMock, FakePut):
 #		expected = {"_id":1, "_ref": 123, "birthdate": "18-7-1994", "country": "Russia", "email": "juanma@mail.jm", "images": [ "No tengo imagen" ], "name": "Juan", "surname": "Fresia", "type": "passenger", "username": "juan" }
@@ -266,21 +274,29 @@ class TestUsersLogin(object):
 #		assert(response_parsed['code'] == 200)
 
 
-	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
 	@patch('src.main.com.ServerRequest.requests.delete', side_effect=FakeDelete)
 	def test_delete_user_by_id_success(self, validateTokenMock, FakeDelete):
 		self.app = app.test_client()
 		response = self.app.delete(V1_URL + '/users/1', headers={'UserToken' : "A fake token"}, content_type='application/json')
 		assert(response.status_code == 204)
 
-	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
 	@patch('src.main.com.ServerRequest.requests.delete', side_effect=FakeDelete)
 	def test_delete_user_by_id_forbidden(self, validateTokenMock, FakeDelete):
 		self.app = app.test_client()
 		response = self.app.delete(V1_URL + '/users/9', headers={'UserToken' : "A fake token"}, content_type='application/json')
 		assert(response.status_code == 403)
 
-	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_2)
+	@patch('src.main.com.ServerRequest.requests.delete', side_effect=FakeDelete)
+	def test_delete_user_by_id_nonexistent(self, validateTokenMock, FakeDelete):
+		self.app = app.test_client()
+		response = self.app.delete(V1_URL + '/users/2', headers={'UserToken' : "A fake token"}, content_type='application/json')
+		assert(response.status_code == 404)
+
+
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
 	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
 	def test_validate_user_error(self, validateTokenMock, FakePost):
 		expected = {"birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@error.com", "password" : "hola9876",
@@ -290,14 +306,14 @@ class TestUsersLogin(object):
 		response = self.app.post(V1_URL + '/users/login', headers={'UserToken' : "A fake token"}, data = json.dumps(expected), content_type='application/json')
 		assert(response.status_code == 400)
 
-	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION)
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
 	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
 	def test_validate_user_success(self, validateTokenMock, FakePost):
 		expected = {"id":20, "birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@success.com", "password" : "hola9876",
 					"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito" }
 
 		self.app = app.test_client()
-		response = self.app.post(V1_URL + '/users/login', headers={'UserToken' : "A fake token"}, data = json.dumps(expected), content_type='application/json')
+		response = self.app.post(V1_URL + '/users/login', headers={"UserToken" : "A fake token"}, data = json.dumps(expected), content_type='application/json')
 		response_parsed = json.loads(response.get_data())
 		expected["_id"] = expected.pop("id")
 		assert(response.status_code == 200)

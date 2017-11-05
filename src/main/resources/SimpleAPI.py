@@ -52,7 +52,7 @@ class GreetAdd(Resource):
 
 	def get(self):
 		if not validateToken(request):
-			return ResponseMaker.response(constants.FORBIDDEN, "Forbidden")
+			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
 		print("GET at /greet")
 		logger.getLogger().info("GET at /greet")
 		aux = [user for user in self.users.find()]
@@ -60,7 +60,7 @@ class GreetAdd(Resource):
 
 	def post(self):
 		if not validateToken(request):
-			return ResponseMaker.response(constants.FORBIDDEN, "Forbidden")
+			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
 		print(request.json)
 		if (not request.json or not 'user' in request.json):
 			logger.getLogger().error("Missing user data to create user.")

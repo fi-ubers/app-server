@@ -37,30 +37,33 @@ class UserLogin(Resource):
 		(valid, response) = ServerRequest.validateUser(request.json)
 		print(valid, response)
 
-		if not valid:
-			logger.getLogger().debug('Error 418: I\' m a teapot and your credentials are not valid!')
-			return ResponseMaker.response_error(response.status_code, "Shared server error")
-		print("USER VALIDATED: " + str(response))
-		logger.getLogger().debug("Credentials are valid, server responsed with user")
+		try:
+			if not valid:
+				logger.getLogger().debug('Error 418: I\' m a teapot and your credentials are not valid!')
+				return ResponseMaker.response_error(response.status_code, "Shared server error")
+			print("USER VALIDATED: " + str(response))
+			logger.getLogger().debug("Credentials are valid, server responsed with user")
 
-		user_js = response;
-		user_js['_id'] = user_js.pop('id')
-		print(user_js)
+			user_js = response;
+			user_js['_id'] = user_js.pop('id')
+			print(user_js)
 
-		# (token-generation) Generate a new UserToken for that user
-		token = TokenGenerator.generateToken(response);
-		# user_js["token"] = token
+			# (token-generation) Generate a new UserToken for that user
+			token = TokenGenerator.generateToken(response);
+			# user_js["token"] = token
 
-		# (mongodb) If credentials are valid, add user to active users table
+			# (mongodb) If credentials are valid, add user to active users table
 		
-		users_online = MongoController.getCollection("online")
-		for user in users_online.find():
-			if user["_id"] == response["_id"]:
-				users_online.delete_many({"_id" : user["_id"]}) 
-		users_online.insert_one(response)
+			users_online = MongoController.getCollection("online")
+			for user in users_online.find():
+				if user["_id"] == response["_id"]:
+					users_online.delete_many({"_id" : user["_id"]}) 
+			users_online.insert_one(response)
 		
-		return ResponseMaker.response_object(constants.SUCCESS, ['user', 'token'], [user_js, token])
-
+			return ResponseMaker.response_object(constants.SUCCESS, ['user', 'token'], [user_js, token])
+		except Exception as e:
+			logger.getLogger().exception(str(e))
+			return ResponseMaker.response_error(500, "Internal Error")
 
 class UsersList(Resource):
 	"""This is the handler for user creation.
@@ -72,12 +75,12 @@ class UsersList(Resource):
 				"fbId" : string,
 				"fbToken" : string
 			}
-			"firstName" : string,
-			"lastName" : string,
+			"firstname" : string,
+			"lastname" : string,
 			"country" : string,
 			"email" : string,
 			"birthdate" : string,
-			"images" : string,
+			"images" : [string],
 		}
 
 	Creates a new user based on the data provided.
@@ -87,8 +90,8 @@ class UsersList(Resource):
 			"ref" : string,
 			"username" : string,
 			"cars" : array of Cars,
-			"firstName" : string,
-			"lastName" : string,
+			"firstname" : string,
+			"lastname" : string,
 			"country" : string,
 			"email" : string,
 			"birthdate" : string,
@@ -193,7 +196,9 @@ class UserById(Resource):
 
 		(valid, decoded) = TokenGenerator.validateToken(token)
 
-		print(decoded)
+		if not valid or (decoded['_id'] != id):
+			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
+
 		print("GET at /user/id")
 		candidates = [user for user in self.users.find() if user['_id'] == id]
 
@@ -233,28 +238,23 @@ class UserById(Resource):
 		try:
 			#Ask Shared-Server to update this user
 			success, updated_user = ServerRequest.updateUser(request.json)	
-			print("UPDATE:" + str(success) + "," + str(updated_user))	
 			if success:
 				#Update in local data-base
-				self.users.update({'_id':updated_user['id']}, updated_user,  upsert= True) # ???
+				self.users.update({'_id':updated_user['id']}, updated_user,  upsert= True)
 				logger.getLogger().info("Successfully updated user")
 				return ResponseMaker.response_error(constants.SUCCESS, "User updated successfully!")
 			return ResponseMaker.response_error(constants.NOT_FOUND, "User not found!")	
-		except ValueError, e:
-			print("VALUE ERROR")
+		except ValueError as e:
 			logger.getLogger().error(str(e))
 			return ResponseMaker.response_error(constants.UPDATE_CONFLICT, "User update failed:" + str(e))
-		except requests.exceptions.Timeout:	
+		except requests.exceptions.Timeout as e:	
 			logger.getLogger().error(str(e))	
 			return ResponseMaker.response_error(constants.REQ_TIMEOUT, "User update failed:" + str(e))
 		except Exception as e:
 			logger.getLogger().error(str(e))
-			#print("HELLOOOO " + str(e))
-		        #traceback.print_exc(file=sys.stdout)
-			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")		
+			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden: " + str(e))		
 		
 	def delete(self, id):
-		print(id)
 		print("DELETE at /users/id")
 		logger.getLogger().debug("DELETE at /users/" + str(id))
 
@@ -287,10 +287,21 @@ class Cars(Resource):
 	def __init__(self):
 		self.users = MongoController.getCollection("online")
 
-	"""Receives a userId and returns a list of all the cars owned by that user.
+	"""Receives a userId and returns a list of all the cars owned by that user, with the following layout:
+		{	
+		  "cars": [{
+                      "id": "idCar1",
+                      "_ref": "refCar1",
+                      "owner": "ownerCar1",
+                      "properties": [{
+                        "name": "nameCar1",
+                        "value": "valueCar1"
+                      }]
+                  }]
+		}		
 	"""
-	def get(self, userId):
-		logger.getLogger().debug("GET at /users/userId/cars" + str(id))
+	def get(self, id):
+		logger.getLogger().debug("GET at /users/userId/cars " + str(id))
 		if not "UserToken" in request.headers:
 			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing token")
 
@@ -301,15 +312,15 @@ class Cars(Resource):
 		print(decoded)
 		if not valid or (decoded['_id'] != id):
 			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
-
-		print("GET at /user/id")
 		
-		cars = self.users.findOne({ _id: userId })['cars']
+		cars = [user for user in self.users.find() if user['_id'] == id and user['type'] == 'driver']
+
 		try:
 			if (len(cars) == 0):
-				status_code, cars = ServerRequest.getUserCars(userId)
+				print("FETECHING CARS...")
+				status_code, cars = ServerRequest.getUserCars(id)
 		except Exception, e:
-			return ResponseMaker.response_error(status_code, "User id did not match any existing users.")			
+			return ResponseMaker.response_error(constants.NOT_FOUND, "User id did not match any existing users.")			
 		return ResponseMaker.response_object(constants.SUCCESS, ['cars'], cars)
 	
 	"""Receives a user id. Creates a car associated to the identified user with the information
@@ -319,15 +330,13 @@ class Cars(Resource):
 	  'value': 'plateNumber'
 	}		
 	"""
-	def post(self, userId):
+	def post(self, id):
 		print(request.json)
 		logger.getLogger().debug("POST at /users/cars")
 		logger.getLogger().debug(request.json)
 		
-		carInfo = request.json
-
 		#Create car at shared server.
-		(status, response) = ServerRequest.createUserCar(userId, carInfo["id"], carInfo["owner"], carInfo["properties"])
+		(status, response) = ServerRequest.createUserCar(id, request.json)
 		
 		if (status != constants.CREATE_SUCCESS):
 			return ResponseMaker.response_error(status, response['message'])
@@ -363,7 +372,7 @@ class CarsById(Resource):
 
 		print("GET at /user/id")
 		
-		car = self.users.findOne({ _id: userId, cars:{id: carId}})['car']
+		car = self.users.findOne({ '_id': userId, cars:{'_id': carId}})['car']
 		try:
 			if (len(car) == 0):
 				status_code, car = ServerRequest.getUserCar(userId, carId)

@@ -9,11 +9,12 @@ import requests
 import logging as logger
 import config.constants as constants
 
-SS_URI = "http://127.0.0.1:5000/api"
+SS_URI = 'https://fiuber-shared-server.herokuapp.com/api'#"http://127.0.0.1:5000/api"
 if not "SS_URL" in os.environ:
 	os.environ["SS_URL"] = SS_URI
 
-DEFAULT_APP_TOKEN = 'Sorry, there is no token'
+DEFAULT_APP_TOKEN ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzQsImp0aSI6ImE3YWIxOTA2LWQwZjEtNDY1Ny05OTc4LTdiYjBmODJhZjZhOSIsImlhdCI6MTUwODI2MDQ4OX0.IrurkKZ-wbmTp8kQf_rGVHv5jcvwCibQJDoHwvZJ1Gg'
+
 if not "APP_TOKEN" in os.environ:
 	os.environ["APP_TOKEN"] = DEFAULT_APP_TOKEN
 
@@ -81,8 +82,6 @@ def updateUser(user_js):
 
 """ Asks shared server to create a new user"""
 def createUser(user_js):
-	#user_js["_ref"] = ""
-
 	r = requests.post(USER_END + QUERY_TOKEN, data = json.dumps(user_js), headers=headers)
 
 	if (r.status_code != constants.CREATE_SUCCESS):
@@ -147,17 +146,16 @@ with the following layout:
 Attempts to create a new car with the information given. 
 Returns a car object on successful creation.
 """
-def createUserCar(userId, carId, owner, properties):
-	car_js["id"] = str(carId)
-	car_js["_ref"] = ""
-	car_js["owner"] = str(owner)
-	car_js["properties"] = str([properties])
-	r = requests.post(os.environ["SS_URL"] + USER_END + "/" + str(userId) + CARS_END, data = json.dumps(car_js), headers=headers)
+def createUserCar(userId, carProperties):
+	carInfo = { "id" : "1" }
+	carInfo["_ref"] = "1"
+	carInfo["owner"] = "FIUBER"
+	carInfo["properties"] =  [carProperties]
+	r = requests.post(USER_END + "/" + str(userId) + CARS_END + QUERY_TOKEN, data = json.dumps(carInfo), headers=headers)
 	if (r.status_code != constants.CREATE_SUCCESS):
 		raise Exception("Shared Server returned error: %d"%(r.status_code))
-#	print("CREATED RESPONSE:" + str(r.json()))
-	return r.json()["car"]
-
+	return (r.status_code, r.json()["car"])
+	#return (201, carInfo)
 
 """Receives a user id and attempts to delete it. Returns True if the user exists and is correctly deleted.
 Returns False if the user id does not match any user id.
