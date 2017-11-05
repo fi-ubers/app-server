@@ -96,6 +96,28 @@ class FakePost(object):
 		return self.response
 
 
+class FakeDelete(object):
+	def __init__(self, url, headers={}):
+		self.url = url
+		self.db = default_db
+		self.headers = headers
+		self.status_code = 0
+
+		if (self.url == MOCK_URL + '/users/1/cars/12' + MOCK_TOKEN):
+			self.status_code = 204
+			self.response = { "code" : self.status_code, 'message' : 'delete successful'}
+		elif (self.url == MOCK_URL + '/users/2/cars/13' + MOCK_TOKEN):
+			self.status_code = 404
+			self.response = { "code" : self.status_code, 'message' : 'non-existent id'}
+		elif (self.url == MOCK_URL + "/users/2/cars/14" + MOCK_TOKEN):
+			self.status_code = 500
+			self.response = {"code" : self.status_code, "message" : "Unexpected error"}
+		else:
+			self.response = {"code" : 666, 'message' : 'Mocking error'}
+
+	def json(self):
+		return self.response
+
 class TestCarsCRUD(object):
 
 	def test_getall_user_cars_unauthorized(self):
@@ -159,6 +181,45 @@ class TestCarsCRUD(object):
 		response = self.app.post(V1_URL + '/users/2/cars', headers={"UserToken" : "A fake token"}, data = json.dumps(expected), content_type='application/json')
 		response_parsed = json.loads(response.get_data())
 
+		assert(response.status_code == 500)
+		assert(response_parsed["message"] == "Unexpected error")
+
+
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
+	@patch('src.main.com.ServerRequest.requests.delete', side_effect=FakeDelete)
+	def test_delete_car_success(self, validateTokenMock, FakeDelete):
+		self.app = app.test_client()
+		response = self.app.delete(V1_URL + '/users/1/cars/12', headers={"UserToken" : "A fake token"}, content_type='application/json')
+		assert(response.status_code == 204)
+
+
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_2)
+	@patch('src.main.com.ServerRequest.requests.delete', side_effect=FakeDelete)
+	def test_delete_car_nonexistent(self, validateTokenMock, FakeDelete):
+		self.app = app.test_client()
+		response = self.app.delete(V1_URL + '/users/2/cars/13', headers={"UserToken" : "A fake token"}, content_type='application/json')
+		response_parsed = json.loads(response.get_data())
+		assert(response.status_code == 404)
+
+
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_2)
+	@patch('src.main.com.ServerRequest.requests.delete', side_effect=FakeDelete)
+	def test_delete_car_unauthorized(self, validateTokenMock, FakeDelete):
+		self.app = app.test_client()
+		response = self.app.delete(V1_URL + '/users/1/cars/12', headers={"UserToken" : "A fake token"}, content_type='application/json')
+
+		response_parsed = json.loads(response.get_data())
+		assert(response.status_code == 403)
+		assert(response_parsed["message"] == "Forbidden")
+
+
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_2)
+	@patch('src.main.com.ServerRequest.requests.delete', side_effect=FakeDelete)
+	def test_delete_car_error(self, validateTokenMock, FakeDelete):
+		self.app = app.test_client()
+		response = self.app.delete(V1_URL + '/users/2/cars/14', headers={"UserToken" : "A fake token"}, content_type='application/json')
+
+		response_parsed = json.loads(response.get_data())
 		assert(response.status_code == 500)
 		assert(response_parsed["message"] == "Unexpected error")
 

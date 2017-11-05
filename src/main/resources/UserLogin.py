@@ -14,6 +14,7 @@ import os
 import requests
 import logging as logger
 
+
 class UserLogin(Resource):
 	"""This is the handler for user login and credential validation.
 	Expects credentials in the body of the request, with UserCredentials format:
@@ -353,7 +354,7 @@ class Cars(Resource):
 		
 			if (status != constants.CREATE_SUCCESS):
 				return ResponseMaker.response_error(status, response["message"])
-			#Update local database
+			#TODO:Update local database
 			car = response
 			car["_id"] = car.pop("id")
 			#self.users.update({"_id": id}, { $push: { "cars": car } })
@@ -398,6 +399,35 @@ class CarsById(Resource):
 		raise NotImplemented
 
 	def delete(self, userId, carId):
-		raise NotImplemented
+		print("DELETE at /users/id")
+		logger.getLogger().debug("DELETE at /users/" + str(userId) + "/cars/" + str(carId))
+
+		if not "UserToken" in request.headers:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing token")
+
+		token = request.headers['UserToken']
+
+		(valid, decoded) = TokenGenerator.validateToken(token)
+
+		print(decoded)
+		if not valid or (decoded['_id'] != userId):
+			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
+		try:
+			#Ask Shared-Server to delete this user
+			delete_success, status_code = ServerRequest.deleteUserCar(userId, carId)
+			if delete_success:
+				#TODO:Delete in local data-base
+				#deletedCar = [car for user in self.users.find() for car in user["cars"] if (user['_id'] == userId and car["_id"]==carId)]
+				#self.users.update({"_id": id}, { $pop: { "cars.id": carId } })
+				logger.getLogger().info("Successfully deleted user car.")			
+				return ResponseMaker.response_object(constants.DELETE_SUCCESS, ['car'], {"id":carId})			
+			else:
+				logger.getLogger().error("Attempted to delete car with non-existent id.")
+				return ResponseMaker.response_error(status_code, "Delete error")	
+
+			
+
+		except Exception, e:
+			return ResponseMaker.response_error(constants.ERROR, "Unexpected error")			
 
 

@@ -13,7 +13,7 @@ SS_URI = 'https://fiuber-shared-server.herokuapp.com/api'#"http://127.0.0.1:5000
 if not "SS_URL" in os.environ:
 	os.environ["SS_URL"] = SS_URI
 
-DEFAULT_APP_TOKEN ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzQsImp0aSI6ImE3YWIxOTA2LWQwZjEtNDY1Ny05OTc4LTdiYjBmODJhZjZhOSIsImlhdCI6MTUwODI2MDQ4OX0.IrurkKZ-wbmTp8kQf_rGVHv5jcvwCibQJDoHwvZJ1Gg'
+DEFAULT_APP_TOKEN='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzQsImp0aSI6ImE3YWIxOTA2LWQwZjEtNDY1Ny05OTc4LTdiYjBmODJhZjZhOSIsImlhdCI6MTUwODI2MDQ4OX0.IrurkKZ-wbmTp8kQf_rGVHv5jcvwCibQJDoHwvZJ1Gg'
 
 if not "APP_TOKEN" in os.environ:
 	os.environ["APP_TOKEN"] = DEFAULT_APP_TOKEN
@@ -134,8 +134,6 @@ def getUserCar(userId, carId):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		raise Exception("Shared Server returned error: %d"%(r.status_code))
 	return (r.status_code, r.json()["car"])
-	
-
 
 """ Receives a user id, a car owner and a dictionary containing the properties of the car
 with the following layout:
@@ -160,7 +158,7 @@ def createUserCar(userId, carProperties):
 Returns False if the user id does not match any user id.
 """
 def deleteUserCar(userId, carId):
-	r = requests.delete(os.environ["SS_URL"] + USER_END + "/" + str(userId) + CARS_END + "/" + str(carId))
+	r = requests.delete(USER_END + "/" + str(userId) + CARS_END + "/" + str(carId) + QUERY_TOKEN)
 	if (r.status_code == constants.NOT_FOUND):
 		return (False, r.status_code)
 	if (r.status_code != constants.DELETE_SUCCESS):
