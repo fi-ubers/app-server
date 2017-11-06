@@ -1,6 +1,6 @@
 """@package ServerRequest
 Implements API methods that allow user related
-transactions and requests to be sent to the Shared 
+transactions and requests to be sent to the Shared
 Server.
 """
 import os
@@ -21,7 +21,7 @@ if not "APP_TOKEN" in os.environ:
 QUERY_TOKEN = "?token=" + os.environ["APP_TOKEN"]
 
 CARS_END = "/cars"
-USER_END = os.environ["SS_URL"] + "/users" 
+USER_END = os.environ["SS_URL"] + "/users"
 TRANSACT_END = "/transactions"
 TRIPS_END = "/trips"
 
@@ -48,8 +48,8 @@ def getUser(userId):
 	return (r.status_code, r.json()["user"])
 
 
-"""Attempts to perform a request. If the request is rejected because of a reference missmatch, the 
-operation will be repeated until successfully completed or until a maximum number of attempts is 
+"""Attempts to perform a request. If the request is rejected because of a reference missmatch, the
+operation will be repeated until successfully completed or until a maximum number of attempts is
 reached or until another error arises."""
 def _permformUpdate(f, endpoint, updatedEntityName, updatedEntity):
 	r = f(endpoint, updatedEntity)
@@ -136,7 +136,7 @@ with the following layout:
   'name': 'brandName',
   'value': 'plateNumber'
 }
-Attempts to create a new car with the information given. 
+Attempts to create a new car with the information given.
 Returns a car object on successful creation.
 """
 def createUserCar(userId, carProperties):
@@ -196,8 +196,7 @@ def getUserTransactions(id):
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		raise Exception("Shared Server returned error: %d"%(r.status_code))
-	print("RESPONSE:" + str(r.json()))
-	return (True, r.json()['transactions'])
+	return (r.status_code, r.json()['transactions'])
 
 
 """Receives a user id and a json representing a transaction with the following layout:
@@ -222,7 +221,57 @@ def makePayment(id, transaction):
 		raise Exception("Shared Server returned error: %d"%(r.status_code))
 	return (r.status_code, r.json()["transaction"])
 
-
-
-
-
+"""Receives a user id. Returns a json structures with the following layout:
+  "trips": [
+    {
+      "id": "string",
+      "applicationOwner": "string",
+      "driver": "string",
+      "passenger": "string",
+      "start": {
+        "address": {
+          "street": "string",
+          "location": {
+            "lat": 0,
+            "lon": 0
+          }
+        },
+        "timestamp": 0
+      },
+      "end": {
+        "address": {
+          "street": "string",
+          "location": {
+            "lat": 0,
+            "lon": 0
+          }
+        },
+        "timestamp": 0
+      },
+      "totalTime": 0,
+      "waitTime": 0,
+      "travelTime": 0,
+      "distance": 0,
+      "route": [
+        {
+          "location": {
+            "lat": 0,
+            "lon": 0
+          },
+          "timestamp": 0
+        }
+      ],
+      "cost": {
+        "currency": "string",
+        "value": 0
+      }
+    }
+  ]
+"""
+def getUserTrips(id):
+	endpoint = USER_END + "/" + str(id) + TRIPS_END + QUERY_TOKEN
+	r = requests.get(endpoint, headers=headers)
+	if (r.status_code != constants.SUCCESS):
+		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
+		raise Exception("Shared Server returned error: %d"%(r.status_code))
+	return (r.status_code, r.json()['trips'])

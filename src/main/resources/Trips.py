@@ -19,11 +19,43 @@ class Trips(Resource):
 
 	def post(self):
 		raise NotImplemented
-	
-class UserTrips(Resource):
 
+class UserTrips(Resource):
+	"""Receives a user id. Returns a json structure with a list containing
+	all the trips made by that user.
+	"""
 	def get(self, id):
-		raise NotImplemented
+		logger.getLogger().debug("GET at /users/" + str(id) +"/trips")
+		if not "UserToken" in request.headers:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing token")
+
+		token = request.headers['UserToken']
+
+		(valid, decoded) = TokenGenerator.validateToken(token)
+
+		if not valid or (decoded['_id'] != id):
+			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
+
+		print("GET at /user/id/trips")
+		#TODO: search local database
+		trips = [] #[user for user in self.users.find() if user['_id'] == id]
+
+		if len(trips) == 0:
+			#If not available in local data-base, ask Shared-Server for user info.
+			(status, response) = ServerRequest.getUserTrips(id)
+
+			if (status != constants.SUCCESS):
+				return ResponseMaker.response_error(status, response["message"])
+
+		#TODO: fetch user from ss and store locally
+		trips = response
+
+		if len(trips) == 0:
+			logger.getLogger().error("Attempted to retrieve non-existent user trip list.")
+			return ResponseMaker.response_error(constants.NOT_FOUND, "Trip list not found.")
+
+		return ResponseMaker.response_object(constants.SUCCESS, ['trips'], [trips])
+
 
 class TripEstimation(Resource):
 
@@ -35,5 +67,3 @@ class TripsById(Resource):
 
 	def get(self):
 		raise NotImplemented
-
-
