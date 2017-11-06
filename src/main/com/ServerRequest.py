@@ -9,11 +9,11 @@ import requests
 import logging as logger
 import config.constants as constants
 
-SS_URI = 'https://fiuber-shared-server.herokuapp.com/api'#"http://127.0.0.1:5000/api"
+SS_URI = "http://127.0.0.1:5000/api" #'https://fiuber-shared-server.herokuapp.com/api'
 if not "SS_URL" in os.environ:
 	os.environ["SS_URL"] = SS_URI
 
-DEFAULT_APP_TOKEN='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzQsImp0aSI6ImE3YWIxOTA2LWQwZjEtNDY1Ny05OTc4LTdiYjBmODJhZjZhOSIsImlhdCI6MTUwODI2MDQ4OX0.IrurkKZ-wbmTp8kQf_rGVHv5jcvwCibQJDoHwvZJ1Gg'
+DEFAULT_APP_TOKEN="Sorry there is no token"
 
 if not "APP_TOKEN" in os.environ:
 	os.environ["APP_TOKEN"] = DEFAULT_APP_TOKEN
@@ -84,16 +84,12 @@ def createUser(user_js):
 	if (r.status_code != constants.CREATE_SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		return (r.status_code, r.json())
-
-	print("CREATED RESPONSE:" + str(r.json()))
 	return (r.status_code, r.json()["user"])
 
 """Receives a user represented by a json structure and validates its credentials.
 Returns True if the credentials were invalid, returns False otherwise.
 """
 def validateUser(user_js):
-	print(user_js)
-	print(USER_END)
 	r = requests.post(USER_END + "/validate" + QUERY_TOKEN, data = json.dumps(user_js), headers=headers)
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
@@ -105,7 +101,6 @@ Returns False if the user id does not match any user id.
 """
 def deleteUser(userId):
 	r = requests.delete(USER_END + "/" + str(userId) + QUERY_TOKEN, headers=headers)
-
 	if (r.status_code != constants.DELETE_SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		return (False, r.status_code)
@@ -127,7 +122,7 @@ def getUserCar(userId, carId):
 	r = requests.get(USER_END + "/" + str(userId) + CARS_END + "/" + str(carId) + QUERY_TOKEN, headers=headers)
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
-		raise Exception("Shared Server returned error: %d"%(r.status_code))
+		return (r.status_code, r.json())
 	return (r.status_code, r.json()["car"])
 
 """ Receives a user id, a car owner and a dictionary containing the properties of the car
@@ -147,7 +142,7 @@ def createUserCar(userId, carProperties):
 	r = requests.post(USER_END + "/" + str(userId) + CARS_END + QUERY_TOKEN, data = json.dumps(carInfo), headers=headers)
 	if (r.status_code != constants.CREATE_SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
-		raise Exception("Shared Server returned error: %d"%(r.status_code))
+		return (r.status_code, r.json())
 	return (r.status_code, r.json()["car"])
 
 """Receives a user id and attempts to delete it. Returns True if the user exists and is correctly deleted.
@@ -184,7 +179,7 @@ def updateUserCar(userId, carId, car):
 		return (False, r.json()['message'])
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
-		raise Exception("Shared Server returned error: %d"%(r.status_code))
+		return (r.status_code, r.json())
 	return (True, r.json()['car'])
 
 
@@ -195,7 +190,7 @@ def getUserTransactions(id):
 	r = requests.get(endpoint, headers=headers)
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
-		raise Exception("Shared Server returned error: %d"%(r.status_code))
+		return (r.status_code, r.json())
 	return (r.status_code, r.json()['transactions'])
 
 
@@ -218,19 +213,19 @@ def makePayment(id, transaction):
 	r = requests.put(endpoint, data = json.dumps(transaction), headers=headers)
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
-		raise Exception("Shared Server returned error: %d"%(r.status_code))
+		return (r.status_code, r.json())
 	return (r.status_code, r.json()["transaction"])
 
 """Receives a user id. Returns a json structures with the following layout:
   "trips": [
     {
       "id": "string",
-      "applicationOwner": "string",
-      "driver": "string",
-      "passenger": "string",
+      "applicationOwner": "owner name",
+      "driver": "driver id",
+      "passenger": "passanger id",
       "start": {
         "address": {
-          "street": "string",
+          "street": "street name",
           "location": {
             "lat": 0,
             "lon": 0
@@ -240,7 +235,7 @@ def makePayment(id, transaction):
       },
       "end": {
         "address": {
-          "street": "string",
+          "street": "street name",
           "location": {
             "lat": 0,
             "lon": 0
@@ -262,7 +257,7 @@ def makePayment(id, transaction):
         }
       ],
       "cost": {
-        "currency": "string",
+        "currency": "coin",
         "value": 0
       }
     }
@@ -273,5 +268,63 @@ def getUserTrips(id):
 	r = requests.get(endpoint, headers=headers)
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
-		raise Exception("Shared Server returned error: %d"%(r.status_code))
+		return (r.status_code, r.json())
 	return (r.status_code, r.json()['trips'])
+
+"""Receives a json structure representing a trip, with the following layout:
+  "trip": {
+    "id": "string",
+    "applicationOwner": "string",
+    "driver": "string",
+    "passenger": "string",
+    "start": {
+      "address": {
+        "street": "string",
+        "location": {
+          "lat": 0,
+          "lon": 0
+        }
+      },
+      "timestamp": 0
+    },
+    "end": {
+      "address": {
+        "street": "string",
+        "location": {
+          "lat": 0,
+          "lon": 0
+        }
+      },
+      "timestamp": 0
+    },
+    "totalTime": 0,
+    "waitTime": 0,
+    "travelTime": 0,
+    "distance": 0,
+    "route": [
+      {
+        "location": {
+          "lat": 0,
+          "lon": 0
+        },
+        "timestamp": 0
+      }
+    ],
+    "cost": {
+      "currency": "string",
+      "value": 0
+    }
+  },
+  "paymethod": {
+    "paymethod": "string",
+    "parameters": {}
+  }
+
+Returns a tuple (201, trip) if the trip was successfully created.
+"""
+def createTrip(trip):
+	r = requests.post(os.environ["SS_URL"] + TRIPS_END + QUERY_TOKEN, data = json.dumps(trip), headers=headers)
+	if (r.status_code != constants.CREATE_SUCCESS):
+		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
+		return (r.status_code, r.json())
+	return (r.status_code, r.json()["trip"])

@@ -18,7 +18,23 @@ import logging as logger
 class Trips(Resource):
 
 	def post(self):
-		raise NotImplemented
+		print(request.json)
+		logger.getLogger().debug("POST at /trips")
+		logger.getLogger().debug(request.json)
+
+		try:
+			#Create trip at shared server.
+			(status, response) = ServerRequest.createTrip(request.json)
+			print("RESPONSE: " + str(response))
+			if (status != constants.CREATE_SUCCESS):
+				print("NO SUCCESS " + str(status))
+				return ResponseMaker.response_error(status, response["message"])
+			#TODO:Update local database
+			trip = response
+			return ResponseMaker.response_object(status, ["trip"], [trip])
+		except Exception, e:
+			print("Error " + str(e))
+			return ResponseMaker.response_error(constants.ERROR, "Unexpected error")
 
 class UserTrips(Resource):
 	"""Receives a user id. Returns a json structure with a list containing
@@ -50,7 +66,7 @@ class UserTrips(Resource):
 		#TODO: fetch user from ss and store locally
 		trips = response
 
-		if len(trips) == 0:
+		if (status == constants.NOT_FOUND):
 			logger.getLogger().error("Attempted to retrieve non-existent user trip list.")
 			return ResponseMaker.response_error(constants.NOT_FOUND, "Trip list not found.")
 

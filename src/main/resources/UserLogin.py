@@ -50,13 +50,13 @@ class UserLogin(Resource):
 			# user_js["token"] = token
 
 			# (mongodb) If credentials are valid, add user to active users table
-		
+
 			users_online = MongoController.getCollection("online")
 			for user in users_online.find():
 				if user["_id"] == response["_id"]:
-					users_online.delete_many({"_id" : user["_id"]}) 
+					users_online.delete_many({"_id" : user["_id"]})
 			users_online.insert_one(response)
-		
+
 			return ResponseMaker.response_object(constants.SUCCESS, ['user', 'token'], [user_js, token])
 		except Exception as e:
 			logger.getLogger().exception(str(e))
@@ -95,7 +95,7 @@ class UsersList(Resource):
 			"images" : string
 		}
 		40X: On user parameter error
-		{ "code" : integer, "message" : string }	
+		{ "code" : integer, "message" : string }
 		50X: Other type or error (example, no connection with shared or bdd)
 	"""
 	def post(self):
@@ -172,7 +172,7 @@ class UserLogout(Resource):
 			return ResponseMaker.response_error(constants.NOT_FOUND, "User not found")
 
 		users_online.delete_many(user[0]);
-		
+
 		return ResponseMaker.response_object(constants.SUCCESS, ['user'], [user[0]] )
 
 
@@ -180,7 +180,7 @@ class UserById(Resource):
 	"""This class initializes a resource named UserById which allows
 	the user to perform operations Consult(GET), Update(PUT) and Removal(DELETE)
 	through	the user id.
-	"""		
+	"""
 	def __init__(self):
 		self.users = MongoController.getCollection("online")
 
@@ -202,15 +202,15 @@ class UserById(Resource):
 		if len(candidates) == 0:
 			#If not available in local data-base, ask Shared-Server for user info.
 			(status, response) = ServerRequest.getUser(id)
-			
+
 			if (status != constants.SUCCESS):
 				return ResponseMaker.response_error(status, response["message"])
-			
+
 			candidates = [ response ]
 			candidates[0]['_id'] = candidates[0].pop('id')
 			self.users.insert_one(candidates[0])
 
-		if len(candidates) == 0:		
+		if len(candidates) == 0:
 			logger.getLogger().error("Attempted to retrieve user with non-existent id.")
 			return ResponseMaker.response_error(constants.NOT_FOUND, "User id not found:" + str(e))
 
@@ -219,7 +219,6 @@ class UserById(Resource):
 
 
 	def put(self, id):
-
 		print(id)
 		print("PUT at /user/id")
 		logger.getLogger().debug("PUT at /users/" + str(id))
@@ -234,23 +233,23 @@ class UserById(Resource):
 			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
 		try:
 			#Ask Shared-Server to update this user
-			success, updated_user = ServerRequest.updateUser(request.json)	
+			success, updated_user = ServerRequest.updateUser(request.json)
 			if success:
 				#Update in local data-base
 				self.users.update({'_id':updated_user['id']}, updated_user,  upsert= True)
 				logger.getLogger().info("Successfully updated user")
 				return ResponseMaker.response_error(constants.SUCCESS, "User updated successfully!")
-			return ResponseMaker.response_error(constants.NOT_FOUND, "User not found!")	
+			return ResponseMaker.response_error(constants.NOT_FOUND, "User not found!")
 		except ValueError as e:
 			logger.getLogger().error(str(e))
 			return ResponseMaker.response_error(constants.UPDATE_CONFLICT, "User update failed:" + str(e))
-		except requests.exceptions.Timeout as e:	
-			logger.getLogger().error(str(e))	
+		except requests.exceptions.Timeout as e:
+			logger.getLogger().error(str(e))
 			return ResponseMaker.response_error(constants.REQ_TIMEOUT, "User update failed:" + str(e))
 		except Exception as e:
 			logger.getLogger().error(str(e))
-			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden: " + str(e))		
-		
+			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden: " + str(e))
+
 	def delete(self, id):
 		print("DELETE at /users/id")
 		logger.getLogger().debug("DELETE at /users/" + str(id))
@@ -272,10 +271,9 @@ class UserById(Resource):
 			#Delete in local data-base
 			candidates = [user for user in self.users.find() if user['_id'] == id]
 			self.users.delete_many({"_id" : id })
-			logger.getLogger().info("Successfully deleted user.")			
+			logger.getLogger().info("Successfully deleted user.")
 		else:
 			logger.getLogger().error("Attempted to delete user with non-existent id.")
-			return ResponseMaker.response_error(status_code, "Delete error")	
+			return ResponseMaker.response_error(status_code, "Delete error")
 
 		return ResponseMaker.response_object(constants.DELETE_SUCCESS, ['user'], candidates)
-
