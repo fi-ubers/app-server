@@ -2,12 +2,6 @@ import json
 import os
 import jwt
 
-user1 = {"_id" : 1, "username" : "juan", "cars":[{"id":"12","_ref":"123", "owner":"FIUBER", "properties":[{"name": "Ford", "value": "LDR123" }] } ] }
-user2 = {"_id" : 2, "username" : "juanpi", "cars":[{"id":"14","_ref":"666", "owner":"FIUBER", "properties":[{"name": "Audi", "value": "LDR456"  }] } ] }
-user3 = {"_id" : 3, "username" : "euge", "cars":[{"id":"17","_ref":"555", "owner":"FIUBER", "properties":[{"name": "Mercedes", "value": "LDR789" }] } ] }
-
-default_db = [user1, user2, user3]
-
 V1_URL = '/v1/api'
 MOCK_URL = 'http://172.17.0.2:80'
 MOCK_TOKEN = '?token=untokendementira'
@@ -18,36 +12,17 @@ MOCK_TOKEN_VALIDATION_7 = (True, {"username" : "luis", "_id" : 7})
 
 os.environ['SS_URL'] = MOCK_URL
 
-class UserCollectionMock(object):
-	def __init__(self):
-		self.users = default_db[0:2]
-
-	def reset(self):
-		self.users = default_db[0:2]
-
-	def find(self):
-		return self.users
-
-	def insert_one(self, new):
-		self.users.append(new)
-
-	def delete_many(self, cond):
-		for key in cond.keys():
-			for user in self.users:
-				if (user.has_key(key) or user[key] == cond[key]):
-					self.users.remove(user)
 from mock import Mock, patch
+from CollectionMock import UserCollectionMock, default_db
 from src.main.mongodb import MongoController
 MongoController.getCollection = Mock(return_value = UserCollectionMock())
 
 
 from src.main.com import ServerRequest, TokenGenerator
-from src.main.resources import UserLogin
+from src.main.resources import UserCars
 from src.main.myApp import application as app
 
 ServerRequest.QUERY_TOKEN = MOCK_TOKEN
-
-
 
 """
 This mock classes are to override ServerRequest.request methods.
@@ -65,10 +40,10 @@ class FakeGet(object):
 			self.status_code = 200
 			self.response = {'code' : self.status_code, "cars" : self.db[0]["cars"]}
 		elif (self.url == MOCK_URL + '/users/2'):
-			self.status_code = 401 
+			self.status_code = 401
 			self.response = {"code" : 401, 'message' : 'Unauthorized'}
 		elif (self.url == MOCK_URL + '/users/3'):
-			self.status_code = 500 
+			self.status_code = 500
 			self.response = {"code" : 500, 'message' : 'Unexpected error'}
 		elif (self.url == MOCK_URL + '/users/1/cars/12' + MOCK_TOKEN):
 			self.status_code = 200
@@ -190,10 +165,6 @@ class TestCarsCRUD(object):
 		assert(response.status_code == 500)
 		assert(response_parsed["message"] == "Unexpected error")
 
-
-
-
-
 	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_2)
 	def test_get_car_by_id_unauthorized(self, validateTokenMock):
 		self.app = app.test_client()
@@ -267,4 +238,3 @@ class TestCarsCRUD(object):
 		response_parsed = json.loads(response.get_data())
 		assert(response.status_code == 500)
 		assert(response_parsed["message"] == "Unexpected error")
-

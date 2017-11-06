@@ -2,23 +2,6 @@ import json
 import os
 import jwt
 
-user1 = {"_id": 1, "birthdate": "18-7-1994", "country": "Norway",
-		 "email": "juanma@mail.jm", "images": [ "No tengo imagen" ],
-		 "name": "Juan", "surname": "Fresia", "type": "passenger",
-		 "username": "juan" }
-
-user2 = {"_id": 2, "id": 2, "birthdate": "6-10-1996", "country": "Norway",
-		 "email": "juanpa@mail.jp", "images": ["No tengo imagen"],
-		 "name": "Pablo", "surname": "Fresia", "type": "passenger",
-		 "username": "juanpi"}
-
-user3 = {"_id": 3, "id" : 3,  "birthdate": "17-10-1993", "country": "Georgia",
-		 "email": "euge@euge.com", "images": [ "No tengo imagen"	],
-		 "name": "Euge",	"surname": "Mariotti", "type": "driver",
-		 "username": "euge" }
-
-default_db = [user1, user2, user3]
-
 V1_URL = '/v1/api'
 MOCK_URL = 'http://172.17.0.2:80'
 MOCK_TOKEN = '?token=untokendementira'
@@ -29,26 +12,8 @@ MOCK_TOKEN_VALIDATION_7 = (True, {"username" : "luis", "_id" : 7})
 
 os.environ['SS_URL'] = MOCK_URL
 
-class UserCollectionMock(object):
-	def __init__(self):
-		self.users = default_db[0:2]
-
-	def reset(self):
-		self.users = default_db[0:2]
-
-	def find(self):
-		return self.users
-
-	def insert_one(self, new):
-		self.users.append(new)
-
-	def delete_many(self, cond):
-		for key in cond.keys():
-			for user in self.users:
-				if (user.has_key(key) or user[key] == cond[key]):
-					self.users.remove(user)
-
 from mock import Mock, patch
+from CollectionMock import UserCollectionMock, default_db
 from src.main.mongodb import MongoController
 MongoController.getCollection = Mock(return_value = UserCollectionMock())
 
