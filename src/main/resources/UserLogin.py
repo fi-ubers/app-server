@@ -6,7 +6,6 @@ Should allow creation and login of users with validation of credentials..
 from flask_restful import Resource
 from flask import jsonify, abort, request, make_response
 from src.main.com import ResponseMaker, ServerRequest, TokenGenerator
-
 from src.main.mongodb import MongoController
 import config.constants as constants
 

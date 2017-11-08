@@ -9,11 +9,10 @@ MOCK_TOKEN = '?token=untokendementira'
 os.environ['SS_URL'] = MOCK_URL
 
 from mock import Mock, patch
-from src.main.com import ServerRequest
-from src.main.resources.Server import ServerConn
+from src.main.com import Server
 from datetime import datetime
 
-ServerRequest.QUERY_TOKEN = MOCK_TOKEN
+Server.QUERY_TOKEN = MOCK_TOKEN
 
 server_info = { "server": { "id": "1", "_ref": "aasd", "createdBy": "Gandalf", "createdTime": 0, "name": "SS1", "lastConnection": 0 }, "token": { "expiresAt": datetime.today() , "token": "abc123" } }
 
@@ -48,15 +47,15 @@ class FakeGetError(object):
 
 class TestServer(object):
 
-	@patch('src.main.com.ServerRequest.requests.get', side_effect=FakeGet)
+	@patch('src.main.com.Server.requests.get', side_effect=FakeGet)
 	def test_ping_server_success(self, FakeGet):
-		server = ServerConn()
+		server = Server.ServerTokenUpdater()
 		server_response = server.updateToken()
 		assert server_response == server_info["server"]
 	
-	@patch('src.main.com.ServerRequest.requests.get', side_effect=FakeGetError)
+	@patch('src.main.com.Server.requests.get', side_effect=FakeGetError)
 	def test_ping_server_error(self, FakeGetError):
-		server = ServerConn()
+		server = Server.ServerTokenUpdater()
 		server_response = server.updateToken()
 		assert server_response["error"] == 500
 

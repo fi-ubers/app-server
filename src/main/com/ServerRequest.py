@@ -8,6 +8,7 @@ import json
 import requests
 import logging as logger
 import config.constants as constants
+from Server import ServerTokenUpdater
 
 SS_URI = "http://127.0.0.1:5000/api" #'https://fiuber-shared-server.herokuapp.com/api'
 if not "SS_URL" in os.environ:
@@ -30,6 +31,7 @@ headers = {'Content-Type' : 'application/json'}
 MAX_ATTEMPTS = 10
 
 """Returns a list of all the users and their information in json format."""
+@ServerTokenUpdater()
 def getUsers():
 	r = requests.get(USER_END + QUERY_TOKEN, headers=headers)
 	if (r.status_code != constants.SUCCESS):
@@ -329,30 +331,4 @@ def createTrip(trip):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		return (r.status_code, r.json())
 	return (r.status_code, r.json()["trip"])
-
-"""Returns a json object with the following layout:
-  "ping": {
-    "server": {
-      "id": "string",
-      "_ref": "string",
-      "createdBy": "string",
-      "createdTime": 0,
-      "name": "string",
-      "lastConnection": 0
-    },
-    "token": {
-      "expiresAt": 0,
-      "token": "string"
-    }
- }
-"""
-def pingServer():
-	r = requests.get(os.environ["SS_URL"] + SERVER_END + "/ping" + QUERY_TOKEN, headers=headers)
-	if (r.status_code != constants.SUCCESS):
-		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
-		return (r.status_code, r.json())		
-	return (r.status_code, r.json()["ping"])
-
-
-
 
