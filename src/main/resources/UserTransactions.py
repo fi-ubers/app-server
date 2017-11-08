@@ -38,7 +38,6 @@ class UserTransactions(Resource):
 			if (len(transactions) == 0):
 				status_code, transactions = ServerRequest.getUserTransactions(id)
 		except Exception, e:
-			print(str(e))
 			return ResponseMaker.response_error(constants.NOT_FOUND, "User id did not match any existing users." + str(e))			
 		return ResponseMaker.response_object(constants.SUCCESS, ['transactions'], [transactions])
 	

@@ -6,7 +6,6 @@ from src.main.resources.UserLogin import UserLogin, UsersList, UserLogout, UserB
 from src.main.resources.UserCars import Cars, CarsById
 from src.main.resources.UserTransactions import UserTransactions
 from src.main.resources.Trips import UserTrips, Trips, TripEstimation, TripsById
-from src.main.resources.Server import Server
 from src.main.resources.Paymethods import Paymethods
 
 V1_URL = '/v1/api'
@@ -29,8 +28,6 @@ api.add_resource(UserTrips, V1_URL + '/users/<int:id>/trips')
 api.add_resource(Trips, V1_URL + '/trips')
 api.add_resource(TripEstimation, V1_URL + '/trips/estimate')
 api.add_resource(TripsById, V1_URL + '/trips/<int:id>')
-#Server operations
-api.add_resource(Server, V1_URL + '/servers/ping')
 #Payment operations
 api.add_resource(Paymethods, V1_URL + '/payment')
 
