@@ -1,0 +1,31 @@
+version: '2.1'
+
+services:
+  db:
+    container_name: mongodatabase
+    image: mongo:3.0.2
+    ports:
+      - '27017:27017'
+    volumes:
+      - './db/mongo:/data/db'
+    command: mongod --smallfiles
+    healthcheck:
+      test: exit 0
+
+  app-server:
+    container_name: app-server
+    build: .
+    ports:
+      - '5002:8000'
+    environment:
+      - MONGODB_URL=mongodb://mongodatabase:27017/test
+      - SS_URL=http://172.19.0.1:5000/api
+      - APP_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwianRpIjoiZmI4MzhhZjMtZWUwOS00MzMxLTkzMTItMzZmMTM1ZmQ0OTY1IiwiZXhwIjoxNTA4NDQ4NDE1LCJpYXQiOjE1MDgwMTY0ODh9.01TezabqWNndtjiVdWyw3gTDsM5T4RB4n3SYxlGdPNI
+    volumes:
+      - '.:/src/main'
+    links:
+      - db
+    depends_on:
+      db:
+        condition: service_healthy
+

@@ -1,8 +1,9 @@
+sudo: required
 language: python
+services:
+  - docker
 python:
 - '2.7.9'
-before_install:
-- sudo apt-get update -qq
 install: pip install -r requirements.txt
 script:
 - py.test --cov-report html --cov=src.main src/test/ --verbose
