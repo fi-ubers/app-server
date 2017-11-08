@@ -10,17 +10,16 @@ import logging as logger
 import config.constants as constants
 from Server import ServerTokenUpdater
 
-SS_URI = "http://127.0.0.1:5000/api" #'https://fiuber-shared-server.herokuapp.com/api'
+SS_URI = 'https://fiuber-shared-server.herokuapp.com/api'#"http://127.0.0.1:5000/api"
 if not "SS_URL" in os.environ:
 	os.environ["SS_URL"] = SS_URI
 
-DEFAULT_APP_TOKEN="Sorry there is no token"
+DEFAULT_APP_TOKEN ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzQsImp0aSI6ImE3YWIxOTA2LWQwZjEtNDY1Ny05OTc4LTdiYjBmODJhZjZhOSIsImlhdCI6MTUwODI2MDQ4OX0.IrurkKZ-wbmTp8kQf_rGVHv5jcvwCibQJDoHwvZJ1Gg'
 
 if not "APP_TOKEN" in os.environ:
 	os.environ["APP_TOKEN"] = DEFAULT_APP_TOKEN
 
-QUERY_TOKEN = "?token=" + os.environ["APP_TOKEN"]
-
+QUERY_TOKEN = "?token="
 CARS_END = "/cars"
 USER_END = os.environ["SS_URL"] + "/users"
 TRANSACT_END = "/transactions"
@@ -33,7 +32,7 @@ MAX_ATTEMPTS = 10
 """Returns a list of all the users and their information in json format."""
 @ServerTokenUpdater()
 def getUsers():
-	r = requests.get(USER_END + QUERY_TOKEN, headers=headers)
+	r = requests.get(USER_END + QUERY_TOKEN + os.environ["APP_TOKEN"], headers=headers)
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		raise Exception("Shared Server returned error: %d"%(r.status_code))
@@ -42,8 +41,9 @@ def getUsers():
 
 """Receives a user id. Returns the information of the user that matches that id in json format.
 """
+@ServerTokenUpdater()
 def getUser(userId):
-	r = requests.get(USER_END + "/" + str(userId) + QUERY_TOKEN, headers=headers)
+	r = requests.get(USER_END + "/" + str(userId) + QUERY_TOKEN + os.environ["APP_TOKEN"], headers=headers)
 
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
@@ -72,7 +72,7 @@ def _permformUpdate(f, endpoint, updatedEntityName, updatedEntity):
 Returns False if the user id does not match any user id or _ref value is invalid.
 Returns True if the user info was successfully updated."""
 def updateUser(user_js):
-	endpoint = USER_END + "/" + str(user_js["_id"]) + QUERY_TOKEN
+	endpoint = USER_END + "/" + str(user_js["_id"]) + QUERY_TOKEN + os.environ["APP_TOKEN"]
 	r = _permformUpdate(lambda ep, u: requests.put(ep, json.dumps(u), headers=headers), endpoint, "user", user_js)
 	if (r.status_code == constants.NOT_FOUND):
 		return (False, r.json()['message'])
@@ -81,9 +81,9 @@ def updateUser(user_js):
 	return (True, r.json()['user'])
 
 """ Asks shared server to create a new user"""
+@ServerTokenUpdater()
 def createUser(user_js):
-	r = requests.post(USER_END + QUERY_TOKEN, data = json.dumps(user_js), headers=headers)
-
+	r = requests.post(USER_END + QUERY_TOKEN + os.environ["APP_TOKEN"], data = json.dumps(user_js), headers=headers)
 	if (r.status_code != constants.CREATE_SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		return (r.status_code, r.json())
@@ -93,7 +93,10 @@ def createUser(user_js):
 Returns True if the credentials were invalid, returns False otherwise.
 """
 def validateUser(user_js):
-	r = requests.post(USER_END + "/validate" + QUERY_TOKEN, data = json.dumps(user_js), headers=headers)
+	r = requests.post(USER_END + "/validate" + QUERY_TOKEN + os.environ["APP_TOKEN"], data = json.dumps(user_js), headers=headers)
+	if (r.status_code == constants.UNAUTHORIZED):
+		ServerTokenUpdater().updateToken()
+		r = requests.post(USER_END + "/validate" + QUERY_TOKEN + os.environ["APP_TOKEN"], data = json.dumps(user_js), headers=headers)
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		return (False, r)
@@ -103,7 +106,10 @@ def validateUser(user_js):
 Returns False if the user id does not match any user id.
 """
 def deleteUser(userId):
-	r = requests.delete(USER_END + "/" + str(userId) + QUERY_TOKEN, headers=headers)
+	r = requests.delete(USER_END + "/" + str(userId) + QUERY_TOKEN + os.environ["APP_TOKEN"], headers=headers)
+	if (r.status_code == constants.UNAUTHORIZED):
+		ServerTokenUpdater().updateToken()
+		r = requests.delete(USER_END + "/" + str(userId) + QUERY_TOKEN + os.environ["APP_TOKEN"], headers=headers)
 	if (r.status_code != constants.DELETE_SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		return (False, r.status_code)
@@ -111,6 +117,7 @@ def deleteUser(userId):
 
 """Receives a user id and returns a list of all the cars owned by that user.
 """
+@ServerTokenUpdater()
 def getUserCars(userId):
 	r = requests.get(USER_END + "/" + str(userId) + CARS_END)
 	if (r.status_code != constants.SUCCESS):
@@ -121,8 +128,9 @@ def getUserCars(userId):
 """Receives a user id and a car id. Returns the information of the car with
 matching id that belongs to the identified user.
 """
+@ServerTokenUpdater()
 def getUserCar(userId, carId):
-	r = requests.get(USER_END + "/" + str(userId) + CARS_END + "/" + str(carId) + QUERY_TOKEN, headers=headers)
+	r = requests.get(USER_END + "/" + str(userId) + CARS_END + "/" + str(carId) + QUERY_TOKEN + os.environ["APP_TOKEN"], headers=headers)
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		return (r.status_code, r.json())
@@ -137,12 +145,13 @@ with the following layout:
 Attempts to create a new car with the information given.
 Returns a car object on successful creation.
 """
+@ServerTokenUpdater()
 def createUserCar(userId, carProperties):
 	carInfo = { "id" : "1" }
 	carInfo["_ref"] = "1"
 	carInfo["owner"] = "FIUBER"
 	carInfo["properties"] =  [carProperties]
-	r = requests.post(USER_END + "/" + str(userId) + CARS_END + QUERY_TOKEN, data = json.dumps(carInfo), headers=headers)
+	r = requests.post(USER_END + "/" + str(userId) + CARS_END + QUERY_TOKEN + os.environ["APP_TOKEN"], data = json.dumps(carInfo), headers=headers)
 	if (r.status_code != constants.CREATE_SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		return (r.status_code, r.json())
@@ -151,8 +160,9 @@ def createUserCar(userId, carProperties):
 """Receives a user id and attempts to delete it. Returns True if the user exists and is correctly deleted.
 Returns False if the user id does not match any user id.
 """
+@ServerTokenUpdater()
 def deleteUserCar(userId, carId):
-	r = requests.delete(USER_END + "/" + str(userId) + CARS_END + "/" + str(carId) + QUERY_TOKEN)
+	r = requests.delete(USER_END + "/" + str(userId) + CARS_END + "/" + str(carId) + QUERY_TOKEN + os.environ["APP_TOKEN"])
 	if (r.status_code == constants.NOT_FOUND):
 		return (False, r.status_code)
 	if (r.status_code != constants.DELETE_SUCCESS):
@@ -176,7 +186,7 @@ def deleteUserCar(userId, carId):
 Returns False if the user and car ids do not match any existing vehicles.
 Returns True if the car info was successfully updated."""
 def updateUserCar(userId, carId, car):
-	endpoint = USER_END + "/" + str(userId) + CARS_END + "/" + str(carId) + QUERY_TOKEN
+	endpoint = USER_END + "/" + str(userId) + CARS_END + "/" + str(carId) + QUERY_TOKEN + os.environ["APP_TOKEN"]
 	r = _permformUpdate(lambda ep, u: requests.put(ep, json.dumps(u), headers=headers), endpoint, "car", car)
 	if (r.status_code == constants.NOT_FOUND):
 		return (False, r.json()['message'])
@@ -188,8 +198,9 @@ def updateUserCar(userId, carId, car):
 
 """Receives a user id and returns a list with all the transactions made by that user.
 """
+@ServerTokenUpdater()
 def getUserTransactions(id):
-	endpoint = USER_END + "/" + str(id) + TRANSACT_END + QUERY_TOKEN
+	endpoint = USER_END + "/" + str(id) + TRANSACT_END + QUERY_TOKEN + os.environ["APP_TOKEN"]
 	r = requests.get(endpoint, headers=headers)
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
@@ -210,8 +221,9 @@ def getUserTransactions(id):
 	  }
 Returns a tuple (True, transaction) if the transaction was successfully created.
 """
+@ServerTokenUpdater()
 def makePayment(id, transaction):
-	endpoint = USER_END + "/" + str(id) + TRANSACT_END + QUERY_TOKEN
+	endpoint = USER_END + "/" + str(id) + TRANSACT_END + QUERY_TOKEN + os.environ["APP_TOKEN"]
 	transaction["id"] = "1"
 	r = requests.put(endpoint, data = json.dumps(transaction), headers=headers)
 	if (r.status_code != constants.SUCCESS):
@@ -266,8 +278,9 @@ def makePayment(id, transaction):
     }
   ]
 """
+@ServerTokenUpdater()
 def getUserTrips(id):
-	endpoint = USER_END + "/" + str(id) + TRIPS_END + QUERY_TOKEN
+	endpoint = USER_END + "/" + str(id) + TRIPS_END + QUERY_TOKEN + os.environ["APP_TOKEN"]
 	r = requests.get(endpoint, headers=headers)
 	if (r.status_code != constants.SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
@@ -325,10 +338,13 @@ def getUserTrips(id):
 
 Returns a tuple (201, trip) if the trip was successfully created.
 """
+@ServerTokenUpdater()
 def createTrip(trip):
-	r = requests.post(os.environ["SS_URL"] + TRIPS_END + QUERY_TOKEN, data = json.dumps(trip), headers=headers)
+	r = requests.post(os.environ["SS_URL"] + TRIPS_END + QUERY_TOKEN + os.environ["APP_TOKEN"], data = json.dumps(trip), headers=headers)
 	if (r.status_code != constants.CREATE_SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		return (r.status_code, r.json())
 	return (r.status_code, r.json()["trip"])
+
+
 

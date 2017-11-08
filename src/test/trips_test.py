@@ -5,12 +5,13 @@ import jwt
 V1_URL = "/v1/api"
 
 MOCK_URL = "http://172.17.0.2:80"
-MOCK_TOKEN = "?token=untokendementira"
+MOCK_TOKEN = "?token="
 MOCK_TOKEN_VALIDATION_1 = (True, {"username" : "juan", "_id" : 1})
 MOCK_TOKEN_VALIDATION_2 = (True, {"username" : "juanpi", "_id" : 2})
 MOCK_TOKEN_VALIDATION_7 = (True, {"username" : "luis", "_id" : 7})
 
 os.environ["SS_URL"] = MOCK_URL
+os.environ["APP_TOKEN"] = "untokendementira"
 
 from mock import Mock, patch
 from CollectionMock import UserCollectionMock, default_db
@@ -35,14 +36,14 @@ class FakeGet(object):
 		self.headers = headers
 		self.db = default_db
 		self.status_code = 0
-
-		if (self.url == MOCK_URL + '/users/1/trips' + MOCK_TOKEN):
+		print(str(self.url) + "vs" + str(MOCK_URL + '/users/1/trips' + MOCK_TOKEN + os.environ["APP_TOKEN"]) )
+		if (self.url == MOCK_URL + '/users/1/trips' + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			self.status_code = 200
 			self.response = {'code' : self.status_code, 'trips' : self.db[0]["trips"] }
-		elif (self.url == MOCK_URL + '/users/2/trips' + MOCK_TOKEN):
+		elif (self.url == MOCK_URL + '/users/2/trips' + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			self.status_code = 500
 			self.response = {'code' : self.status_code, 'message' : "Unknown Error"}
-		elif (self.url == MOCK_URL + '/users/7/trips' + MOCK_TOKEN):
+		elif (self.url == MOCK_URL + '/users/7/trips' + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			self.status_code = 404
 			self.response = {'code' : self.status_code, 'message' : "NOT FOUND"}
 		else:
@@ -58,7 +59,7 @@ class FakePost(object):
 		self.db = default_db
 		self.data = data
 		self.status_code = 0
-		if (self.url == MOCK_URL + '/trips' + MOCK_TOKEN):
+		if (self.url == MOCK_URL + '/trips' + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			ret = json.loads(self.data)
 			if ret["id"] == "1":
 				self.status_code = 500
@@ -123,6 +124,7 @@ class TestUsertrips(object):
 		response_parsed = json.loads(response.get_data())
 		assert(response.status_code == 500)
 		assert(response_parsed["message"] == "Unknown Error")
+	
 
 	@patch("src.main.com.ServerRequest.requests.post", side_effect=FakePost)
 	def test_new_trip_success(self, FakePost):

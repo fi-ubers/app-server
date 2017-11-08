@@ -4,19 +4,19 @@ import jwt
 
 V1_URL = '/v1/api'
 MOCK_URL = 'http://172.17.0.2:80'
-MOCK_TOKEN = '?token=untokendementira'
+MOCK_TOKEN = '?token='
 MOCK_TOKEN_VALIDATION_1 = (True, {"username" : "juan", "_id" : 1})
 MOCK_TOKEN_VALIDATION_2 = (True, {"username" : "juanpi", "_id" : 2})
 MOCK_TOKEN_VALIDATION_3 = (True, {"username" : "euge", "_id" : 3})
 MOCK_TOKEN_VALIDATION_7 = (True, {"username" : "luis", "_id" : 7})
 
 os.environ['SS_URL'] = MOCK_URL
+os.environ["APP_TOKEN"] = "untokendementira"
 
 from mock import Mock, patch
 from CollectionMock import UserCollectionMock, default_db
 from src.main.mongodb import MongoController
 MongoController.getCollection = Mock(return_value = UserCollectionMock())
-
 
 from src.main.com import ServerRequest, TokenGenerator
 from src.main.resources import UserLogin
@@ -37,10 +37,10 @@ class FakeGet(object):
 		self.db = default_db
 		self.status_code = 0
 
-		if (self.url == MOCK_URL + '/users/3' + MOCK_TOKEN):
+		if (self.url == MOCK_URL + '/users/3' + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			self.status_code = 200
 			self.response = {'code' : self.status_code, 'user' : self.db[2] }
-		elif (self.url == MOCK_URL + '/users/7' + MOCK_TOKEN):
+		elif (self.url == MOCK_URL + '/users/7' + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			self.status_code = 404 
 			self.response = {"code" : 404, 'message' : 'Not found'}
 		else:
@@ -55,7 +55,7 @@ class FakePost(object):
 		self.db = default_db
 		self.data = data
 		self.status_code = 0
-		if (self.url == MOCK_URL + '/users' + MOCK_TOKEN):
+		if (self.url == MOCK_URL + '/users' + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			ret = json.loads(self.data)
 			ret['id'] = 6
 			if ret["email"] == "fakemail@error.com":
@@ -65,14 +65,14 @@ class FakePost(object):
 				ret.pop('password')
 				self.status_code = 201
 				self.response = { "code" : self.status_code, "user" : ret }
-		elif (self.url == MOCK_URL + '/users/validate' + MOCK_TOKEN):
+		elif (self.url == MOCK_URL + '/users/validate' + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			ret = json.loads(self.data)
 			if ret["email"] == "fakemail@error.com":
 				self.status_code = 400
 				self.response = {"code" : self.status_code, 'message' : 'Unknown Error'}				
 			else:
 				self.status_code = 200
-				self.response = { "code" : self.status_code, "user" : ret, "token" : MOCK_TOKEN }	
+				self.response = { "code" : self.status_code, "user" : ret, "token" : os.environ["APP_TOKEN"] }	
 		else:
 			self.response = {"code" : 666, 'message' : 'Mocking error'}
 
@@ -87,7 +87,7 @@ class FakePut(object):
 		self.data = data
 		self.status_code = 0
 
-		if (self.url == MOCK_URL + '/users/1' + MOCK_TOKEN):
+		if (self.url == MOCK_URL + '/users/1' + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			ret = json.loads(self.data)
 			ret['id'] = 1
 			self.status_code = 200
@@ -106,10 +106,10 @@ class FakeDelete(object):
 		self.headers = headers
 		self.status_code = 0
 
-		if (self.url == MOCK_URL + '/users/1' + MOCK_TOKEN):
+		if (self.url == MOCK_URL + '/users/1' + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			self.status_code = 204
 			self.response = { "code" : self.status_code, 'message' : 'delete successful'}
-		if (self.url == MOCK_URL + '/users/2' + MOCK_TOKEN):
+		if (self.url == MOCK_URL + '/users/2' + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			self.status_code = 404
 			self.response = { "code" : self.status_code, 'message' : 'non-existent id'}
 		else:

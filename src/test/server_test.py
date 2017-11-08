@@ -4,9 +4,10 @@ import jwt
 
 V1_URL = '/v1/api'
 MOCK_URL = 'http://172.17.0.2:80'
-MOCK_TOKEN = '?token=untokendementira'
+MOCK_TOKEN = '?token='
 
 os.environ['SS_URL'] = MOCK_URL
+os.environ["APP_TOKEN"] = "untokendementira"
 
 from mock import Mock, patch
 from src.main.com import Server
@@ -21,7 +22,7 @@ class FakeGet(object):
 		self.url = url
 		self.headers = headers
 		self.status_code = 0
-		if (self.url == MOCK_URL + "/server/ping" + MOCK_TOKEN):
+		if (self.url == MOCK_URL + "/server/ping" + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			self.status_code = 200
 			self.response = {"code" : self.status_code, "ping" : server_info}
 		else:
@@ -35,7 +36,7 @@ class FakeGetError(object):
 		self.url = url
 		self.headers = headers
 		self.status_code = 0
-		if (self.url == MOCK_URL + "/server/ping" + MOCK_TOKEN):
+		if (self.url == MOCK_URL + "/server/ping" + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			self.status_code = 500
 			self.response = {"code" : self.status_code, "ping" : server_info}
 		else:

@@ -31,11 +31,11 @@ class UserLogin(Resource):
 	def post(self):
 		logger.getLogger().debug("POST at /users/login")
 		logger.getLogger().debug(request.json)
-
-		# (shared-server) First ask shared server for credentials validation
-		(valid, response) = ServerRequest.validateUser(request.json)
-
 		try:
+			# (shared-server) First ask shared server for credentials validation
+			(valid, response) = ServerRequest.validateUser(request.json)
+			print "VALIDATION: " + str((valid, response))
+		
 			if not valid:
 				logger.getLogger().debug('Error 418: I\' m a teapot and your credentials are not valid!')
 				return ResponseMaker.response_error(response.status_code, "Shared server error")
@@ -59,6 +59,7 @@ class UserLogin(Resource):
 			return ResponseMaker.response_object(constants.SUCCESS, ['user', 'token'], [user_js, token])
 		except Exception as e:
 			logger.getLogger().exception(str(e))
+			raise e
 			return ResponseMaker.response_error(500, "Internal Error")
 
 class UsersList(Resource):

@@ -9,18 +9,16 @@ import logging as logger
 import config.constants as constants
 
 headers = {'Content-Type' : 'application/json'}
-
-SS_URI = "http://127.0.0.1:5000/api" #'https://fiuber-shared-server.herokuapp.com/api'
+SS_URI = 'https://fiuber-shared-server.herokuapp.com/api'#"http://127.0.0.1:5000/api"
 if not "SS_URL" in os.environ:
 	os.environ["SS_URL"] = SS_URI
 
-DEFAULT_APP_TOKEN="Sorry there is no token"
+DEFAULT_APP_TOKEN ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzQsImp0aSI6ImE3YWIxOTA2LWQwZjEtNDY1Ny05OTc4LTdiYjBmODJhZjZhOSIsImlhdCI6MTUwODI2MDQ4OX0.IrurkKZ-wbmTp8kQf_rGVHv5jcvwCibQJDoHwvZJ1Gg'
 
 if not "APP_TOKEN" in os.environ:
 	os.environ["APP_TOKEN"] = DEFAULT_APP_TOKEN
 
-QUERY_TOKEN = "?token=" + os.environ["APP_TOKEN"]
-
+QUERY_TOKEN = "?token="
 SERVER_END = "/server"
 
 class ServerTokenUpdater(object):
@@ -30,7 +28,8 @@ class ServerTokenUpdater(object):
 			status, res = f(*args)
 			if (status == constants.UNAUTHORIZED):
 				self.updateToken()
-			return f(*args)
+				return f(*args)
+			return status, res
 		return wrapped_f	
 
 	"""Updates the current App-Server token to communicate with Shared-Server.
@@ -46,11 +45,11 @@ class ServerTokenUpdater(object):
 	"""
 	def updateToken(self):
 		try:
-			status, request = self.pingServer()
-			print (status, request)
-			if (status != constants.SUCCESS):
-				logger.getLogger().error("Shared Server returned error code {}.".format(status))
-				return {"error" : status}
+			status_code, request = self.pingServer()
+			print (status_code, request)
+			if (status_code != constants.SUCCESS):
+				logger.getLogger().error("Shared Server returned error code {}.".format(status_code))
+				return {"error" : status_code}
 			token = request["token"]
 			os.environ["APP_TOKEN"] = token["token"]
 			logger.getLogger().debug("Successfully updated App Server Token.")
@@ -77,12 +76,13 @@ class ServerTokenUpdater(object):
 	 }
 	"""
 	def pingServer(self):
-		r = requests.get(os.environ["SS_URL"] + SERVER_END + "/ping" + QUERY_TOKEN, headers=headers)
+		r = requests.get(os.environ["SS_URL"] + SERVER_END + "/ping" + QUERY_TOKEN + os.environ["APP_TOKEN"], headers=headers)
 		if (r.status_code != constants.SUCCESS):
 			logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 			return (r.status_code, r.json())		
 		return (r.status_code, r.json()["ping"])
 
 
-	
+
+
 
