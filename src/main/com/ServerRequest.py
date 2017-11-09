@@ -25,6 +25,7 @@ USER_END = os.environ["SS_URL"] + "/users"
 TRANSACT_END = "/transactions"
 TRIPS_END = "/trips"
 SERVER_END = "/server"
+PAYMETHODS_END = "/paymethods"
 
 headers = {'Content-Type' : 'application/json'}
 MAX_ATTEMPTS = 10
@@ -346,5 +347,12 @@ def createTrip(trip):
 		return (r.status_code, r.json())
 	return (r.status_code, r.json()["trip"])
 
+@ServerTokenUpdater()
+def getPaymethods():
+	r = requests.get(os.environ["SS_URL"] + PAYMETHODS_END + QUERY_TOKEN + os.environ["APP_TOKEN"], headers=headers)
+	if (r.status_code != constants.CREATE_SUCCESS):
+		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
+		return (r.status_code, r.json())
+	return (r.status_code, r.json()["paymethods"])
 
 
