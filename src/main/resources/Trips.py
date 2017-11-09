@@ -23,11 +23,20 @@ class Trips(Resource):
 		logger.getLogger().debug(request.json)
 
 		try:
+			# (validate-token) Validate user token
+			if not "UserToken" in request.headers:
+				return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing token")
+
+			token = request.headers['UserToken']
+
+			(valid, response) = TokenGenerator.validateToken(token)
+			if not valid:
+				return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
+			
 			#Create trip at shared server.
 			(status, response) = ServerRequest.createTrip(request.json)
-			print("RESPONSE: " + str(response))
+
 			if (status != constants.CREATE_SUCCESS):
-				print("NO SUCCESS " + str(status))
 				return ResponseMaker.response_error(status, response["message"])
 			#TODO:Update local database
 			trip = response
@@ -81,5 +90,25 @@ class TripEstimation(Resource):
 
 class TripsById(Resource):
 
-	def get(self):
-		raise NotImplemented
+	def get(self, id):
+		logger.getLogger().debug("GET at /trips/" + str(id))
+		# (validate-token) Validate user token
+		if not "UserToken" in request.headers:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing token")
+
+		token = request.headers['UserToken']
+
+		(valid, response) = TokenGenerator.validateToken(token)
+
+		if not valid:
+			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
+
+		(status, response) = ServerRequest.getTrip(id)
+
+		if (status != constants.SUCCESS):
+			return ResponseMaker.response_error(status, response["message"])
+
+		return ResponseMaker.response_object(constants.SUCCESS, ['trip'], [response])
+
+
+

@@ -288,6 +288,61 @@ def getUserTrips(id):
 		return (r.status_code, r.json())
 	return (r.status_code, r.json()['trips'])
 
+"""Receives a trip id. Returns a json structure with the following layout:
+{
+    "id": "string",
+    "applicationOwner": "string",
+    "driver": "string",
+    "passenger": "string",
+    "start": {
+      "address": {
+        "street": "string",
+        "location": {
+          "lat": 0,
+          "lon": 0
+        }
+      },
+      "timestamp": 0
+    },
+    "end": {
+      "address": {
+        "street": "string",
+        "location": {
+          "lat": 0,
+          "lon": 0
+        }
+      },
+      "timestamp": 0
+    },
+    "totalTime": 0,
+    "waitTime": 0,
+    "travelTime": 0,
+    "distance": 0,
+    "route": [
+      {
+        "location": {
+          "lat": 0,
+          "lon": 0
+        },
+        "timestamp": 0
+      }
+    ],
+    "cost": {
+      "currency": "string",
+      "value": 0
+    }
+}
+"""
+@ServerTokenUpdater()
+def getTrip(id):
+	endpoint = os.environ["SS_URL"] + TRIPS_END + "/" + str(id) + QUERY_TOKEN + os.environ["APP_TOKEN"]
+	r = requests.get(endpoint, headers=headers)
+	if (r.status_code != constants.SUCCESS):
+		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
+		return (r.status_code, r.json())
+	return (r.status_code, r.json()['trip'])
+
+
 """Receives a json structure representing a trip, with the following layout:
   "trip": {
     "id": "string",
@@ -347,12 +402,25 @@ def createTrip(trip):
 		return (r.status_code, r.json())
 	return (r.status_code, r.json()["trip"])
 
+
+"""Returns a list containing all paymethods, such as the following:
+  [
+    {
+      "name": "paymethodName",
+      "parameters": {"number": "112233",  "type": "credit",  "expirationMonth": "01",  "expirationYear": "19",  "ccvv": "225"}
+    }
+  ]
+"""
+
 @ServerTokenUpdater()
 def getPaymethods():
 	r = requests.get(os.environ["SS_URL"] + PAYMETHODS_END + QUERY_TOKEN + os.environ["APP_TOKEN"], headers=headers)
+	print(r)
 	if (r.status_code != constants.CREATE_SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 		return (r.status_code, r.json())
 	return (r.status_code, r.json()["paymethods"])
+
+
 
 
