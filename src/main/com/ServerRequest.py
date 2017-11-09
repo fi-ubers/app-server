@@ -402,6 +402,64 @@ def createTrip(trip):
 		return (r.status_code, r.json())
 	return (r.status_code, r.json()["trip"])
 
+"""Receives a json structure containing all the trip data, with the following layout:
+{
+  "id": "string",
+  "applicationOwner": "string",
+  "driver": "string",
+  "passenger": "string",
+  "start": {
+    "address": {
+      "street": "string",
+      "location": {
+        "lat": 0,
+        "lon": 0
+      }
+    },
+    "timestamp": 0
+  },
+  "end": {
+    "address": {
+      "street": "string",
+      "location": {
+        "lat": 0,
+        "lon": 0
+      }
+    },
+    "timestamp": 0
+  },
+  "totalTime": 0,
+  "waitTime": 0,
+  "travelTime": 0,
+  "distance": 0,
+  "route": [
+    {
+      "location": {
+        "lat": 0,
+        "lon": 0
+      },
+      "timestamp": 0
+    }
+  ],
+  "cost": {
+    "currency": "string",
+    "value": 0
+  }
+}
+Returns trip cost estimation:
+  {
+    "currency": "string",
+    "value": 0
+  }
+"""
+@ServerTokenUpdater()
+def estimateTrip(tripData):
+	r = requests.post(os.environ["SS_URL"] + TRIPS_END + "/estimate" + QUERY_TOKEN + os.environ["APP_TOKEN"], data = json.dumps(tripData), headers=headers)
+	if (r.status_code != constants.CREATE_SUCCESS):
+		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
+		return (r.status_code, r.json())
+	return (r.status_code, r.json()["cost"])
+
 
 """Returns a list containing all paymethods, such as the following:
   [
@@ -411,7 +469,6 @@ def createTrip(trip):
     }
   ]
 """
-
 @ServerTokenUpdater()
 def getPaymethods():
 	r = requests.get(os.environ["SS_URL"] + PAYMETHODS_END + QUERY_TOKEN + os.environ["APP_TOKEN"], headers=headers)

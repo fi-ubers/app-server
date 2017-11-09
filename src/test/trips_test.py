@@ -78,6 +78,14 @@ class FakePost(object):
 			else:
 				self.status_code = 201
 				self.response = { "code" : self.status_code, "trip" : ret }
+		elif (self.url == MOCK_URL + '/trips/estimate' + MOCK_TOKEN + os.environ["APP_TOKEN"]):
+			ret = json.loads(self.data)
+			if ret["id"] == '1':
+				self.status_code = 200
+				self.response = { "cost" : {"currency": "dollar", "value": "200" } }		
+			else:
+				self.status_code = 500
+				self.response = {"code" : self.status_code, 'message' : 'Unknown Error'}
 		else:
 			self.response = {"code" : 666, 'message' : 'Mocking error'}
 
@@ -92,7 +100,6 @@ class TestUsertrips(object):
 		response = self.app.get(V1_URL + "/users/1/trips", headers={"UserToken" : "A fake token"})
 		response_parsed = json.loads(response.get_data())
 		assert(response.status_code == 403)
-
 
 	@patch("src.main.com.TokenGenerator.validateToken", return_value=MOCK_TOKEN_VALIDATION_1)
 	@patch("src.main.com.ServerRequest.requests.get", side_effect=FakeGet)
@@ -176,3 +183,34 @@ class TestUsertrips(object):
 		response_parsed = json.loads(response.get_data())
 		assert(response.status_code == 201)
 		assert(response_parsed["trip"] == expected)
+
+	@patch("src.main.com.TokenGenerator.validateToken", return_value=MOCK_TOKEN_VALIDATION_1)
+	@patch("src.main.com.ServerRequest.requests.post", side_effect=FakePost)
+	def test_estimate_trip_success(self,validateTokenMock, FakePost):
+		trip = default_db[0]["trips"][0]
+		expected = {"cost": {"currency": "dollar", "value": "200" }}
+		self.app = app.test_client()
+		response = self.app.post(V1_URL + "/trips/estimation", headers={"UserToken" : "A fake token"}, data = json.dumps(trip), content_type='application/json')
+		response_parsed = json.loads(response.get_data())
+		assert(response.status_code == 200)
+		assert(response_parsed["cost"] == expected)
+
+	@patch("src.main.com.TokenGenerator.validateToken", return_value=MOCK_TOKEN_VALIDATION_1)
+	@patch("src.main.com.ServerRequest.requests.post", side_effect=FakePost)
+	def test_estimate_trip_error(self,validateTokenMock, FakePost):
+		trip = default_db[1]["trips"][0]
+		self.app = app.test_client()
+		response = self.app.post(V1_URL + "/trips/estimation", headers={"UserToken" : "A fake token"}, data = json.dumps(trip), content_type='application/json')
+		response_parsed = json.loads(response.get_data())
+		assert(response.status_code == 500)
+		assert(response_parsed["message"] == "Unknown Error")
+
+	@patch("src.main.com.TokenGenerator.validateToken", return_value=MOCK_TOKEN_VALIDATION_8)
+	def test_estimate_trip_unauthorized(self,validateTokenMock):
+		trip = default_db[1]["trips"][0]
+		self.app = app.test_client()
+		response = self.app.post(V1_URL + "/trips/estimation", headers={"UserToken" : "A fake token"}, data = json.dumps(trip), content_type='application/json')
+		response_parsed = json.loads(response.get_data())
+		assert(response.status_code == 403)
+		assert(response_parsed["message"] == "Forbidden")
+
