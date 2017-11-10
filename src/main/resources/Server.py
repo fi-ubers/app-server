@@ -31,7 +31,7 @@ class ServerConn(object):
 			os.environ["APP_TOKEN"] = token["token"]
 			logger.getLogger().debug("Successfully updated App Server Token.")
 			return request["server"]
-		except Exception, e:
+		except Exception as e:
 			logger.getLogger().error("Unexpected Error." + str(e))
 			return {"error" : str(e)}
 

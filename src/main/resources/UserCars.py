@@ -51,7 +51,7 @@ class Cars(Resource):
 			if (len(cars) == 0):
 				print("FETECHING CARS...")
 				status_code, cars = ServerRequest.getUserCars(id)
-		except Exception, e:
+		except Exception as e:
 			return ResponseMaker.response_error(constants.NOT_FOUND, "User id did not match any existing users.")			
 		return ResponseMaker.response_object(constants.SUCCESS, ['cars'], cars)
 	
@@ -91,7 +91,7 @@ class Cars(Resource):
 			#self.users.update({"_id": id}, { $push: { "cars": car } })
 			return ResponseMaker.response_object(status, ["car"], [car])
 
-		except Exception, e:
+		except Exception as e:
 			return ResponseMaker.response_error(constants.ERROR, "Unexpected error")			
 
 class CarsById(Resource):
@@ -122,7 +122,7 @@ class CarsById(Resource):
 			if (len(car) == 0):
 				status_code, car = ServerRequest.getUserCar(userId, carId)
 			return ResponseMaker.response_object(constants.SUCCESS, ['car'], car["properties"])
-		except Exception, e:
+		except Exception as e:
 			return ResponseMaker.response_error(constants.ERROR,  "Unexpected error")			
 		
 		
@@ -184,7 +184,7 @@ class CarsById(Resource):
 				logger.getLogger().error("Attempted to delete car with non-existent id.")
 				return ResponseMaker.response_error(status_code, "Delete error")	
 
-		except Exception, e:
+		except Exception as e:
 			return ResponseMaker.response_error(constants.ERROR, "Unexpected error")			
 
 

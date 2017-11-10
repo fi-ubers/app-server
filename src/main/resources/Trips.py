@@ -32,7 +32,7 @@ class Trips(Resource):
 			#TODO:Update local database
 			trip = response
 			return ResponseMaker.response_object(status, ["trip"], [trip])
-		except Exception, e:
+		except Exception as e:
 			print("Error " + str(e))
 			return ResponseMaker.response_error(constants.ERROR, "Unexpected error")
 
