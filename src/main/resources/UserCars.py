@@ -87,7 +87,7 @@ class Cars(Resource):
 				return ResponseMaker.response_error(status, response["message"])
 			#TODO:Update local database
 			car = response
-			car["_id"] = car.pop("id")
+			#car["_id"] = car.pop("id")
 			#self.users.update({"_id": id}, { $push: { "cars": car } })
 			return ResponseMaker.response_object(status, ["car"], [car])
 
