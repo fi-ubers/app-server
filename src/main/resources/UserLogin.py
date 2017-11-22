@@ -193,9 +193,6 @@ class UserById(Resource):
 
 		(valid, decoded) = TokenGenerator.validateToken(token)
 
-		if not valid or (decoded['_id'] != id):
-			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
-
 		print("GET at /user/id")
 		candidates = [user for user in self.users.find() if user['_id'] == id]
 
