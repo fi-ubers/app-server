@@ -296,7 +296,7 @@ class LocUserById(Resource):
 		'online':False,
 		'coord': {
 			'lat':0,
-			'long':0
+			'lng':0
 		}
 	}
 	"""
@@ -335,7 +335,7 @@ class LocUserById(Resource):
 	"""Receives a JSON specifying a user's new location with the following layout:
 		'coord': {
 			'lat':0,
-			'long':0
+			'lng':0
 		}
 	Updates the user's location to specified coordinates.	
 	"""

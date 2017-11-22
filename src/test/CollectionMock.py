@@ -27,10 +27,10 @@ user3 = {"_id": 3,  "birthdate": "17-10-1993", "country": "Georgia", "email": "e
 "cars":carList3, "transactions": transacList3, "trips" : tripList3}
 
 
-user4 = {"_id": 10, "birthdate": "3-1-1997", "country": "Italy", "email": "corneliusf@gmail.com", "images": [ "No tengo imagen" ],"name": "Cornelius", "surname": "Fudge", "type": "passenger","username": "cornelius999", "cars": carList1, "transactions": transacList1, "trips" : tripList1, "coord":{"lat":"0", "long":"0"}, "online":True}
+user4 = {"_id": 10, "birthdate": "3-1-1997", "country": "Italy", "email": "corneliusf@gmail.com", "images": [ "No tengo imagen" ],"name": "Cornelius", "surname": "Fudge", "type": "passenger","username": "cornelius999", "cars": carList1, "transactions": transacList1, "trips" : tripList1, "coord":{"lat":"0", "lng":"0"}, "online":True}
 
 
-user5 = {"_id": 11, "birthdate": "3-1-1997", "country": "England", "email": "sh@holmes.com", "images": [ "No tengo imagen" ],"name": "Sherlock", "surname": "Holmes", "type": "passenger","username": "sherlockholmes", "cars": carList1, "transactions": transacList1, "trips" : tripList1, "coord":{"lat":"0", "long":"0"}, "online":True}
+user5 = {"_id": 11, "birthdate": "3-1-1997", "country": "England", "email": "sh@holmes.com", "images": [ "No tengo imagen" ],"name": "Sherlock", "surname": "Holmes", "type": "passenger","username": "sherlockholmes", "cars": carList1, "transactions": transacList1, "trips" : tripList1, "coord":{"lat":"0", "lng":"0"}, "online":True}
 
 default_db = [user1, user2, user3, user4, user5]
 

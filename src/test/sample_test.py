@@ -153,7 +153,7 @@ class TestUsersLogin(object):
 	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
 	def test_get_user_by_id_in_app(self, validateTokenMock):
 		expected = default_db[0]
-		expected["coord"] = {'lat': '0', 'long': '0'}
+		expected["coord"] = {'lat': '0', 'lng': '0'}
 		expected["online"] = False
 
 		self.app = app.test_client()
@@ -204,7 +204,7 @@ class TestUsersLogin(object):
 		print(response)
 
 		expected["_id"] = 6
-		expected["coord"] = {'lat': '0', 'long': '0'}
+		expected["coord"] = {'lat': '0', 'lng': '0'}
 		expected["online"] = False
 		expected.pop("password")
 
@@ -274,7 +274,7 @@ class TestUsersLogin(object):
 	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
 	def test_validate_user_error(self, validateTokenMock, FakePost):
 		expected = {"birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@error.com", "password" : "hola9876",
-		"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito", 'coord': {'lat': '0', 'long': '0'} }
+		"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito", 'coord': {'lat': '0', 'lng': '0'} }
 
 		self.app = app.test_client()
 		response = self.app.post(V1_URL + '/users/login', headers={'UserToken' : "A fake token"}, data = json.dumps(expected), content_type='application/json')
@@ -290,7 +290,7 @@ class TestUsersLogin(object):
 		response = self.app.post(V1_URL + '/users/login', headers={"UserToken" : "A fake token"}, data = json.dumps(expected), content_type='application/json')
 		response_parsed = json.loads(response.get_data())
 		expected["_id"] = expected.pop("id")
-		expected['coord']= {'lat': '0', 'long': '0'}
+		expected['coord']= {'lat': '0', 'lng': '0'}
 		expected['online'] = True
 		assert(response.status_code == 200)
 		assert(response_parsed['user'] == expected)
@@ -301,7 +301,7 @@ class TestUsersLogin(object):
 		expected = {}
 		expected["_id"] = 10
 		expected["online"] = True
-		expected["coord"]= {'lat': '0', 'long': '0'}
+		expected["coord"]= {'lat': '0', 'lng': '0'}
 
 		self.app = app.test_client()
 		response = self.app.get(V1_URL + '/users/10/location', headers={"UserToken" : "A fake token"})
