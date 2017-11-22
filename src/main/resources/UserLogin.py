@@ -332,6 +332,13 @@ class LocUserById(Resource):
 
 		return ResponseMaker.response_object(constants.SUCCESS, ['user_loc'], [User.LocUserJSON(candidates[0])])
 
+	"""Receives a JSON specifying a user's new location with the following layout:
+		'coord': {
+			'lat':0,
+			'long':0
+		}
+	Updates the user's location to specified coordinates.	
+	"""
 
 	def put(self, id):
 		print(id)
@@ -349,7 +356,7 @@ class LocUserById(Resource):
 		try:
 			updated_location = request.json["coord"]
 			#Update in local data-base
-			self.users.update({'_id':updated_user['id']}, {"$set":{"coord":updated_location}},  upsert= True)
+			self.users.update({'_id':id}, {"$set":{"coord":updated_location}},  upsert= True)
 			logger.getLogger().info("Successfully updated user")
 			return ResponseMaker.response_error(constants.SUCCESS, "User updated successfully!")	
 		except ValueError as e:
@@ -360,5 +367,6 @@ class LocUserById(Resource):
 			return ResponseMaker.response_error(constants.REQ_TIMEOUT, "User update failed:" + str(e))
 		except Exception as e:
 			logger.getLogger().error(str(e))
-			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden: " + str(e))
+			print(str(e))
+			return ResponseMaker.response_error(constants.ERROR, str(e))
 

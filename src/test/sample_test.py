@@ -1,6 +1,7 @@
 import json
 import os
 import jwt
+import random
 
 V1_URL = '/v1/api'
 MOCK_URL = 'http://172.17.0.2:80'
@@ -10,6 +11,7 @@ MOCK_TOKEN_VALIDATION_2 = (True, {"username" : "juanpi", "_id" : 2})
 MOCK_TOKEN_VALIDATION_3 = (True, {"username" : "euge", "_id" : 3})
 MOCK_TOKEN_VALIDATION_7 = (True, {"username" : "luis", "_id" : 7})
 MOCK_TOKEN_VALIDATION_10 = (True, {"username" : "cornelius999", "_id" : 10})
+MOCK_TOKEN_VALIDATION_11 = (True, {"username" : "sherlockholmes", "_id" : 11})
 
 os.environ['SS_URL'] = MOCK_URL
 os.environ["APP_TOKEN"] = "untokendementira"
@@ -136,7 +138,7 @@ class TestUsersLogin(object):
 
 	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
 	def test_getall_users_authorized(self, validateTokenMock):
-		expected = default_db[0:3]
+		expected = default_db[0:4]
 
 		self.app = app.test_client()
 		response = self.app.get(V1_URL + '/users', headers={"UserToken" : "A fake token"})
@@ -241,8 +243,6 @@ class TestUsersLogin(object):
 
 #		response_parsed = json.loads(response.get_data())
 #		print(response_parsed)
-ConnectionError: HTTPConnectionPool(host='172.17.0.2', port=80): Max retries exceeded with url: /users/10?token=untokendementira (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x7f1c869a0b10>: Failed to establish a new connection: [Errno 113] No route to host',))
-
 #		assert(response.status_code == 200)
 #		assert(response_parsed['user'] == expected)
 #		assert(response_parsed['code'] == 200)
@@ -296,7 +296,7 @@ ConnectionError: HTTPConnectionPool(host='172.17.0.2', port=80): Max retries exc
 		assert(response_parsed['user'] == expected)
 
 	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_10)
-	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakeGet)
+	@patch('src.main.com.ServerRequest.requests.get', side_effect=FakeGet)
 	def test_get_userlocation_success(self, validateTokenMock, FakeGet):
 		expected = {}
 		expected["_id"] = 10
@@ -308,6 +308,29 @@ ConnectionError: HTTPConnectionPool(host='172.17.0.2', port=80): Max retries exc
 		response_parsed = json.loads(response.get_data())
 		assert(response.status_code == 200)
 		assert(response_parsed['user_loc'] == expected)
+
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_10)
+	@patch('src.main.com.ServerRequest.requests.get', side_effect=FakeGet)
+	def test_get_userlocation_unauthorized(self, validateTokenMock, FakeGet):
+		self.app = app.test_client()
+		response = self.app.get(V1_URL + '/users/1/location', headers={"UserToken" : "A fake token"})
+		response_parsed = json.loads(response.get_data())
+		assert(response.status_code == 403)
+
+#	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_11)
+#	def test_modify_userlocation_success(self, validateTokenMock):
+#		current_loc = default_db[4]["coord"]
+#		longitude = float(current_loc["long"])
+#		latitude = float(current_loc["lat"])
+#		newlat = random.uniform(0,latitude) if (latitude > 0) else random.uniform(latitude+1, 100)
+#		newlong = random.uniform(0,longitude) if (longitude > 0) else random.uniform(longitude+1, 100)
+#		new_loc = {"coord": {"lat": str(newlat), "long": str(newlong)}}
+
+#		self.app = app.test_client()
+#		response = self.app.put(V1_URL + '/users/11/location', headers={'UserToken' : "A fake token"}, data = json.dumps(new_loc), content_type='application/json')	
+#		response_parsed = json.loads(response.get_data())
+#		assert(response.status_code == 200)
+#		assert(default_db[4]["coord"] == new_loc["coord"])
 
 
 """

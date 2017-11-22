@@ -7,8 +7,8 @@ def UserJSON(user_js):
 
 def LocUserJSON(user_js):
 	location_js = {}
-	location_js["_id"] = user["_id"]
-	location_js["online"] = user["online"]
+	location_js["_id"] = user_js["_id"]
+	location_js["online"] = user_js["online"]
 	location_js["coord"] = user_js["coord"]
 	return location_js
 
