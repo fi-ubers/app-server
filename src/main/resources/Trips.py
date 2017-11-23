@@ -18,7 +18,6 @@ import uuid
 import logging as logger
 
 class Trips(Resource):
-
 	""" Helper function to check if user is online and a passenger """
 	def userId_is_passenger(self, id):
 		users_online = MongoController.getCollection("online")
@@ -58,17 +57,17 @@ class Trips(Resource):
 		token = request.headers['UserToken']
 		(valid, requester) = TokenGenerator.validateToken(token)
 		if not valid:
-			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
+			return ResponseMaker.response_error(constants.UNAUTHORIZED, "Unauthorized")
 
 		# Check if user is 1) logged in, and 2) a passenger
 		(user, is_passenger) = self.userId_is_passenger(requester["_id"])
-		logger.getLogger().debug("The 'passenger' requesting the trip is:")
-		logger.getLogger().debug(user)
 
 		if user == None:
 			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - user is not logged in")
 		if not is_passenger:
-			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - user is not passenger")
+			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden - user is not passenger")
+
+		logger.getLogger().debug("The 'passenger' requesting the trip is: " + str(user["_id"]) + "-" + user["username"])
 		# TODO: check for user state
 
 		# Check the trip data is valid!
@@ -95,9 +94,43 @@ class Trips(Resource):
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "trip"], ["Trip created!", new_trip])
 
 
+	"""
+	Get a list of all active trips.
+	Requires an UserToken to use. Will fail with 401 if token does not decode.
+	Requires user to be a "driver". Will fail with 403 if user is "passanger"
+	Allows three in-query parameters 
+	"""
+	def get(self):
+		logger.getLogger().debug("GET at /trips")
+
+		# (validate-token) Validate user token
+		if not "UserToken" in request.headers:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing token")
+
+		token = request.headers['UserToken']
+		(valid, requester) = TokenGenerator.validateToken(token)
+		if not valid:
+			return ResponseMaker.response_error(constants.UNAUTHORIZED, "Unauthorized")
+
+		# Check if user is 1) logged in, and 2) a passenger
+		(user, is_passenger) = self.userId_is_passenger(requester["_id"])
+
+		if user == None:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - user is not logged in")
+		if is_passenger:
+			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden - user is not driver")
+
+		logger.getLogger().debug("The 'driver' requesting trips is: " + str(user["_id"]) + "-" + user["username"])
+
+
+		## Actual getting of the trips!
+
+		return ResponseMaker.response_object(constants.SUCCESS, ["message"], ["Getting trips!"])
 
 class TripsById(Resource):
-
+	"""
+	Get a trip by ID
+	"""
 	def get(self, id):
 		logger.getLogger().debug("GET at /trips/" + str(id))
 
@@ -109,7 +142,7 @@ class TripsById(Resource):
 		(valid, response) = TokenGenerator.validateToken(token)
 
 		if not valid:
-			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
+			return ResponseMaker.response_error(constants.UNAUTHORIZED, "Unauthorized")
 		
 		active_trips = MongoController.getCollection("active_trips")
 		trip = list(active_trips.find({"_id" : id}))
@@ -146,7 +179,7 @@ class UserTrips(Resource):
 		(valid, decoded) = TokenGenerator.validateToken(token)
 
 		if not valid or (decoded['_id'] != id):
-			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
+			return ResponseMaker.response_error(constants.UNAUTHORIZED, "Unauthorized")
 
 		print("GET at /user/id/trips")
 		#TODO: search local database
