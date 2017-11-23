@@ -10,11 +10,12 @@ from src.main.com import ResponseMaker, ServerRequest, TokenGenerator
 from src.main.mongodb import MongoController
 import config.constants as constants
 
+from src.main.com import TripStates
+
 import os
 import requests
 import uuid
 import logging as logger
-
 
 class Trips(Resource):
 
@@ -41,8 +42,6 @@ class Trips(Resource):
 				if not field in waypoint:
 					return False
 		return True
-
-
 
 	"""
 	Use POST at /trips to create a new proposed trip as a passenger. It will fail if user is a driver.
@@ -84,8 +83,9 @@ class Trips(Resource):
 		new_trip["directions"] = trip
 		new_trip["passengerId"] = requester["_id"]
 		new_trip["driverId"] = -1
-		new_trip["state"] = "pending"
-		new_trip["_id"] = uuid.uuid1()
+		new_trip["state"] = TripStates.TRIP_PROPOSED
+		new_trip["_id"] = str(uuid.uuid1())
+		logger.getLogger().debug("Created trip with uudi: " + new_trip["_id"])
 		print(new_trip["_id"])
 
 		# (mongodb) Storing new trip in the db!
@@ -94,6 +94,43 @@ class Trips(Resource):
 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "trip"], ["Trip created!", new_trip])
 
+
+
+class TripsById(Resource):
+
+	def get(self, id):
+		logger.getLogger().debug("GET at /trips/" + str(id))
+
+		# (validate-token) Validate user token
+		if not "UserToken" in request.headers:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing token")
+
+		token = request.headers['UserToken']
+		(valid, response) = TokenGenerator.validateToken(token)
+
+		if not valid:
+			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
+		
+		active_trips = MongoController.getCollection("active_trips")
+		trip = list(active_trips.find({"_id" : id}))
+
+		if len(trip) == 0:
+			return ResponseMaker.response_error(constants.NOT_FOUND, "Not found")
+
+		# This should never happen
+		if len(trip) > 1:
+			return ResponseMaker.response_error(constants.ERROR, "Internal server error - more than one trip with same ID")
+
+		trip = trip[0]
+		print(trip)
+
+		return ResponseMaker.response_object(constants.SUCCESS, ["message", "trip"], ["OK", trip])
+
+
+
+ #####
+ ##### EVERITHING BELOW HERE NEEDS REVISION
+ #####
 
 class UserTrips(Resource):
 	"""Receives a user id. Returns a json structure with a list containing
@@ -160,28 +197,3 @@ class TripEstimation(Resource):
 		except Exception, e:
 			logger.getLogger().error("Error " + str(e))
 			return ResponseMaker.response_error(constants.ERROR, "Unexpected error" + str(e))
-
-class TripsById(Resource):
-
-	def get(self, id):
-		logger.getLogger().debug("GET at /trips/" + str(id))
-		# (validate-token) Validate user token
-		if not "UserToken" in request.headers:
-			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing token")
-
-		token = request.headers['UserToken']
-
-		(valid, response) = TokenGenerator.validateToken(token)
-
-		if not valid:
-			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
-
-		(status, response) = ServerRequest.getTrip(id)
-
-		if (status != constants.SUCCESS):
-			return ResponseMaker.response_error(status, response["message"])
-
-		return ResponseMaker.response_object(constants.SUCCESS, ['trip'], [response])
-
-
-

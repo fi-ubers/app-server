@@ -28,10 +28,13 @@ api.add_resource(CarsById, V1_URL + '/users/<int:userId>/cars/<int:carId>')
 api.add_resource(UserTransactions, V1_URL + '/users/<int:id>/transactions')
 
 # Trips operations
-api.add_resource(UserTrips, V1_URL + '/users/<int:id>/trips')
 api.add_resource(Trips, V1_URL + '/trips')
+api.add_resource(TripsById, V1_URL + '/trips/<string:id>')
+
+
+###### CHECK THESE
+api.add_resource(UserTrips, V1_URL + '/users/<int:id>/trips')
 api.add_resource(TripEstimation, V1_URL + '/trips/estimation')
-api.add_resource(TripsById, V1_URL + '/trips/<int:id>')
 
 # Payment operations
 api.add_resource(Paymethods, V1_URL + '/payment')
