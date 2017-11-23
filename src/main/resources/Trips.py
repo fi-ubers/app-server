@@ -18,6 +18,8 @@ import uuid
 import logging as logger
 
 class Trips(Resource):
+
+	### TODO: move these to another place???
 	""" Helper function to check if user is online and a passenger """
 	def userId_is_passenger(self, id):
 		users_online = MongoController.getCollection("online")
@@ -41,6 +43,18 @@ class Trips(Resource):
 				if not field in waypoint:
 					return False
 		return True
+
+	"""
+	Computes the euclidian distance between two coordinates
+	This is not accurate actually, because coordinates are in
+	latitude/logitude.
+	"""
+	def distance(self, a, b):
+		x1 = a["lat"]
+		x2 = b["lat"]
+		y1 = a["lng"]
+		y2 = b["lng"]
+		return ( (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) )
 
 	"""
 	Use POST at /trips to create a new proposed trip as a passenger. It will fail if user is a driver.
@@ -124,8 +138,23 @@ class Trips(Resource):
 
 
 		## Actual getting of the trips!
+		params = request.args
 
-		return ResponseMaker.response_object(constants.SUCCESS, ["message"], ["Getting trips!"])
+		active_trips = MongoController.getCollection("active_trips")
+		trips = list(active_trips.find())
+
+		if "filter" in params:
+			trips = [trip for trip in trips if trip["state"] == params["filter"]]
+
+		if "sort" in params:
+			continue
+
+		if "limit" in params:
+			limit = int(params["limit"])
+			if limit > 0:
+				trips = trips[:(limit)]
+
+		return ResponseMaker.response_object(constants.SUCCESS, ["message", "trips"], ["Getting trips!", trips])
 
 class TripsById(Resource):
 	"""
