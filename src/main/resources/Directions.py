@@ -18,6 +18,30 @@ GOOGLE_DIRECTIONS = "https://maps.googleapis.com/maps/api/directions/json"
 class Directions(Resource):
 
 
+	def to_shared(self, directions):
+		prototrip = {}
+		start = {}
+		start["address"] = {}
+		start["address"]["street"] = directions["origin_name"]
+		start["address"]["location"] = {"lat" : directions["origin"]["lat"], "lon" : directions["origin"]["lng"]}
+		prototrip["start"] = start
+
+		end = {}
+		end["address"] = {}
+		end["address"]["street"] = directions["destination_name"]
+		end["address"]["location"] = {"lat" : directions["destination"]["lat"], "lon" : directions["destination"]["lng"]}
+		prototrip["end"] = end
+
+		prototrip["travelTime"] = int(directions["duration"])
+		prototrip["waitTime"] = 0
+		prototrip["totalTime"] = prototrip["travelTime"] + prototrip["waitTime"]
+
+		prototrip["distance"] = directions["distance"]
+
+		prototrip["passenger"] = 1
+
+		return prototrip
+
 	def convert_response(self, gresp):
 		directions = {}
 		directions["status"] = gresp["status"]
@@ -65,7 +89,6 @@ class Directions(Resource):
 		if not "lat" in destination or not "lng" in destination:
 			return ResponseMaker.response_error(constants.PARAMERR, "Bad request")
 
-
 		origin_str = "origin=" + str(origin["lat"]) + "," + str(origin["lng"])
 		print("origin_str = " + origin_str)
 		destination_str = "destination=" + str(destination["lat"]) + "," + str(destination["lng"])
@@ -78,4 +101,9 @@ class Directions(Resource):
 		if r["status"] != "OK":
 			return ResponseMaker.response_error(500, "Google API error: " + r["status"])
 		
-		return ResponseMaker.response_object(200, ["directions"], [self.convert_response(r)])
+		r = self.convert_response(r)
+
+		## TODO: send prototrip to shared server to estimate trip cost!
+		proto = self.to_shared(r)
+		print(proto)
+		return ResponseMaker.response_object(200, ["directions"], [r])

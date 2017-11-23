@@ -147,7 +147,7 @@ class Trips(Resource):
 			trips = [trip for trip in trips if trip["state"] == params["filter"]]
 
 		if "sort" in params:
-			continue
+			pass
 
 		if "limit" in params:
 			limit = int(params["limit"])
