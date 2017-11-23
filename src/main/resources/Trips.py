@@ -12,38 +12,88 @@ import config.constants as constants
 
 import os
 import requests
+import uuid
 import logging as logger
 
 
 class Trips(Resource):
 
+	""" Helper function to check if user is online and a passenger """
+	def userId_is_passenger(self, id):
+		users_online = MongoController.getCollection("online")
+
+		for user in users_online.find():
+			if user["_id"] == id:
+				found = user
+				return (user, user["type"] == "passenger")
+		return (None, False)
+
+	""" Check the validity of a new-trip request """
+	def check_new_trip(self, trip):
+		required_single = ["origin", "destination", "distance", "duration", "path"]
+		required_waypoints = ["coords", "distance", "duration"]
+		for field in required_single:
+			if not field in trip:
+				return False
+
+		for waypoint in trip["path"]:
+			for field in required_waypoints:
+				if not field in waypoint:
+					return False
+		return True
+
+
+
+	"""
+	Use POST at /trips to create a new proposed trip as a passenger. It will fail if user is a driver.
+	"""
 	def post(self):
 		print(request.json)
 		logger.getLogger().debug("POST at /trips")
 		logger.getLogger().debug(request.json)
 
-		try:
-			# (validate-token) Validate user token
-			if not "UserToken" in request.headers:
-				return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing token")
+		# (validate-token) Validate user token
+		if not "UserToken" in request.headers:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing token")
 
-			token = request.headers['UserToken']
+		token = request.headers['UserToken']
+		(valid, requester) = TokenGenerator.validateToken(token)
+		if not valid:
+			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
 
-			(valid, response) = TokenGenerator.validateToken(token)
-			if not valid:
-				return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
-			
-			#Create trip at shared server.
-			(status, response) = ServerRequest.createTrip(request.json)
+		# Check if user is 1) logged in, and 2) a passenger
+		(user, is_passenger) = self.userId_is_passenger(requester["_id"])
+		logger.getLogger().debug("The 'passenger' requesting the trip is:")
+		logger.getLogger().debug(user)
 
-			if (status != constants.CREATE_SUCCESS):
-				return ResponseMaker.response_error(status, response["message"])
-			#TODO:Update local database
-			trip = response
-			return ResponseMaker.response_object(status, ["trip"], [trip])
-		except Exception, e:
-			logger.getLogger().error("Error " + str(e))
-			return ResponseMaker.response_error(constants.ERROR, "Unexpected error")
+		if user == None:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - user is not logged in")
+		if not is_passenger:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - user is not passenger")
+		# TODO: check for user state
+
+		# Check the trip data is valid!
+		trip = request.json
+		if trip == None:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing trip data")
+		if not self.check_new_trip(trip):
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - bad trip data")
+
+		# Creating a new trip
+		new_trip = {}
+		new_trip["directions"] = trip
+		new_trip["passengerId"] = requester["_id"]
+		new_trip["driverId"] = -1
+		new_trip["state"] = "pending"
+		new_trip["_id"] = uuid.uuid1()
+		print(new_trip["_id"])
+
+		# (mongodb) Storing new trip in the db!
+		active_trips = MongoController.getCollection("active_trips")
+		active_trips.insert_one(new_trip)
+
+		return ResponseMaker.response_object(constants.SUCCESS, ["message", "trip"], ["Trip created!", new_trip])
+
 
 class UserTrips(Resource):
 	"""Receives a user id. Returns a json structure with a list containing

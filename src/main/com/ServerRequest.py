@@ -10,11 +10,11 @@ import logging as logger
 import config.constants as constants
 from Server import ServerTokenUpdater
 
-SS_URI = 'https://fiuber-shared-server.herokuapp.com/api'#"http://127.0.0.1:5000/api"
+SS_URI = "http://127.0.0.1:5005/api"
 if not "SS_URL" in os.environ:
 	os.environ["SS_URL"] = SS_URI
 
-DEFAULT_APP_TOKEN ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzQsImp0aSI6ImE3YWIxOTA2LWQwZjEtNDY1Ny05OTc4LTdiYjBmODJhZjZhOSIsImlhdCI6MTUwODI2MDQ4OX0.IrurkKZ-wbmTp8kQf_rGVHv5jcvwCibQJDoHwvZJ1Gg'
+DEFAULT_APP_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwianRpIjoiODgzZmM3YzctYTYxYS00MmQ5LWEwMDAtNDM4MzE2MzY4YmE3IiwiZXhwIjoxNTExODQwMzEyLCJpYXQiOjE1MTE0MDg0MTZ9.r8NWgLb1ogx9uVyRqF-zWUvKtKoFCx7qgmHlEO7eNnc'
 
 if not "APP_TOKEN" in os.environ:
 	os.environ["APP_TOKEN"] = DEFAULT_APP_TOKEN
