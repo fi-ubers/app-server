@@ -54,7 +54,9 @@ class UserLogin(Resource):
 				if user_js["_id"] == response["_id"]:
 					users_online.delete_many({"_id" : user_js["_id"]})			
 
+			user_js = User.UserJSON(user_js)
 			user_js["online"] = True
+
 			users_online.insert_one(user_js)
 
 			return ResponseMaker.response_object(constants.SUCCESS, ['user', 'token'], [user_js, token])
@@ -313,19 +315,10 @@ class LocUserById(Resource):
 		candidates = [user for user in self.users.find() if user['_id'] == id]
 
 		if len(candidates) == 0:
-			#If not available in local data-base, ask Shared-Server for user info.
-			(status, response) = ServerRequest.getUser(id)
-
-			if (status != constants.SUCCESS):
-				return ResponseMaker.response_error(status, response["message"])
-
-			candidates = [ response ]
-			user = candidates[0]
-			self.users.insert_one(user)
-
-		if len(candidates) == 0:
 			logger.getLogger().error("Attempted to retrieve user with non-existent id.")
 			return ResponseMaker.response_error(constants.NOT_FOUND, "User id not found:" + str(e))
+	
+		print(candidates[0])
 
 		return ResponseMaker.response_object(constants.SUCCESS, ['user_loc'], [User.LocUserJSON(candidates[0])])
 
