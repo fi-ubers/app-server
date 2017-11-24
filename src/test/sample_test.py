@@ -1,6 +1,7 @@
 import json
 import os
 import jwt
+import random
 
 V1_URL = '/v1/api'
 MOCK_URL = 'http://172.17.0.2:80'
@@ -9,6 +10,8 @@ MOCK_TOKEN_VALIDATION_1 = (True, {"username" : "juan", "_id" : 1})
 MOCK_TOKEN_VALIDATION_2 = (True, {"username" : "juanpi", "_id" : 2})
 MOCK_TOKEN_VALIDATION_3 = (True, {"username" : "euge", "_id" : 3})
 MOCK_TOKEN_VALIDATION_7 = (True, {"username" : "luis", "_id" : 7})
+MOCK_TOKEN_VALIDATION_10 = (True, {"username" : "cornelius999", "_id" : 10})
+MOCK_TOKEN_VALIDATION_11 = (True, {"username" : "sherlockholmes", "_id" : 11})
 
 os.environ['SS_URL'] = MOCK_URL
 os.environ["APP_TOKEN"] = "untokendementira"
@@ -36,13 +39,16 @@ class FakeGet(object):
 		self.headers = headers
 		self.db = default_db
 		self.status_code = 0
-
+		
 		if (self.url == MOCK_URL + '/users/3' + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			self.status_code = 200
 			self.response = {'code' : self.status_code, 'user' : self.db[2] }
 		elif (self.url == MOCK_URL + '/users/7' + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			self.status_code = 404 
 			self.response = {"code" : 404, 'message' : 'Not found'}
+		elif (self.url == MOCK_URL + '/users/10'+MOCK_TOKEN + os.environ["APP_TOKEN"]):
+			self.status_code = 200
+			self.response = {'code' : self.status_code, 'user' : self.db[3] }
 		else:
 			self.response = {"code" : 666, 'message' : 'Mocking error'}
 
@@ -132,7 +138,7 @@ class TestUsersLogin(object):
 
 	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
 	def test_getall_users_authorized(self, validateTokenMock):
-		expected = default_db[0:2]
+		expected = default_db[0:4]
 
 		self.app = app.test_client()
 		response = self.app.get(V1_URL + '/users', headers={"UserToken" : "A fake token"})
@@ -147,6 +153,8 @@ class TestUsersLogin(object):
 	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
 	def test_get_user_by_id_in_app(self, validateTokenMock):
 		expected = default_db[0]
+		expected["coord"] = {'lat': '0', 'lng': '0'}
+		expected["online"] = False
 
 		self.app = app.test_client()
 		response = self.app.get(V1_URL + '/users/1', headers={"UserToken" : "A fake token"})
@@ -188,7 +196,7 @@ class TestUsersLogin(object):
 	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
 	def test_register_new_user(self, validateTokenMock, FakeGet):
 		expected = {"birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@success.com", "password" : "hola9876",
-					"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito" }
+		"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito" }
 
 		self.app = app.test_client()
 		response = self.app.post(V1_URL + '/users', headers={"UserToken" : "A fake token"}, data = json.dumps(expected), content_type='application/json')
@@ -196,6 +204,8 @@ class TestUsersLogin(object):
 		print(response)
 
 		expected["_id"] = 6
+		expected["coord"] = {'lat': '0', 'lng': '0'}
+		expected["online"] = False
 		expected.pop("password")
 
 		response_parsed = json.loads(response.get_data())
@@ -208,7 +218,7 @@ class TestUsersLogin(object):
 	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
 	def test_register_new_user_fail(self, validateTokenMock, FakeGet):
 		expected = {"birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@error.com", "password" : "hola9876",
-					"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito" }
+		"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito" }
 
 		self.app = app.test_client()
 		response = self.app.post(V1_URL + '/users', headers={"UserToken" : "A fake token"}, data = json.dumps(expected), content_type='application/json')
@@ -233,7 +243,6 @@ class TestUsersLogin(object):
 
 #		response_parsed = json.loads(response.get_data())
 #		print(response_parsed)
-
 #		assert(response.status_code == 200)
 #		assert(response_parsed['user'] == expected)
 #		assert(response_parsed['code'] == 200)
@@ -265,7 +274,7 @@ class TestUsersLogin(object):
 	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
 	def test_validate_user_error(self, validateTokenMock, FakePost):
 		expected = {"birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@error.com", "password" : "hola9876",
-					"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito" }
+		"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito", 'coord': {'lat': '0', 'lng': '0'} }
 
 		self.app = app.test_client()
 		response = self.app.post(V1_URL + '/users/login', headers={'UserToken' : "A fake token"}, data = json.dumps(expected), content_type='application/json')
@@ -275,14 +284,54 @@ class TestUsersLogin(object):
 	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
 	def test_validate_user_success(self, validateTokenMock, FakePost):
 		expected = {"id":20, "birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@success.com", "password" : "hola9876",
-					"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito" }
+		"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito" }
 
 		self.app = app.test_client()
 		response = self.app.post(V1_URL + '/users/login', headers={"UserToken" : "A fake token"}, data = json.dumps(expected), content_type='application/json')
 		response_parsed = json.loads(response.get_data())
 		expected["_id"] = expected.pop("id")
+		expected['coord']= {'lat': '0', 'lng': '0'}
+		expected['online'] = True
 		assert(response.status_code == 200)
 		assert(response_parsed['user'] == expected)
+
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_10)
+	@patch('src.main.com.ServerRequest.requests.get', side_effect=FakeGet)
+	def test_get_userlocation_success(self, validateTokenMock, FakeGet):
+		expected = {}
+		expected["_id"] = 10
+		expected["online"] = True
+		expected["coord"]= {'lat': '0', 'lng': '0'}
+
+		self.app = app.test_client()
+		response = self.app.get(V1_URL + '/users/10/location', headers={"UserToken" : "A fake token"})
+		response_parsed = json.loads(response.get_data())
+		assert(response.status_code == 200)
+		assert(response_parsed['user_loc'] == expected)
+
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_10)
+	@patch('src.main.com.ServerRequest.requests.get', side_effect=FakeGet)
+	def test_get_userlocation_unauthorized(self, validateTokenMock, FakeGet):
+		self.app = app.test_client()
+		response = self.app.get(V1_URL + '/users/1/location', headers={"UserToken" : "A fake token"})
+		response_parsed = json.loads(response.get_data())
+		assert(response.status_code == 403)
+
+#	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_11)
+#	def test_modify_userlocation_success(self, validateTokenMock):
+#		current_loc = default_db[4]["coord"]
+#		longitude = float(current_loc["long"])
+#		latitude = float(current_loc["lat"])
+#		newlat = random.uniform(0,latitude) if (latitude > 0) else random.uniform(latitude+1, 100)
+#		newlong = random.uniform(0,longitude) if (longitude > 0) else random.uniform(longitude+1, 100)
+#		new_loc = {"coord": {"lat": str(newlat), "long": str(newlong)}}
+
+#		self.app = app.test_client()
+#		response = self.app.put(V1_URL + '/users/11/location', headers={'UserToken' : "A fake token"}, data = json.dumps(new_loc), content_type='application/json')	
+#		response_parsed = json.loads(response.get_data())
+#		assert(response.status_code == 200)
+#		assert(default_db[4]["coord"] == new_loc["coord"])
+
 
 """
 Some tests to add in the future:
