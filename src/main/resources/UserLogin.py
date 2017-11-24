@@ -330,7 +330,7 @@ class LocUserById(Resource):
 	Updates the user's location to specified coordinates.	
 	"""
 
-	def put(self, id):
+	def post(self, id):
 		print(id)
 		print("PUT at /user/" + str(id) + "/loacation")
 		logger.getLogger().debug("PUT at /users/" + str(id) + "/location")

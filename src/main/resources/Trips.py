@@ -247,8 +247,10 @@ class TripActions(Resource):
 			users = MongoController.getCollection("online")
 			users.update( { "_id" : user["_id"] }, { "$set" : { "state" : User.USER_IDLE } }) 
 
+			return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was deleted. Passenger updated.", action["action"], trip])
 
-		return ResponseMaker.response_object(constants.SUCCESS, ["message", "trip"], ["OK", trip])
+
+		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action"], ["No action performed.", action["action"]])
 
 
  #####
