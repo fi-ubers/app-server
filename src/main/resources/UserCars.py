@@ -85,6 +85,7 @@ class Cars(Resource):
 
 			if (status != constants.CREATE_SUCCESS):
 				return ResponseMaker.response_error(status, response["message"])
+
 			#Update local database
 			car = response
 			car["_id"] = car.pop("id")
@@ -92,7 +93,9 @@ class Cars(Resource):
 			return ResponseMaker.response_object(status, ["car"], [car])
 
 		except Exception as e:
-			return ResponseMaker.response_error(constants.ERROR, "Unexpected error")
+			logger.getLogger().debug(str(e))
+			print(str(e))
+			return ResponseMaker.response_error(constants.ERROR, "Unexpected error: " + str(e))
 
 class CarsById(Resource):
 	"""This class initializes a resource named CarsById which allows
