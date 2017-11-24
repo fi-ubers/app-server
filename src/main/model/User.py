@@ -1,7 +1,13 @@
+
+USER_IDLE = 'idle'
+USERP_PROPOSED = 'proposed'
+
+
 def UserJSON(user_js):
 	user_js["_id"] = user_js.pop("id") if user_js.has_key("id") else user_js.pop("_id")
 	user_js["online"] = False if not user_js.has_key("online") else user_js["online"]
 	user_js["coord"] = {"lat": "0", "lng": "0"} if not user_js.has_key("coord") else user_js["coord"]
+	user_js["state"] = USER_IDLE if not "state" in user_js else user_js["state"]
 	return user_js
 
 

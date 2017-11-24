@@ -5,7 +5,7 @@ import src.main.mongodb.MongoController
 from src.main.resources.UserLogin import UserLogin, UsersList, UserLogout, UserById, LocUserById
 from src.main.resources.UserCars import Cars, CarsById
 from src.main.resources.UserTransactions import UserTransactions
-from src.main.resources.Trips import UserTrips, Trips, TripEstimation, TripsById
+from src.main.resources.Trips import UserTrips, Trips, TripActions, TripEstimation, TripsById
 from src.main.resources.Paymethods import Paymethods
 from src.main.resources.Directions import Directions
 
@@ -31,6 +31,7 @@ api.add_resource(UserTransactions, V1_URL + '/users/<int:id>/transactions')
 # Trips operations
 api.add_resource(Trips, V1_URL + '/trips')
 api.add_resource(TripsById, V1_URL + '/trips/<string:id>')
+api.add_resource(TripActions, V1_URL + '/trips/<string:id>/action')
 
 
 ###### CHECK THESE

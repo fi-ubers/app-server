@@ -346,7 +346,7 @@ class LocUserById(Resource):
 		try:
 			updated_location = request.json["coord"]
 			#Update in local data-base
-			self.users.update({'_id':id}, {"$set":{"coord":updated_location}},  upsert= True)
+			self.users.update({'_id':id}, {"$set":{"coord":updated_location}})
 			logger.getLogger().info("Successfully updated user")
 			return ResponseMaker.response_error(constants.SUCCESS, "User updated successfully!")	
 		except ValueError as e:
