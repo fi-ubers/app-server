@@ -2,7 +2,8 @@ from flask import Flask
 from flask_restful import Resource, Api
 
 import src.main.mongodb.MongoController
-from src.main.resources.UserLogin import UserLogin, UsersList, UserLogout, UserById, LocUserById
+from src.main.resources.UserLogin import UserLogin, UsersList, UserLogout, UserById
+from src.main.resources.UserInfo import LocUserById, UserRatingById
 from src.main.resources.UserCars import Cars, CarsById
 from src.main.resources.UserTransactions import UserTransactions
 from src.main.resources.Trips import UserTrips, Trips, TripEstimation, TripsById
@@ -17,6 +18,7 @@ api = Api(application)
 
 #User operations
 api.add_resource(LocUserById, V1_URL + '/users/<int:id>/location')
+api.add_resource(UserRatingById, V1_URL + '/users/<int:id>/rating')
 api.add_resource(UserById, V1_URL + '/users/<int:id>')
 api.add_resource(UserLogin, V1_URL + '/users/login')
 api.add_resource(UserLogout, V1_URL + '/users/logout')

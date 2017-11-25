@@ -260,6 +260,6 @@ class TripEstimation(Resource):
 				return ResponseMaker.response_error(status, response["message"])
 			
 			return ResponseMaker.response_object(status, ["cost"], [response])
-		except Exception, e:
+		except Exception as e:
 			logger.getLogger().error("Error " + str(e))
 			return ResponseMaker.response_error(constants.ERROR, "Unexpected error" + str(e))

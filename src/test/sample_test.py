@@ -195,7 +195,7 @@ class TestUsersLogin(object):
 	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
 	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
 	def test_register_new_user(self, validateTokenMock, FakeGet):
-		expected = {"birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@success.com", "password" : "hola9876",
+		expected = {"birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@success.com", "password" : "hola9876", "state":"idle",
 		"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito" }
 
 		self.app = app.test_client()
@@ -283,7 +283,7 @@ class TestUsersLogin(object):
 	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
 	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
 	def test_validate_user_success(self, validateTokenMock, FakePost):
-		expected = {"id":20, "birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@success.com", "password" : "hola9876",
+		expected = {"id":20, "birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@success.com", "password" : "hola9876", "state":"idle",
 		"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito" }
 
 		self.app = app.test_client()
@@ -314,7 +314,6 @@ class TestUsersLogin(object):
 	def test_get_userlocation_unauthorized(self, validateTokenMock, FakeGet):
 		self.app = app.test_client()
 		response = self.app.get(V1_URL + '/users/1/location', headers={"UserToken" : "A fake token"})
-		response_parsed = json.loads(response.get_data())
 		assert(response.status_code == 403)
 
 #	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_11)
@@ -332,6 +331,34 @@ class TestUsersLogin(object):
 #		assert(response.status_code == 200)
 #		assert(default_db[4]["coord"] == new_loc["coord"])
 
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_10)
+	@patch('src.main.com.ServerRequest.requests.get', side_effect=FakeGet)
+	def test_get_driverrate_unauthorized(self, validateTokenMock, FakeGet):
+		self.app = app.test_client()
+		response = self.app.get(V1_URL + '/users/3/rating', headers={"UserToken" : "A fake token"})
+		assert(response.status_code == 403)
+
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_10)
+	@patch('src.main.com.ServerRequest.requests.get', side_effect=FakeGet)
+	def test_get_passengerrate_error(self, validateTokenMock, FakeGet):
+		self.app = app.test_client()
+		response = self.app.get(V1_URL + '/users/10/rating', headers={"UserToken" : "A fake token"})
+		response_parsed = json.loads(response.get_data())
+		assert(response.status_code == 400)
+		assert(response_parsed["message"] == "The requested user is not a driver. Only drivers receive ratings.")
+
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_3)
+	@patch('src.main.com.ServerRequest.requests.get', side_effect=FakeGet)
+	def test_get_driverrate_success(self, validateTokenMock, FakeGet):
+		expected = {}
+		expected["_id"] = 3
+		expected["rating"] = {"rate":0, "rateCount":0}
+
+		self.app = app.test_client()
+		response = self.app.get(V1_URL + '/users/3/rating', headers={"UserToken" : "A fake token"})
+		response_parsed = json.loads(response.get_data())
+		assert(response.status_code == 200)
+		assert(response_parsed['rating'] == expected)
 
 """
 Some tests to add in the future:
