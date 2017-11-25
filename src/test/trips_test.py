@@ -99,7 +99,7 @@ class TestUsertrips(object):
 		self.app = app.test_client()
 		response = self.app.get(V1_URL + "/users/1/trips", headers={"UserToken" : "A fake token"})
 		response_parsed = json.loads(response.get_data())
-		assert(response.status_code == 403)
+		assert(response.status_code == 401)
 
 	@patch("src.main.com.TokenGenerator.validateToken", return_value=MOCK_TOKEN_VALIDATION_1)
 	@patch("src.main.com.ServerRequest.requests.get", side_effect=FakeGet)
@@ -133,7 +133,7 @@ class TestUsertrips(object):
 		self.app = app.test_client()
 		response = self.app.get(V1_URL + "/trips/1", headers={"UserToken" : "A fake token"})
 		response_parsed = json.loads(response.get_data())
-		assert(response.status_code == 403)
+		assert(response.status_code == 401)
 
 
 	@patch("src.main.com.TokenGenerator.validateToken", return_value=MOCK_TOKEN_VALIDATION_1)

@@ -9,14 +9,6 @@ import logging as logger
 import config.constants as constants
 
 headers = {'Content-Type' : 'application/json'}
-SS_URI = 'https://fiuber-shared-server.herokuapp.com/api'#"http://127.0.0.1:5000/api"
-if not "SS_URL" in os.environ:
-	os.environ["SS_URL"] = SS_URI
-
-DEFAULT_APP_TOKEN ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MzQsImp0aSI6ImE3YWIxOTA2LWQwZjEtNDY1Ny05OTc4LTdiYjBmODJhZjZhOSIsImlhdCI6MTUwODI2MDQ4OX0.IrurkKZ-wbmTp8kQf_rGVHv5jcvwCibQJDoHwvZJ1Gg'
-
-if not "APP_TOKEN" in os.environ:
-	os.environ["APP_TOKEN"] = DEFAULT_APP_TOKEN
 
 QUERY_TOKEN = "?token="
 SERVER_END = "/server"

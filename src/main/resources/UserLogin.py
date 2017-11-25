@@ -54,7 +54,9 @@ class UserLogin(Resource):
 				if user_js["_id"] == response["_id"]:
 					users_online.delete_many({"_id" : user_js["_id"]})			
 
+			user_js = User.UserJSON(user_js)
 			user_js["online"] = True
+
 			users_online.insert_one(user_js)
 
 			return ResponseMaker.response_object(constants.SUCCESS, ['user', 'token'], [user_js, token])
@@ -197,10 +199,7 @@ class UserById(Resource):
 
 		(valid, decoded) = TokenGenerator.validateToken(token)
 
-		if not valid or (decoded['_id'] != id):
-			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
-
-		print("GET at /user/id/"+str(id))
+		print("GET at /user/id")
 		candidates = [user for user in self.users.find() if user['_id'] == id]
 
 		if len(candidates) == 0:
