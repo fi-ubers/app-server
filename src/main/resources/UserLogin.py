@@ -35,7 +35,6 @@ class UserLogin(Resource):
 		try:
 			# (shared-server) First ask shared server for credentials validation
 			(valid, response) = ServerRequest.validateUser(request.json)
-			print "VALIDATION: " + str((valid, response))
 		
 			if not valid:
 				logger.getLogger().debug('Error 418: I\' m a teapot and your credentials are not valid!')
