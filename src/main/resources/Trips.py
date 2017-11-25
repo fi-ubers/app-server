@@ -100,14 +100,13 @@ class Trips(Resource):
 		new_trip["state"] = TripStates.TRIP_PROPOSED
 		new_trip["_id"] = str(uuid.uuid1())
 		logger.getLogger().debug("Created trip with uudi: " + new_trip["_id"])
-		print(new_trip["_id"])
 
 		# (mongodb) Storing new trip in the db!
 		active_trips = MongoController.getCollection("active_trips")
 		active_trips.insert_one(new_trip)
 		
 		users = MongoController.getCollection("online")
-		users.update_one( { "_id" : user["_id"] }, { "$set" : { "state" : User.USER_PSG_WAITING_ACCEPT } } )
+		users.update_one( { "_id" : user["_id"] }, { "$set" : { "state" : User.USER_PSG_WAITING_ACCEPT, "tripId" : new_trip["_id"] } } )
 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "trip"], ["Trip created!", new_trip])
 

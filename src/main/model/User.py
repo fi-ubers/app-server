@@ -22,6 +22,7 @@ def UserJSON(user_js):
 	if(user_js["type"] == USER_TYPE_DRIVER):
 		user_js["rating"] = {"rate":0, "rateCount":0}
 	user_js["state"] = USER_IDLE if not "state" in user_js else user_js["state"]
+	user_js["tripId"] = "" if not "tripId" in user_js else user_js["tripId"]
 	return user_js
 
 def UserUpdateDedicatedFields(user_new, user_old):
@@ -31,6 +32,7 @@ def UserUpdateDedicatedFields(user_new, user_old):
 	user_new["state"] = user_old["state"]
 	if user_new["type"] == USER_TYPE_DRIVER:
 		user_new["rating"] = user_old["rating"]
+	user_new["tripId"] = user_old["tripId"]
 	return user_new
 
 

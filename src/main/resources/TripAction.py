@@ -80,14 +80,15 @@ class TripActions(Resource):
 		active_trips.remove( { "_id" : trip["_id"] })
 		users = MongoController.getCollection("online")
 
-		users.update( { "_id" : trip["passengerId"] }, { "$set" : { "state" : User.USER_IDLE } }) 
+		users.update( { "_id" : trip["passengerId"] }, { "$set" : { "state" : User.USER_IDLE, "tripId" : "" } }) 
+
 		if userId != trip["passengerId"]:
 			pass
 			### TODO: send firebase notification
 
 		# If trip had a driver, change it's state 
 		if trip["driverId"] >= 0:
-			users.update( { "_id" : trip["driverId"] }, { "$set" : { "state" : User.USER_IDLE } }) 
+			users.update( { "_id" : trip["driverId"] }, { "$set" : { "state" : User.USER_IDLE, "tripId" : "" } }) 
 			### TODO: send firebase notification
 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was deleted. Passenger updated.", action["action"], trip])
@@ -122,8 +123,8 @@ class TripActions(Resource):
 		active_trips = MongoController.getCollection("active_trips")
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : TripStates.TRIP_ACCEPTED } })
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "driverId" : userId } })
-		users.update( { "_id" : userId }, { "$set" : { "state" : User.USER_DRV_WAITING_CONFIRMATION} }) 
-		users.update( { "_id" : trip["passengerId"] }, { "$set" : { "state" : User.USER_PSG_SELECTING_DRIVER } }) 
+		users.update( { "_id" : userId }, { "$set" : { "state" : User.USER_DRV_WAITING_CONFIRMATION, "tripId" : trip["_id"] } } ) 
+		users.update( { "_id" : trip["passengerId"] }, { "$set" : { "state" : User.USER_PSG_SELECTING_DRIVER } } ) 
 
 		trip = list(active_trips.find( { "_id" : trip["_id"] }))[0]
 
