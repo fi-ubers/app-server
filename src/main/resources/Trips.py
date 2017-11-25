@@ -6,12 +6,10 @@ Should allow the user to consult all existing trips, create new ones and validat
 from flask_restful import Resource
 from flask import jsonify, abort, request, make_response
 from src.main.com import ResponseMaker, ServerRequest, TokenGenerator
-from src.main.model import User
+from src.main.model import User, TripStates
 
 from src.main.mongodb import MongoController
 import config.constants as constants
-
-from src.main.com import TripStates
 
 import os
 import requests
@@ -109,7 +107,7 @@ class Trips(Resource):
 		active_trips.insert_one(new_trip)
 		
 		users = MongoController.getCollection("online")
-		users.update_one( { "_id" : user["_id"] }, { "$set" : { "state" : User.USERP_PROPOSED } } )
+		users.update_one( { "_id" : user["_id"] }, { "$set" : { "state" : User.USER_WAITING_ACCEPT } } )
 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "trip"], ["Trip created!", new_trip])
 
@@ -194,63 +192,6 @@ class TripsById(Resource):
 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "trip"], ["OK", trip])
 
-
-
-class TripActions(Resource):
-	"""
-	Perform actions and change trip state
-	"""
-	def post(self, id):
-		logger.getLogger().debug("GET at /trips/" + str(id))
-
-		# (validate-token) Validate user token
-		if not "UserToken" in request.headers:
-			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing token")
-
-		token = request.headers['UserToken']
-		(valid, user) = TokenGenerator.validateToken(token)
-
-		if not valid:
-			return ResponseMaker.response_error(constants.UNAUTHORIZED, "Unauthorized")
-		
-		active_trips = MongoController.getCollection("active_trips")
-		trip = list(active_trips.find({"_id" : id}))
-
-		if len(trip) == 0:
-			return ResponseMaker.response_error(constants.NOT_FOUND, "Not found")
-
-		# This should never happen
-		if len(trip) > 1:
-			return ResponseMaker.response_error(constants.ERROR, "Internal server error - more than one trip with same ID")
-
-		trip = trip[0]
-		print(trip)
-
-		action = request.json
-		if action == None:
-			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing action")
-
-
-		####
-		#### Call a special function to delete trip
-		#### perform_action_on_trip(action, trip, user):
-
-		if not "action" in action:
-			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing action")
-
-		if action["action"] == "delete":
-			print("Someone wants to delete trip " + trip["_id"])
-			if not user["_id"] == trip["passengerId"]:
-				return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden - you are not the owner of this trip")
-			
-			active_trips.remove( { "_id" : trip["_id"] })
-			users = MongoController.getCollection("online")
-			users.update( { "_id" : user["_id"] }, { "$set" : { "state" : User.USER_IDLE } }) 
-
-			return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was deleted. Passenger updated.", action["action"], trip])
-
-
-		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action"], ["No action performed.", action["action"]])
 
 
  #####

@@ -5,7 +5,8 @@ import src.main.mongodb.MongoController
 from src.main.resources.UserLogin import UserLogin, UsersList, UserLogout, UserById, LocUserById
 from src.main.resources.UserCars import Cars, CarsById
 from src.main.resources.UserTransactions import UserTransactions
-from src.main.resources.Trips import UserTrips, Trips, TripActions, TripEstimation, TripsById
+from src.main.resources.Trips import UserTrips, Trips, TripEstimation, TripsById
+from src.main.resources.TripAction import TripActions
 from src.main.resources.Paymethods import Paymethods
 from src.main.resources.Directions import Directions
 

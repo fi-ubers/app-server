@@ -1,7 +1,15 @@
+USER_IDLE = 1
+USER_WAITING_ACCEPT = 2
+USER_WAITING_DRIVER = 4
+USER_TRAVELING = 5
+USER_ARRIVED = 6
 
-USER_IDLE = 'idle'
-USERP_PROPOSED = 'proposed'
+USER_WAITING_CONFIRMATION = 12
+USER_GOING_TO_PICKUP = 13
 
+
+USER_TYPE_PASSENGER = "passenger"
+USER_TYPE_DRIVER = "driver"
 
 def UserJSON(user_js):
 	user_js["_id"] = user_js.pop("id") if user_js.has_key("id") else user_js.pop("_id")
