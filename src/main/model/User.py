@@ -19,10 +19,19 @@ def UserJSON(user_js):
 	user_js["_id"] = user_js.pop("id") if user_js.has_key("id") else user_js.pop("_id")
 	user_js["online"] = False if not user_js.has_key("online") else user_js["online"]
 	user_js["coord"] = {"lat": "0", "lng": "0"} if not user_js.has_key("coord") else user_js["coord"]
-	if(user_js["type"] == "driver"):
+	if(user_js["type"] == USER_TYPE_DRIVER):
 		user_js["rating"] = {"rate":0, "rateCount":0}
 	user_js["state"] = USER_IDLE if not "state" in user_js else user_js["state"]
 	return user_js
+
+def UserUpdateDedicatedFields(user_new, user_old):
+	user_new["_id"] = user_old["_id"]
+	user_new["online"] = user_old["online"]
+	user_new["coord"] = user_old["coord"]
+	user_new["state"] = user_old["state"]
+	if user_new["type"] == USER_TYPE_DRIVER:
+		user_new["rating"] = user_old["rating"]
+	return user_new
 
 
 def LocUserJSON(user_js):

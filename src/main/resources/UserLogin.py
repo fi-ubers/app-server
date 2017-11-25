@@ -45,18 +45,23 @@ class UserLogin(Resource):
 
 			# (token-generation) Generate a new UserToken for that user
 			token = TokenGenerator.generateToken(response);
-			# user_js["token"] = token
 
 			users_online = MongoController.getCollection("online")
-			# (mongodb) If credentials are valid, add user to active users table
+
+			# (mongodb) If credentials are valid, and user is not here, add it
 			for user in users_online.find():
-				if user_js["_id"] == response["_id"]:
-					users_online.delete_many({"_id" : user_js["_id"]})			
+				if user_js["_id"] == user["_id"]:
+					# Found it! Checking refs!
+					logger.getLogger().debug("User trying to log in already found in the local db")
+					if user_js["_ref"] != user["_ref"]:
+						logger.getLogger().debug("Login of an user already in bdd. _ref is old")
+						user_js = User.UserUpdateDedicatedFields(user_js, user)
+					else:
+						user_js = user
+					break
 
-			user_js = User.UserJSON(user_js)
 			user_js["online"] = True
-
-			users_online.insert_one(user_js)
+			users_online.update( { "_id" : user_js["_id"] }, user_js, upsert=True )
 
 			return ResponseMaker.response_object(constants.SUCCESS, ['user', 'token'], [user_js, token])
 		except Exception as e:
