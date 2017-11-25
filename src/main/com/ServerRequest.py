@@ -8,7 +8,7 @@ import json
 import requests
 import logging as logger
 import config.constants as constants
-from Server import ServerTokenUpdater
+from src.main.resources.Server import ServerTokenUpdater
 
 SS_URI = "http://127.0.0.1:5005/api"
 if not "SS_URL" in os.environ:
