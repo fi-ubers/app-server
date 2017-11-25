@@ -60,20 +60,30 @@ class TripActions(Resource):
 			print("Someone wants to accept the trip " + trip["_id"])
 			return self.accept_handler(action, trip, user["_id"])
 
+		if action["action"] == TripStates.ACTION_PASSENGER_CONFIRM:
+			print("Passenger wants to confirm the driver " + trip["_id"])
+			return self.confirm_handler(action, trip, user["_id"])
+
+		if action["action"] == TripStates.ACTION_START:
+			print("Passenger wants to confirm the driver " + trip["_id"])
+			return self.start_handler(action, trip, user["_id"])
+
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action"], ["No action performed. Invalid action.", action["action"]])
 
 
 
-
-
 	def cancel_handler(self, action, trip, userId):
-		if not userId == trip["passengerId"]:
+		if not userId == trip["passengerId"] and not userId == trip["driverId"]:
 			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden - you are not the owner of this trip")
 		
 		active_trips = MongoController.getCollection("active_trips")
 		active_trips.remove( { "_id" : trip["_id"] })
 		users = MongoController.getCollection("online")
-		users.update( { "_id" : userId }, { "$set" : { "state" : User.USER_IDLE } }) 
+
+		users.update( { "_id" : trip["passengerId"] }, { "$set" : { "state" : User.USER_IDLE } }) 
+		if userId != trip["passengerId"]:
+			pass
+			### TODO: send firebase notification
 
 		# If trip had a driver, change it's state 
 		if trip["driverId"] >= 0:
@@ -81,8 +91,6 @@ class TripActions(Resource):
 			### TODO: send firebase notification
 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was deleted. Passenger updated.", action["action"], trip])
-
-
 
 
 	def accept_handler(self, action, trip, userId):
@@ -107,16 +115,125 @@ class TripActions(Resource):
 		### The action itself:
 		#	1) Update the trip to TRIP_ACCEPTED
 		#		1bis) Update trip driver info to userId
-		#	2) Update driver status to USER_WAITING_CONFIRMATION
-		#	3) Send firebase notification to passenger
+		#	2) Update driver status to USER_DRV_WAITING_CONFIRMATION
+		#	3) Update passenger status to USER_PSG_SELECTING_DRIVER
+		#	4) Send firebase notification to passenger
 
 		active_trips = MongoController.getCollection("active_trips")
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : TripStates.TRIP_ACCEPTED } })
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "driverId" : userId } })
-		users.update( { "_id" : userId }, { "$set" : { "state" : User.USER_WAITING_CONFIRMATION} }) 
+		users.update( { "_id" : userId }, { "$set" : { "state" : User.USER_DRV_WAITING_CONFIRMATION} }) 
+		users.update( { "_id" : trip["passengerId"] }, { "$set" : { "state" : User.USER_PSG_SELECTING_DRIVER } }) 
 
 		trip = list(active_trips.find( { "_id" : trip["_id"] }))[0]
 
 		### TODO: send firebase notification to passenger
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was accepted. Driver updated.", action["action"], trip])
 
+
+
+
+	def confirm_handler(self, action, trip, userId):
+		if not userId == trip["passengerId"]:
+			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden - you are not the passenger of this trip")
+		
+		users = MongoController.getCollection("online")
+		passenger = list(users.find({"_id" : userId}))
+		if len(passenger) > 1:
+			return ResponseMaker.response_error(constants.ERROR, "Internal server error - more than one user with same ID.")
+		if len(passenger) == 0:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - user not found")
+		passenger = passenger[0]
+
+		if not trip["state"] == TripStates.TRIP_ACCEPTED:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - wrong trip state")
+		if not passenger["state"] == User.USER_PSG_SELECTING_DRIVER:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - wrong passenger state")
+
+		active_trips = MongoController.getCollection("active_trips")
+		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : TripStates.TRIP_CONFIRMED } } )
+		users.update( { "_id" : userId }, { "$set" : { "state" : User.USER_PSG_WAITING_DRIVER } }) 
+		users.update( { "_id" : trip["driverId"] }, { "$set" : { "state" : User.USER_DRV_GOING_TO_PICKUP } }) 
+
+		### TODO: send firebase notification to driver
+
+		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was updated.", action["action"], trip])
+
+
+	def start_handler_any(self, action, trip, user):
+		users = MongoController.getCollection("online")
+		active_trips = MongoController.getCollection("active_trips")
+
+		if user["type"] == User.USER_TYPE_PASSENGER:
+			if user["state"] != User.USER_PSG_WAITING_DRIVER:
+				return ResponseMaker.response_error(constants.PARAMERR, "Bad request - passenger is not waiting for driver")
+			trip_state = TripStates.TRIP_STARTED_PASSENGER
+
+
+		if user["type"] == User.USER_TYPE_DRIVER:
+			if user["state"] != User.USER_DRV_GOING_TO_PICKUP:
+				return ResponseMaker.response_error(constants.PARAMERR, "Bad request - driver is not going to pickup")
+			trip_state = TripStates.TRIP_STARTED_DRIVER
+
+		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : trip_state } } )
+		users.update( { "_id" : user["_id"] }, { "$set" : { "state" : User.USER_WAITING_START } } ) 
+		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was updated.", action["action"], trip])
+
+		
+
+	def start_handler_passenger(self, action, trip, user):
+		users = MongoController.getCollection("online")
+		active_trips = MongoController.getCollection("active_trips")
+		if user["state"] != User.USER_PSG_WAITING_DRIVER:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - passenger is not waiting for driver")
+
+		driver = list(users.find({ "_id" : trip["driverId"]}))[0]
+		if driver["state"] != User.USER_WAITING_START:
+			return ResponseMaker.response_error(constants.ERROR, "Internal server error - driver in a bad state")
+
+		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : TripStates.TRIP_STARTED } } )
+		users.update( { "_id" : user["_id"] }, { "$set" : { "state" : User.USER_TRAVELING} } ) 
+		users.update( { "_id" : driver["_id"] }, { "$set" : { "state" : User.USER_TRAVELING} } ) 
+		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip just started.", action["action"], trip])
+
+
+	def start_handler_driver(self, action, trip, user):
+		users = MongoController.getCollection("online")
+		active_trips = MongoController.getCollection("active_trips")
+		if user["state"] != User.USER_DRV_GOING_TO_PICKUP:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - driver is not going to pickup")
+
+		passenger = list(users.find({ "_id" : trip["passengerId"]}))[0]
+		if passenger["state"] != User.USER_WAITING_START:
+			return ResponseMaker.response_error(constants.ERROR, "Internal server error - passenger in a bad state")
+
+		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : TripStates.TRIP_STARTED } } )
+		users.update( { "_id" : user["_id"]}, { "$set" : { "state" : User.USER_TRAVELING} } ) 
+		users.update( { "_id" : passenger["_id"] }, { "$set" : { "state" : User.USER_TRAVELING} } ) 
+		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip just started.", action["action"], trip])
+
+	def start_handler(self, action, trip, userId):
+		if not userId == trip["passengerId"] and not userId == trip["driverId"]:
+			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden - you are not the owner of this trip")
+	
+		if trip["state"] not in TripStates.TRIP_START_VALID:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - this trip cannot start")
+
+		# Retrieve user
+		users = MongoController.getCollection("online")
+		user = list(users.find({"_id" : userId}))
+		if len(user) > 1:
+			return ResponseMaker.response_error(constants.ERROR, "Internal server error - more than one user with same ID.")
+		if len(user) == 0:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - user not found")
+		user = user [0]
+
+		# Anyone can accept first
+		if trip["state"] == TripStates.TRIP_CONFIRMED:
+			return self.start_handler_any(action, trip, user)
+		elif trip["state"] == TripStates.TRIP_STARTED_DRIVER:
+			return self.start_handler_passenger(action, trip, user)
+		elif trip["state"] == TripStates.TRIP_STARTED_PASSENGER:
+			return self.start_handler_driver(action, trip, user)
+
+		return ResponseMaker.response_error(constants.PARAMERR, "Internal server error.")

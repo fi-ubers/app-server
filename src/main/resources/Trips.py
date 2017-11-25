@@ -107,7 +107,7 @@ class Trips(Resource):
 		active_trips.insert_one(new_trip)
 		
 		users = MongoController.getCollection("online")
-		users.update_one( { "_id" : user["_id"] }, { "$set" : { "state" : User.USER_WAITING_ACCEPT } } )
+		users.update_one( { "_id" : user["_id"] }, { "$set" : { "state" : User.USER_PSG_WAITING_ACCEPT } } )
 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "trip"], ["Trip created!", new_trip])
 
