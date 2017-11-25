@@ -178,7 +178,7 @@ class UserRatingById(Resource):
 				return ResponseMaker.response_error(constants.NOT_FOUND, "User id not found.")
 			#Recalculate rating
 			rating_count += 1
-			current_rate = (current_rate + new_score) / rating_count
+			current_rate = current_rate + new_score
 			#Update in local data-base
 			self.users.update({'_id':id}, {"$set":{"rating.rateCount": rating_count, "rating.rate": current_rate} },  upsert= True)
 			logger.getLogger().info("Successfully updated driver rating")

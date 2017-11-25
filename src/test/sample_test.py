@@ -195,7 +195,7 @@ class TestUsersLogin(object):
 	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
 	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
 	def test_register_new_user(self, validateTokenMock, FakeGet):
-		expected = {"birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@success.com", "password" : "hola9876",
+		expected = {"birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@success.com", "password" : "hola9876", "state":"idle",
 		"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito" }
 
 		self.app = app.test_client()
@@ -283,7 +283,7 @@ class TestUsersLogin(object):
 	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
 	@patch('src.main.com.ServerRequest.requests.post', side_effect=FakePost)
 	def test_validate_user_success(self, validateTokenMock, FakePost):
-		expected = {"id":20, "birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@success.com", "password" : "hola9876",
+		expected = {"id":20, "birthdate": "11-11-2011", "country": "Chile", "email": "fakemail@success.com", "password" : "hola9876", "state":"idle",
 		"images": ["No tengo imagen"], "name": "Cosme", "surname": "Fulanito", "type": "passenger", "username": "cosme_fulanito" }
 
 		self.app = app.test_client()
