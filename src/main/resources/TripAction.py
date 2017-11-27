@@ -186,6 +186,7 @@ class TripActions(Resource):
 
 		active_trips = MongoController.getCollection("active_trips")
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : TripStates.TRIP_PROPOSED } } )
+		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "driverId" : -1 } })
 		users.update( { "_id" : userId }, { "$set" : { "state" : User.USER_PSG_WAITING_ACCEPT } } ) 
 		users.update( { "_id" : trip["driverId"] }, { "$set" : { "state" : User.USER_DRV_IDLE } } ) 
 
