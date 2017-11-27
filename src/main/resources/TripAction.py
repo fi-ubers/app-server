@@ -85,13 +85,14 @@ class TripActions(Resource):
 		users.update( { "_id" : trip["passengerId"] }, { "$set" : { "state" : User.USER_IDLE, "tripId" : "" } }) 
 
 		if userId != trip["passengerId"]:
-			pass
-			### TODO: send firebase notification
+			passenger = list(users.find({ "_id" : trip["passengerId"]}))[0]
+			NotificationSender().notifyUser(passenger["username"], "Your trip has been canceled!")
 
 		# If trip had a driver, change it's state 
 		if trip["driverId"] >= 0:
 			users.update( { "_id" : trip["driverId"] }, { "$set" : { "state" : User.USER_IDLE, "tripId" : "" } }) 
-			### TODO: send firebase notification
+			driver = list(users.find({ "_id" : trip["driverId"]}))[0]
+			NotificationSender().notifyUser(driver["username"], "Your trip has been canceled!")
 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was deleted. Passenger updated.", action["action"], trip])
 
