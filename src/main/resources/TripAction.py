@@ -4,6 +4,7 @@ This module contains all the handlers for /trips/id/action
 from flask_restful import Resource
 from flask import jsonify, abort, request, make_response
 from src.main.com import ResponseMaker, ServerRequest, TokenGenerator
+from src.main.com.NotificationManager import NotificationSender
 from src.main.model import User, TripStates
 
 from src.main.mongodb import MongoController
@@ -46,6 +47,7 @@ class TripActions(Resource):
 		print(trip)
 
 		action = request.json
+		users = MongoController.getCollection("online")
 		if action == None:
 			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing action")
 
@@ -87,13 +89,15 @@ class TripActions(Resource):
 		users.update( { "_id" : trip["passengerId"] }, { "$set" : { "state" : User.USER_PSG_IDLE, "tripId" : "" } }) 
 
 		if userId != trip["passengerId"]:
-			pass
-			### TODO: send firebase notification
+			passenger = list(users.find({ "_id" : trip["passengerId"]}))[0]
+			NotificationSender().notifyUser(passenger["username"], "Your trip has been canceled!")
 
 		# If trip had a driver, change it's state 
 		if trip["driverId"] >= 0:
 			users.update( { "_id" : trip["driverId"] }, { "$set" : { "state" : User.USER_DRV_IDLE, "tripId" : "" } }) 
-			### TODO: send firebase notification
+			# Send firebase notification
+			driver = list(users.find({ "_id" : trip["driverId"]}))[0]
+			NotificationSender().notifyUser(driver["username"], "Your trip has been canceled!")
 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was deleted. Passenger updated.", action["action"], trip])
 
@@ -133,7 +137,9 @@ class TripActions(Resource):
 
 		trip = list(active_trips.find( { "_id" : trip["_id"] }))[0]
 
-		### TODO: send firebase notification to passenger
+		passenger = list(users.find({ "_id" : trip["passengerId"]}))[0]
+		NotificationSender().notifyUser(passenger["username"], "Trip accepted")
+
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was accepted. Driver updated.", action["action"], trip])
 
 
@@ -161,7 +167,8 @@ class TripActions(Resource):
 		users.update( { "_id" : userId }, { "$set" : { "state" : User.USER_PSG_WAITING_DRIVER } }) 
 		users.update( { "_id" : trip["driverId"] }, { "$set" : { "state" : User.USER_DRV_GOING_TO_PICKUP } }) 
 
-		### TODO: send firebase notification to driver
+		driver = list(users.find({ "_id" : trip["driverId"]}))[0]
+		NotificationSender().notifyUser(driver["username"], "Trip confirmed")
 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was updated.", action["action"], trip])
 
@@ -190,7 +197,8 @@ class TripActions(Resource):
 		users.update( { "_id" : userId }, { "$set" : { "state" : User.USER_PSG_WAITING_ACCEPT } } ) 
 		users.update( { "_id" : trip["driverId"] }, { "$set" : { "state" : User.USER_DRV_IDLE } } ) 
 
-		### TODO: send firebase notification to driver
+		driver = list(users.find({ "_id" : trip["driverId"]}))[0]
+		NotificationSender().notifyUser(driver["username"], "Trip rejected")
 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was updated.", action["action"], trip])
 

@@ -3,9 +3,9 @@ from pyfcm import FCMNotification
 API_KEY = "AAAAvAIsBoY:APA91bHa2aB5G6j1to5j7xSaS6NL83RYWK79_Vl0Zss5xCGhRp3QAFuEEsbpX-RfTXK8ISQNZRy6ajsSm4hSQiSiX18riN2qMbIXme8mLUpIReYQVXSNHxUEr0B_CI9fyYNaaTapJSLq"
 push_service = FCMNotification(api_key=API_KEY)
 
-class NotificationManager(object):
+class NotificationSender(object):
 	
-	def sendNotificationToTopic(self, topicName, messageText):
+	def notifyUser(self, topicName, messageText):
 		# Send a message (messageText) to devices subscribed to a topic named topicName.
 		result = push_service.notify_topic_subscribers(topic_name=topicName, message_body=messageText)
  		return result
