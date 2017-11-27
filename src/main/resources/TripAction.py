@@ -3,7 +3,8 @@ This module contains all the handlers for /trips/id/action
 """
 from flask_restful import Resource
 from flask import jsonify, abort, request, make_response
-from src.main.com import ResponseMaker, ServerRequest, TokenGenerator, NotificationManager
+from src.main.com import ResponseMaker, ServerRequest, TokenGenerator
+from src.main.com.NotificationManager import NotificationSender
 from src.main.model import User, TripStates
 
 from src.main.mongodb import MongoController
@@ -130,7 +131,7 @@ class TripActions(Resource):
 		trip = list(active_trips.find( { "_id" : trip["_id"] }))[0]
 
 		passenger = list(users.find({ "_id" : trip["passengerId"]}))[0]
-		NotificationManager().notifyUser(passenger["username"], "Trip accepted")
+		NotificationSender().notifyUser(passenger["username"], "Trip accepted")
 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was accepted. Driver updated.", action["action"], trip])
 
@@ -160,7 +161,7 @@ class TripActions(Resource):
 		users.update( { "_id" : trip["driverId"] }, { "$set" : { "state" : User.USER_DRV_GOING_TO_PICKUP } }) 
 
 		driver = list(users.find({ "_id" : trip["driverId"]}))[0]
-		NotificationManager().notifyUser(driver["username"], "Trip confirmed")
+		NotificationSender().notifyUser(driver["username"], "Trip confirmed")
 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was updated.", action["action"], trip])
 
