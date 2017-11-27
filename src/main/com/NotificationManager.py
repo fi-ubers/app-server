@@ -5,7 +5,7 @@ push_service = FCMNotification(api_key=API_KEY)
 
 class NotificationManager(object):
 	
-	def sendNotificationToTopic(self, topicName, messageText):
+	def notifyUser(self, topicName, messageText):
 		# Send a message (messageText) to devices subscribed to a topic named topicName.
 		result = push_service.notify_topic_subscribers(topic_name=topicName, message_body=messageText)
  		return result

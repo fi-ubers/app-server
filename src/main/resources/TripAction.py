@@ -3,7 +3,7 @@ This module contains all the handlers for /trips/id/action
 """
 from flask_restful import Resource
 from flask import jsonify, abort, request, make_response
-from src.main.com import ResponseMaker, ServerRequest, TokenGenerator
+from src.main.com import ResponseMaker, ServerRequest, TokenGenerator, NotificationManager
 from src.main.model import User, TripStates
 
 from src.main.mongodb import MongoController
@@ -46,6 +46,7 @@ class TripActions(Resource):
 		print(trip)
 
 		action = request.json
+		users = MongoController.getCollection("online")
 		if action == None:
 			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing action")
 
@@ -58,10 +59,14 @@ class TripActions(Resource):
 
 		if action["action"] == TripStates.ACTION_DRIVER_ACCEPT:
 			print("Someone wants to accept the trip " + trip["_id"])
+			passenger = users.findOne({"_id": trip["passengerId"]})
+			NotificationManager().notifyUser("Trip accepted", trip[passenger["username"]])
 			return self.accept_handler(action, trip, user["_id"])
 
 		if action["action"] == TripStates.ACTION_PASSENGER_CONFIRM:
 			print("Passenger wants to confirm the driver " + trip["_id"])
+			driver = users.findOne({"_id": trip["driverId"]})
+			NotificationManager().notifyUser("Trip confirmed", trip[driver["username"]])
 			return self.confirm_handler(action, trip, user["_id"])
 
 		if action["action"] == TripStates.ACTION_START:
