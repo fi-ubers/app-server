@@ -80,7 +80,7 @@ class TripActions(Resource):
 		active_trips.remove( { "_id" : trip["_id"] })
 		users = MongoController.getCollection("online")
 
-		users.update( { "_id" : trip["passengerId"] }, { "$set" : { "state" : User.USER_IDLE, "tripId" : "" } }) 
+		users.update( { "_id" : trip["passengerId"] }, { "$set" : { "state" : User.USER_PSG_IDLE, "tripId" : "" } }) 
 
 		if userId != trip["passengerId"]:
 			pass
@@ -88,7 +88,7 @@ class TripActions(Resource):
 
 		# If trip had a driver, change it's state 
 		if trip["driverId"] >= 0:
-			users.update( { "_id" : trip["driverId"] }, { "$set" : { "state" : User.USER_IDLE, "tripId" : "" } }) 
+			users.update( { "_id" : trip["driverId"] }, { "$set" : { "state" : User.USER_DRV_IDLE, "tripId" : "" } }) 
 			### TODO: send firebase notification
 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was deleted. Passenger updated.", action["action"], trip])
@@ -109,7 +109,8 @@ class TripActions(Resource):
 		if not user["type"] == User.USER_TYPE_DRIVER:
 			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - user is not driver")
 		
-		if not user["state"] == User.USER_IDLE:
+		# The user is a passenger
+		if not user["state"] == User.USER_PSG_IDLE:
 			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - driver is busy")
 
 
@@ -169,15 +170,17 @@ class TripActions(Resource):
 			if user["state"] != User.USER_PSG_WAITING_DRIVER:
 				return ResponseMaker.response_error(constants.PARAMERR, "Bad request - passenger is not waiting for driver")
 			trip_state = TripStates.TRIP_STARTED_PASSENGER
+			user_state = User.USER_PSG_WAITING_START
 
 
 		if user["type"] == User.USER_TYPE_DRIVER:
 			if user["state"] != User.USER_DRV_GOING_TO_PICKUP:
 				return ResponseMaker.response_error(constants.PARAMERR, "Bad request - driver is not going to pickup")
 			trip_state = TripStates.TRIP_STARTED_DRIVER
+			user_state = User.USER_DRV_WAITING_START
 
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : trip_state } } )
-		users.update( { "_id" : user["_id"] }, { "$set" : { "state" : User.USER_WAITING_START } } ) 
+		users.update( { "_id" : user["_id"] }, { "$set" : { "state" : user_state } } ) 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was updated.", action["action"], trip])
 
 		
@@ -189,12 +192,12 @@ class TripActions(Resource):
 			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - passenger is not waiting for driver")
 
 		driver = list(users.find({ "_id" : trip["driverId"]}))[0]
-		if driver["state"] != User.USER_WAITING_START:
+		if driver["state"] != User.USER_DRV_WAITING_START:
 			return ResponseMaker.response_error(constants.ERROR, "Internal server error - driver in a bad state")
 
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : TripStates.TRIP_STARTED } } )
-		users.update( { "_id" : user["_id"] }, { "$set" : { "state" : User.USER_TRAVELING} } ) 
-		users.update( { "_id" : driver["_id"] }, { "$set" : { "state" : User.USER_TRAVELING} } ) 
+		users.update( { "_id" : user["_id"] }, { "$set" : { "state" : User.USER_PSG_TRAVELING} } ) 
+		users.update( { "_id" : driver["_id"] }, { "$set" : { "state" : User.USER_DRV_TRAVELING} } ) 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip just started.", action["action"], trip])
 
 
@@ -205,12 +208,12 @@ class TripActions(Resource):
 			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - driver is not going to pickup")
 
 		passenger = list(users.find({ "_id" : trip["passengerId"]}))[0]
-		if passenger["state"] != User.USER_WAITING_START:
+		if passenger["state"] != User.USER_PSG_WAITING_START:
 			return ResponseMaker.response_error(constants.ERROR, "Internal server error - passenger in a bad state")
 
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : TripStates.TRIP_STARTED } } )
-		users.update( { "_id" : user["_id"]}, { "$set" : { "state" : User.USER_TRAVELING} } ) 
-		users.update( { "_id" : passenger["_id"] }, { "$set" : { "state" : User.USER_TRAVELING} } ) 
+		users.update( { "_id" : user["_id"]}, { "$set" : { "state" : User.USER_DRV_TRAVELING} } ) 
+		users.update( { "_id" : passenger["_id"] }, { "$set" : { "state" : User.USER_PSG_TRAVELING} } ) 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip just started.", action["action"], trip])
 
 	def start_handler(self, action, trip, userId):

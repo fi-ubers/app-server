@@ -82,13 +82,13 @@ class Trips(Resource):
 
 		logger.getLogger().debug("The 'passenger' requesting the trip is: " + str(user["_id"]) + "-" + user["username"])
 
-		if not user["state"] == User.USER_IDLE:
+		if not user["state"] == User.USER_PSG_IDLE:
 			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - user is not in idle state!")
 
 		# Check the trip data is valid!
 		trip = request.json
 		if trip == None:
-			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - missing trip data")
+			return ResponseMaker.response_errPSG_or(constants.PARAMERR, "Bad request - missing trip data")
 		if not self.check_new_trip(trip):
 			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - bad trip data")
 
