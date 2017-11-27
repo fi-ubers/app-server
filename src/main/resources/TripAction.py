@@ -59,14 +59,10 @@ class TripActions(Resource):
 
 		if action["action"] == TripStates.ACTION_DRIVER_ACCEPT:
 			print("Someone wants to accept the trip " + trip["_id"])
-			passenger = users.findOne({"_id": trip["passengerId"]})
-			NotificationManager().notifyUser(trip[passenger["username"]], "Trip accepted")
 			return self.accept_handler(action, trip, user["_id"])
 
 		if action["action"] == TripStates.ACTION_PASSENGER_CONFIRM:
 			print("Passenger wants to confirm the driver " + trip["_id"])
-			driver = users.findOne({"_id": trip["driverId"]})
-			NotificationManager().notifyUser(trip[driver["username"]], "Trip confirmed")
 			return self.confirm_handler(action, trip, user["_id"])
 
 		if action["action"] == TripStates.ACTION_START:
@@ -133,7 +129,9 @@ class TripActions(Resource):
 
 		trip = list(active_trips.find( { "_id" : trip["_id"] }))[0]
 
-		### TODO: send firebase notification to passenger
+		passenger = list(users.find({ "_id" : trip["passengerId"]}))[0]
+		NotificationManager().notifyUser(passenger["username"], "Trip accepted")
+
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was accepted. Driver updated.", action["action"], trip])
 
 
@@ -161,7 +159,8 @@ class TripActions(Resource):
 		users.update( { "_id" : userId }, { "$set" : { "state" : User.USER_PSG_WAITING_DRIVER } }) 
 		users.update( { "_id" : trip["driverId"] }, { "$set" : { "state" : User.USER_DRV_GOING_TO_PICKUP } }) 
 
-		### TODO: send firebase notification to driver
+		driver = list(users.find({ "_id" : trip["driverId"]}))[0]
+		NotificationManager().notifyUser(driver["username"], "Trip confirmed")
 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was updated.", action["action"], trip])
 
