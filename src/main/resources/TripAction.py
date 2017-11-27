@@ -60,13 +60,13 @@ class TripActions(Resource):
 		if action["action"] == TripStates.ACTION_DRIVER_ACCEPT:
 			print("Someone wants to accept the trip " + trip["_id"])
 			passenger = users.findOne({"_id": trip["passengerId"]})
-			NotificationManager().notifyUser("Trip accepted", trip[passenger["username"]])
+			NotificationManager().notifyUser(trip[passenger["username"]], "Trip accepted")
 			return self.accept_handler(action, trip, user["_id"])
 
 		if action["action"] == TripStates.ACTION_PASSENGER_CONFIRM:
 			print("Passenger wants to confirm the driver " + trip["_id"])
 			driver = users.findOne({"_id": trip["driverId"]})
-			NotificationManager().notifyUser("Trip confirmed", trip[driver["username"]])
+			NotificationManager().notifyUser(trip[driver["username"]], "Trip confirmed")
 			return self.confirm_handler(action, trip, user["_id"])
 
 		if action["action"] == TripStates.ACTION_START:
