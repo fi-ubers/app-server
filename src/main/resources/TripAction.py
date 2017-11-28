@@ -196,6 +196,7 @@ class TripActions(Resource):
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "driverId" : -1 } })
 		users.update( { "_id" : userId }, { "$set" : { "state" : User.USER_PSG_WAITING_ACCEPT } } ) 
 		users.update( { "_id" : trip["driverId"] }, { "$set" : { "state" : User.USER_DRV_IDLE } } ) 
+		users.update( { "_id" : trip["driverId"] }, { "$set" : { "tripId" : "" } } ) 
 
 		driver = list(users.find({ "_id" : trip["driverId"]}))[0]
 		NotificationSender().notifyUser(driver["username"], "Trip rejected")
