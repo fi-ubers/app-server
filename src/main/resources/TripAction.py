@@ -169,6 +169,7 @@ class TripActions(Resource):
 
 		driver = list(users.find({ "_id" : trip["driverId"]}))[0]
 		NotificationSender().notifyUser(driver["username"], "Trip confirmed")
+		NotificationSender().notifyUser(passenger["username"], "Driver confirmed")
 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was updated.", action["action"], trip])
 
@@ -200,6 +201,7 @@ class TripActions(Resource):
 
 		driver = list(users.find({ "_id" : trip["driverId"]}))[0]
 		NotificationSender().notifyUser(driver["username"], "Trip rejected")
+		NotificationSender().notifyUser(passenger["username"], "Driver rejected!")
 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was updated.", action["action"], trip])
 
