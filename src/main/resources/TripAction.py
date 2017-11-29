@@ -323,8 +323,8 @@ class TripActions(Resource):
 		if user["type"] == User.USER_TYPE_DRIVER:
 			if user["state"] != User.USER_DRV_TRAVELING:
 				return ResponseMaker.response_error(constants.PARAMERR, "Bad request - driver is not traveling")
-			trip_state = TripStates.TRIP_FINISHED
-			user_state = User.USER_DRV_WAITING_START
+			trip_state = TripStates.TRIP_FINISHED_DRIVER
+			user_state = User.USER_DRV_WAITING_FINISH
 			theother = list(users.find({ "_id" : trip["passengerId"]}))[0]
 
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : trip_state } } )
