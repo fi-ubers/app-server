@@ -214,7 +214,7 @@ class UserTrips(Resource):
 			return ResponseMaker.response_error(constants.UNAUTHORIZED, "Unauthorized")
 
 		print("GET at /user/id/trips")
-		#TODO: search local database
+		#Search local database
 		trips = [] #[user for user in self.users.find() if user['_id'] == id]
 
 		if len(trips) == 0:
