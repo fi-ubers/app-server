@@ -5,7 +5,7 @@ Should allow the user to consult all existing trips, create new ones and validat
 
 from flask_restful import Resource
 from flask import jsonify, abort, request, make_response
-from src.main.com import ResponseMaker, ServerRequest, TokenGenerator
+from src.main.com import ResponseMaker, ServerRequest, TokenGenerator, Distances
 from src.main.model import User, TripStates
 
 from src.main.mongodb import MongoController
@@ -42,18 +42,6 @@ class Trips(Resource):
 				if not field in waypoint:
 					return False
 		return True
-
-	"""
-	Computes the euclidian distance between two coordinates
-	This is not accurate actually, because coordinates are in
-	latitude/logitude.
-	"""
-	def distance(self, a, b):
-		x1 = a["lat"]
-		x2 = b["lat"]
-		y1 = a["lng"]
-		y2 = b["lng"]
-		return ( (x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) )
 
 	"""
 	Use POST at /trips to create a new proposed trip as a passenger. It will fail if user is a driver.
@@ -160,8 +148,8 @@ class Trips(Resource):
 		if "filter" in params:
 			trips = [trip for trip in trips if trip["state"] == params["filter"]]
 
-		if "sort" in params:
-			pass
+		if "sort" in params and params["sort"] == "near":
+			trips.sort(key = lambda x: Distances.computeDistance(user["coord"], x["directions"]["origin"]))
 
 		if "limit" in params:
 			limit = int(params["limit"])
