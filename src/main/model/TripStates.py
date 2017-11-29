@@ -14,6 +14,7 @@ TRIP_FINISHED_PASSENGER ="finished_passenger"
 TRIP_FINISHED_DRIVER = "finished_driver"
 TRIP_FINISHED = "finished"
 TRIP_FINISHED_RATED = "finished_rated"
+TRIP_PAYED = "payed"
 
 TRIP_START_VALID = [TRIP_CONFIRMED, TRIP_STARTED_PASSENGER, TRIP_STARTED_DRIVER]
 TRIP_FINISH_VALID = [TRIP_STARTED, TRIP_FINISHED_PASSENGER, TRIP_FINISHED_DRIVER]
@@ -48,8 +49,9 @@ def trip_to_shared(trip):
 	new_trip["route"] = {} 
 	new_trip["distance"] = trip["directions"]["distance"]
 	new_trip["totalTime"] = trip["directions"]["duration"]
-	new_trip["waitTime"] = 10 
+	new_trip["waitTime"] = 1 
 	new_trip["travelTime"] = new_trip["totalTime"]
+	new_trip["cost"] = trip["cost"] if "cost" in trip else {}
+	new_trip.pop("cost") 
 
 	return new_trip
-

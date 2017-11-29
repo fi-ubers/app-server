@@ -456,8 +456,7 @@ def estimateTrip(tripData):
 	r = requests.post(os.environ["SS_URL"] + TRIPS_END + "/estimate" + QUERY_TOKEN + os.environ["APP_TOKEN"], data = json.dumps(tripData), headers=headers)
 	if (r.status_code != constants.CREATE_SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
-		return (r.status_code, r.json())
-	return (r.status_code, r.json()["cost"])
+	return (r.status_code, r.json())
 
 
 """Returns a list containing all paymethods, such as the following:

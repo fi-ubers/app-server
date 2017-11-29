@@ -101,6 +101,17 @@ class Trips(Resource):
 		new_trip["_id"] = str(uuid.uuid1())
 		logger.getLogger().debug("Created trip with uudi: " + new_trip["_id"])
 
+		# (shared) Ask shared for a trip cost estimation
+		try:
+			(status, response) = ServerRequest.estimateTrip(TripStates.trip_to_shared(new_trip))
+		except Exception as e:
+			logger.getLogger().exception("No cost estimation from server: " + str(e))
+
+		if not status == constants.SUCCESS:
+			logger.getLogger().exception("No cost estimation from server: " + str(e))
+		else:
+			new_trip["cost"] = response["cost"]
+
 		# (mongodb) Storing new trip in the db!
 		active_trips = MongoController.getCollection("active_trips")
 		active_trips.insert_one(new_trip)

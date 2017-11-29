@@ -98,7 +98,7 @@ class TripActions(Resource):
 		if not userId == trip["passengerId"] and not userId == trip["driverId"]:
 			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden - you are not the owner of this trip")
 
-		if not trip["state"] in TripState.TRIP_CANCELABLE:
+		if not trip["state"] in TripStates.TRIP_CANCELABLE:
 			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - this trip cannot be cancelled")
 		
 		active_trips = MongoController.getCollection("active_trips")
@@ -233,6 +233,7 @@ class TripActions(Resource):
 				return ResponseMaker.response_error(constants.PARAMERR, "Bad request - passenger is not waiting for driver")
 			trip_state = TripStates.TRIP_STARTED_PASSENGER
 			user_state = User.USER_PSG_WAITING_START
+			theother = list(users.find({ "_id" : trip["driverId"]}))[0]
 
 
 		if user["type"] == User.USER_TYPE_DRIVER:
@@ -240,9 +241,14 @@ class TripActions(Resource):
 				return ResponseMaker.response_error(constants.PARAMERR, "Bad request - driver is not going to pickup")
 			trip_state = TripStates.TRIP_STARTED_DRIVER
 			user_state = User.USER_DRV_WAITING_START
+			theother = list(users.find({ "_id" : trip["passengerId"]}))[0]
 
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : trip_state } } )
 		users.update( { "_id" : user["_id"] }, { "$set" : { "state" : user_state } } ) 
+
+		# Send notification to the other user 
+		NotificationSender().notifyUser(theother["username"], user["username"] + " is ready to start the trip!")
+
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was updated.", action["action"], trip])
 
 	def start_handler_passenger(self, action, trip, user):
@@ -311,6 +317,7 @@ class TripActions(Resource):
 				return ResponseMaker.response_error(constants.PARAMERR, "Bad request - passenger is not traveling")
 			trip_state = TripStates.TRIP_FINISHED_PASSENGER
 			user_state = User.USER_PSG_WAITING_FINISH
+			theother = list(users.find({ "_id" : trip["driverId"]}))[0]
 
 
 		if user["type"] == User.USER_TYPE_DRIVER:
@@ -318,9 +325,13 @@ class TripActions(Resource):
 				return ResponseMaker.response_error(constants.PARAMERR, "Bad request - driver is not traveling")
 			trip_state = TripStates.TRIP_FINISHED
 			user_state = User.USER_DRV_WAITING_START
+			theother = list(users.find({ "_id" : trip["passengerId"]}))[0]
 
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : trip_state } } )
 		users.update( { "_id" : user["_id"] }, { "$set" : { "state" : user_state } } ) 
+
+		NotificationSender().notifyUser(theother["username"], user["username"] + " wants to finish the trip!")
+
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was updated.", action["action"], trip])
 
 	def finish_handler_passenger(self, action, trip, user):
@@ -434,8 +445,8 @@ class TripActions(Resource):
 		if not status_code == constants.CREATE_SUCCESS:
 			return ResponseMaker.response_object(status_code, ["message", "to_shared"],  ["Payment API error, try again", shared_trip])
 
-
 		active_trips = MongoController.getCollection("active_trips")
+		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : TripStates.TRIP_PAYED } } )
 		active_trips.remove( { "_id" : trip["_id"] } )
 
 		users = MongoController.getCollection("online")

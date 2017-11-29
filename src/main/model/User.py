@@ -24,6 +24,7 @@ def UserJSON(user_js):
 	user_js["_id"] = user_js.pop("id") if user_js.has_key("id") else user_js.pop("_id")
 	user_js["online"] = False if not user_js.has_key("online") else user_js["online"]
 	user_js["coord"] = {"lat": "0", "lng": "0"} if not user_js.has_key("coord") else user_js["coord"]
+
 	user_state = USER_PSG_IDLE
 	if(user_js["type"] == USER_TYPE_DRIVER):
 		user_js["rating"] = {"rate":0, "rateCount":0} if not user_js.has_key("rating") else user_js["rating"] 
@@ -31,6 +32,8 @@ def UserJSON(user_js):
 		
 	user_js["state"] = user_state if not "state" in user_js else user_js["state"]
 	user_js["tripId"] = "" if not "tripId" in user_js else user_js["tripId"]
+
+	user_js["balance"] = "Hello" if not "balance" in user_js else user_js["balance"]
 	return user_js
 
 def UserUpdateDedicatedFields(user_new, user_old):

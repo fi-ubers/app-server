@@ -5,7 +5,8 @@ endpoint. It is meant to allow clientes find routes for their trips.
 
 from flask_restful import Resource
 from flask import jsonify, abort, request, make_response
-from src.main.com import ResponseMaker, TokenGenerator
+from src.main.com import ResponseMaker, TokenGenerator, ServerRequest
+from src.main.model import TripStates
 
 import config.constants as constants
 import os
@@ -16,31 +17,6 @@ GOOGLE_API_KEY = "AIzaSyD5nKGS9WOqJI0kN9s24aP27Axuq6WuW0A"
 GOOGLE_DIRECTIONS = "https://maps.googleapis.com/maps/api/directions/json"
 
 class Directions(Resource):
-
-
-	def to_shared(self, directions):
-		prototrip = {}
-		start = {}
-		start["address"] = {}
-		start["address"]["street"] = directions["origin_name"]
-		start["address"]["location"] = {"lat" : directions["origin"]["lat"], "lon" : directions["origin"]["lng"]}
-		prototrip["start"] = start
-
-		end = {}
-		end["address"] = {}
-		end["address"]["street"] = directions["destination_name"]
-		end["address"]["location"] = {"lat" : directions["destination"]["lat"], "lon" : directions["destination"]["lng"]}
-		prototrip["end"] = end
-
-		prototrip["travelTime"] = int(directions["duration"])
-		prototrip["waitTime"] = 0
-		prototrip["totalTime"] = prototrip["travelTime"] + prototrip["waitTime"]
-
-		prototrip["distance"] = directions["distance"]
-
-		prototrip["passenger"] = 1
-
-		return prototrip
 
 	def convert_response(self, gresp):
 		directions = {}
@@ -103,7 +79,21 @@ class Directions(Resource):
 		
 		r = self.convert_response(r)
 
-		## TODO: send prototrip to shared server to estimate trip cost!
-		proto = self.to_shared(r)
-		print(proto)
-		return ResponseMaker.response_object(200, ["directions"], [r])
+		trip = {}
+		trip["directions"] = r
+		trip["driverId"] = -1
+		trip["passengerId"] = decoded["_id"]
+
+		# (shared) Ask shared for a trip cost estimation
+		try:
+			(status_code, response) = ServerRequest.estimateTrip(TripStates.trip_to_shared(trip))
+		except Exception as e:
+			logger.getLogger().exception("No cost estimation from server: " + str(e))
+
+		if not status_code == constants.SUCCESS:
+			logger.getLogger().exception("No cost estimation from server: " + str(e))
+			cost = {}
+		else:
+			cost = response["cost"]
+
+		return ResponseMaker.response_object(200, ["directions", "cost"], [r, cost])
