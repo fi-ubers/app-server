@@ -6,7 +6,8 @@ USER_PSG_SELECTING_DRIVER = 3
 USER_PSG_WAITING_DRIVER = 4
 USER_PSG_WAITING_START = 7
 USER_PSG_TRAVELING = 5
-USER_ARRIVED = 6 
+USER_PSG_ARRIVED = 6 
+USER_PSG_WAITING_FINISH = 8
 
 
 USER_DRV_IDLE = 11
@@ -14,6 +15,7 @@ USER_DRV_WAITING_CONFIRMATION = 12
 USER_DRV_GOING_TO_PICKUP = 13
 USER_DRV_WAITING_START = 15
 USER_DRV_TRAVELING = 14
+USER_DRV_WAITING_FINISH = 16
 
 USER_TYPE_PASSENGER = "passenger"
 USER_TYPE_DRIVER = "driver"
@@ -24,7 +26,7 @@ def UserJSON(user_js):
 	user_js["coord"] = {"lat": "0", "lng": "0"} if not user_js.has_key("coord") else user_js["coord"]
 	user_state = USER_PSG_IDLE
 	if(user_js["type"] == USER_TYPE_DRIVER):
-		user_js["rating"] = {"rate":0, "rateCount":0}
+		user_js["rating"] = {"rate":0, "rateCount":0} if not user_js.has_key("rating") else user_js["rating"] 
 		user_state = USER_DRV_IDLE
 		
 	user_js["state"] = user_state if not "state" in user_js else user_js["state"]

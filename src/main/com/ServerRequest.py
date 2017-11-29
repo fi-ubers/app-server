@@ -14,7 +14,7 @@ SS_URI = "http://127.0.0.1:5005/api"
 if not "SS_URL" in os.environ:
 	os.environ["SS_URL"] = SS_URI
 
-DEFAULT_APP_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwianRpIjoiODgzZmM3YzctYTYxYS00MmQ5LWEwMDAtNDM4MzE2MzY4YmE3IiwiZXhwIjoxNTExODQwMzEyLCJpYXQiOjE1MTE0MDg0MTZ9.r8NWgLb1ogx9uVyRqF-zWUvKtKoFCx7qgmHlEO7eNnc'
+DEFAULT_APP_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwianRpIjoiZmNlNzljZWItOTIyYi00NTljLWE1OTQtNjZkZDAxMTQxNTU2IiwiZXhwIjoxNTEyMzY0MTY0LCJpYXQiOjE1MTE5MzI1MDR9.MDLKAxH-NAlErjDEigg-vr_8ijv-sJgQ1NhimMGtCPY'
 
 if not "APP_TOKEN" in os.environ:
 	os.environ["APP_TOKEN"] = DEFAULT_APP_TOKEN
@@ -399,8 +399,7 @@ def createTrip(trip):
 	r = requests.post(os.environ["SS_URL"] + TRIPS_END + QUERY_TOKEN + os.environ["APP_TOKEN"], data = json.dumps(trip), headers=headers)
 	if (r.status_code != constants.CREATE_SUCCESS):
 		logger.getLogger("Shared Server returned error: %d"%(r.status_code))
-		return (r.status_code, r.json())
-	return (r.status_code, r.json()["trip"])
+	return (r.status_code, r.json())
 
 """Receives a json structure containing all the trip data, with the following layout:
 {
