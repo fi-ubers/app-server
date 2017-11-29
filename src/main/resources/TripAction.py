@@ -97,6 +97,9 @@ class TripActions(Resource):
 	def cancel_handler(self, action, trip, userId):
 		if not userId == trip["passengerId"] and not userId == trip["driverId"]:
 			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden - you are not the owner of this trip")
+
+		if not trip["state"] in TripState.TRIP_CANCELABLE:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - this trip cannot be cancelled")
 		
 		active_trips = MongoController.getCollection("active_trips")
 		active_trips.remove( { "_id" : trip["_id"] })
@@ -432,11 +435,11 @@ class TripActions(Resource):
 			return ResponseMaker.response_object(status_code, ["message", "to_shared"],  ["Payment API error, try again", shared_trip])
 
 
-#		active_trips = MongoController.getCollection("active_trips")
-#		active_trips.remove( { "_id" : trip["_id"] } )
-#
-#		users = MongoController.getCollection("online")
-#		users.update( { "_id" : userId }, { "$set" : { "state" : User.USER_PSG_IDLE} } )
-#		users.update( { "_id" : userId }, { "$set" : { "tripId" : "" } } )
+		active_trips = MongoController.getCollection("active_trips")
+		active_trips.remove( { "_id" : trip["_id"] } )
+
+		users = MongoController.getCollection("online")
+		users.update( { "_id" : userId }, { "$set" : { "state" : User.USER_PSG_IDLE} } )
+		users.update( { "_id" : userId }, { "$set" : { "tripId" : "" } } )
 
 		return ResponseMaker.response_object(status_code, ["paymethod"], [response]) 
