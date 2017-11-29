@@ -5,7 +5,7 @@ Should allow creation and login of users with validation of credentials..
 
 from flask_restful import Resource
 from flask import jsonify, abort, request, make_response
-from src.main.com import ResponseMaker, ServerRequest, TokenGenerator
+from src.main.com import ResponseMaker, ServerRequest, TokenGenerator, Distances
 from src.main.mongodb import MongoController
 from src.main.model import User
 import config.constants as constants
@@ -151,11 +151,30 @@ class UsersList(Resource):
 		if not valid:
 			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
 
-		print(response)
 
 		# (mongodb) Return all logged in users.
 		users_online = MongoController.getCollection("online")
 		aux = [User.UserJSON(user) for user in users_online.find()]
+		user = list(users_online.find({ "_id" : response["_id"]}))
+		if len(user) == 0:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - you may not be loged in")
+
+		user = user[0]
+
+
+		## Aditional params (only supporting "sort")
+		params = request.args
+
+		if "filter" in params:
+			aux = [u for u in aux if u["type"] == params["filter"]]
+
+		if "sort" in params and params["sort"] == "near":
+			aux.sort(key = lambda x: Distances.computeDistance(user["coord"], x["coord"]))
+
+		if "limit" in params:
+			limit = int(params["limit"])
+			if limit > 0:
+				aux = aux[:(limit)]
 
 		return ResponseMaker.response_object(constants.SUCCESS, ['users'], [aux])
 
