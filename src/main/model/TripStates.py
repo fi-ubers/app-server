@@ -74,6 +74,9 @@ def trip_to_shared(trip):
 		new_trip["totalTime"] = new_trip["waitTime"] + new_trip["travelTime"]
 		new_trip["distance"] = int(Distances.computeDistance(trip["directions"]["origin"], trip["directions"]["destination"]))
 
+
+	if new_trip["waitTime"] <= 0:
+		new_trip["waitTime"] = 1
 	new_trip["cost"] = trip["cost"] if "cost" in trip else {}
 	new_trip.pop("cost") 
 
