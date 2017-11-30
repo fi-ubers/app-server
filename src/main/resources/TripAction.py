@@ -234,8 +234,6 @@ class TripActions(Resource):
 	def start_handler_any(self, action, trip, user):
 		users = MongoController.getCollection("online")
 		active_trips = MongoController.getCollection("active_trips")
-
-
 		
 		if user["type"] == User.USER_TYPE_PASSENGER:
 			if user["state"] != User.USER_PSG_WAITING_DRIVER:
@@ -250,8 +248,8 @@ class TripActions(Resource):
 			trip_state = TripStates.TRIP_STARTED_DRIVER
 			user_state = User.USER_DRV_WAITING_START
 			theother = list(users.find({ "_id" : trip["passengerId"]}))[0]
-			active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "time_start_waiting" :  datetime.datetime.now().isoformat() } } )
 
+		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "time_start_waiting" :  datetime.datetime.now().isoformat() } } )
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : trip_state } } )
 		users.update( { "_id" : user["_id"] }, { "$set" : { "state" : user_state } } ) 
 
@@ -289,7 +287,6 @@ class TripActions(Resource):
 
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : TripStates.TRIP_STARTED } } )
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "time_start" :  datetime.datetime.now().isoformat() } } )
-		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "time_start_waiting" :  datetime.datetime.now().isoformat() } } )
 		users.update( { "_id" : user["_id"]}, { "$set" : { "state" : User.USER_DRV_TRAVELING} } ) 
 		users.update( { "_id" : passenger["_id"] }, { "$set" : { "state" : User.USER_PSG_TRAVELING} } ) 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip just started.", action["action"], trip])
