@@ -1,3 +1,4 @@
+from src.main.model import User
 
 carList1 = [ {"_id":"12","_ref":"123", "owner":"FIUBER", "properties":[ {"name": "Ford", "value": "LDR123" } ] } ]
 transacList1 = [{"id": "11111", "trip": "2", "timestamp": 0, "cost": {"currency": "galleon", "value": 100 },"description": "very expensive", "data": {} }]
@@ -35,13 +36,20 @@ default_db = [user1, user2, user3, user4, user5]
 
 class UserCollectionMock(object):
 	def __init__(self):
-		self.users = default_db[0:4]
+		self.users = []
+		for u in default_db[0:4]:
+			self.users.append(User.UserJSON(u))
 
 	def reset(self):
 		self.users = default_db[0:4]
 
-	def find(self):
-		return self.users
+	def find(self, match={}):
+		if not "_id" in match:
+			return self.users
+		for u in self.users:
+			if u["_id"] == match["_id"]:
+				return [u]
+		return [] 
 
 	def insert_one(self, new):
 		self.users.append(new)
