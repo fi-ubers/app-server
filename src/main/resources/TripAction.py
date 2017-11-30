@@ -3,7 +3,7 @@ This module contains all the handlers for /trips/id/action
 """
 from flask_restful import Resource
 from flask import jsonify, abort, request, make_response
-from src.main.com import ResponseMaker, ServerRequest, TokenGenerator
+from src.main.com import ResponseMaker, ServerRequest, TokenGenerator, Distances
 from src.main.com.NotificationManager import NotificationSender
 from src.main.model import User, TripStates
 
@@ -14,6 +14,13 @@ import os
 import requests
 import uuid
 import logging as logger
+import datetime
+
+
+"""
+This is the maximum distance between who users in order to be considered part of the same trip.
+"""
+MAXIMUM_USER_DISTANCE = 500
 
 
 class TripActions(Resource):
@@ -228,6 +235,8 @@ class TripActions(Resource):
 		users = MongoController.getCollection("online")
 		active_trips = MongoController.getCollection("active_trips")
 
+
+		
 		if user["type"] == User.USER_TYPE_PASSENGER:
 			if user["state"] != User.USER_PSG_WAITING_DRIVER:
 				return ResponseMaker.response_error(constants.PARAMERR, "Bad request - passenger is not waiting for driver")
@@ -235,13 +244,13 @@ class TripActions(Resource):
 			user_state = User.USER_PSG_WAITING_START
 			theother = list(users.find({ "_id" : trip["driverId"]}))[0]
 
-
 		if user["type"] == User.USER_TYPE_DRIVER:
 			if user["state"] != User.USER_DRV_GOING_TO_PICKUP:
 				return ResponseMaker.response_error(constants.PARAMERR, "Bad request - driver is not going to pickup")
 			trip_state = TripStates.TRIP_STARTED_DRIVER
 			user_state = User.USER_DRV_WAITING_START
 			theother = list(users.find({ "_id" : trip["passengerId"]}))[0]
+			active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "time_start_waiting" :  datetime.datetime.now().isoformat() } } )
 
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : trip_state } } )
 		users.update( { "_id" : user["_id"] }, { "$set" : { "state" : user_state } } ) 
@@ -262,9 +271,11 @@ class TripActions(Resource):
 			return ResponseMaker.response_error(constants.ERROR, "Internal server error - driver in a bad state")
 
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : TripStates.TRIP_STARTED } } )
+		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "time_start" :  datetime.datetime.now().isoformat() } } )
 		users.update( { "_id" : user["_id"] }, { "$set" : { "state" : User.USER_PSG_TRAVELING} } ) 
 		users.update( { "_id" : driver["_id"] }, { "$set" : { "state" : User.USER_DRV_TRAVELING} } ) 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip just started.", action["action"], trip])
+
 
 	def start_handler_driver(self, action, trip, user):
 		users = MongoController.getCollection("online")
@@ -277,6 +288,8 @@ class TripActions(Resource):
 			return ResponseMaker.response_error(constants.ERROR, "Internal server error - passenger in a bad state")
 
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : TripStates.TRIP_STARTED } } )
+		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "time_start" :  datetime.datetime.now().isoformat() } } )
+		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "time_start_waiting" :  datetime.datetime.now().isoformat() } } )
 		users.update( { "_id" : user["_id"]}, { "$set" : { "state" : User.USER_DRV_TRAVELING} } ) 
 		users.update( { "_id" : passenger["_id"] }, { "$set" : { "state" : User.USER_PSG_TRAVELING} } ) 
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip just started.", action["action"], trip])
@@ -295,7 +308,12 @@ class TripActions(Resource):
 			return ResponseMaker.response_error(constants.ERROR, "Internal server error - more than one user with same ID.")
 		if len(user) == 0:
 			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - user not found")
-		user = user [0]
+		user = user[0]
+
+		dist = Distances.computeDistance(user["coord"], trip["directions"]["origin"])
+		logger.getLogger().debug("Distance from user [" + user["username"] + "] to starting point is " + str(dist))
+		if dist > MAXIMUM_USER_DISTANCE:
+				return ResponseMaker.response_error(constants.PARAMERR, "Bad request - you are too far away from the starting point")
 
 		# Anyone can accept first
 		if trip["state"] == TripStates.TRIP_CONFIRMED:
@@ -345,6 +363,7 @@ class TripActions(Resource):
 			return ResponseMaker.response_error(constants.ERROR, "Internal server error - driver in a bad state")
 
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : TripStates.TRIP_FINISHED } } )
+		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "time_finish" :  datetime.datetime.now().isoformat() } } )
 		users.update( { "_id" : user["_id"] }, { "$set" : { "state" : User.USER_PSG_ARRIVED } } ) 
 		users.update( { "_id" : driver["_id"] }, { "$set" : { "state" : User.USER_DRV_IDLE } } ) 
 		users.update( { "_id" : driver["_id"] }, { "$set" : { "tripId" : "" } } ) 
@@ -361,6 +380,7 @@ class TripActions(Resource):
 			return ResponseMaker.response_error(constants.ERROR, "Internal server error - passenger in a bad state")
 
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : TripStates.TRIP_FINISHED } } )
+		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "time_finish" :  datetime.datetime.now().isoformat() } } )
 		users.update( { "_id" : user["_id"]}, { "$set" : { "state" : User.USER_DRV_IDLE } } ) 
 		users.update( { "_id" : user["_id"]}, { "$set" : { "tripId" : "" } } ) 
 		users.update( { "_id" : passenger["_id"] }, { "$set" : { "state" : User.USER_PSG_ARRIVED } } ) 

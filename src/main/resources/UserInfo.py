@@ -7,7 +7,7 @@ from flask_restful import Resource
 from flask import jsonify, abort, request, make_response
 from src.main.com import ResponseMaker, ServerRequest, TokenGenerator
 from src.main.mongodb import MongoController
-from src.main.model import User
+from src.main.model import User, TripStates
 import config.constants as constants
 
 import os
@@ -87,8 +87,14 @@ class LocUserById(Resource):
 		try:
 			updated_location = request.json["coord"]
 			#Update in local data-base
-			self.users.update({'_id':id}, {"$set":{"coord":updated_location}},  upsert= True)
+			self.users.update({'_id':id}, {"$set":{"coord":updated_location}} )
 			logger.getLogger().info("Successfully updated user location")
+
+			user = list(self.users.find({"_id":id}))[0]
+			if not user["tripId"] == "" and user["type"] == "driver":
+				## Need to update the trip!
+				TripStates.updateDriverLocation(user["tripId"], user)
+
 			return ResponseMaker.response_object(constants.SUCCESS, ['location'], [updated_location])
 		except ValueError as e:
 			logger.getLogger().error(str(e))

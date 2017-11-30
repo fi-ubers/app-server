@@ -12,6 +12,8 @@ Return value is the distance in meters.
 def computeDistance(src, dst):
 	x = pointFromCoords(src)
 	y = pointFromCoords(dst)
+	print(x)
+	print(y)
 	return great_circle(x, y).m
 
 

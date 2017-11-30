@@ -1,3 +1,6 @@
+from src.main.com import Distances
+
+
 USER_INVALID = 0
 
 USER_PSG_IDLE = 1
@@ -60,3 +63,5 @@ def RatingUserJSON(user_js):
 	rating_js["rating"] = user_js["rating"]
 	return rating_js
 
+def distaceBetween(user1, user2):
+	return Distances.computeDistance(user1["coord"], user2["coord"])
