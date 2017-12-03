@@ -2,7 +2,6 @@
 
 ## Introducción
 
-
 Este proyecto consiste de un servidor Web HTTP accesible a través de una REST API para la aplicación **FIUBER**. **FIUBER** es una aplicación intencionada para conectar a los pasajeros con los conductores de vehículos que ofrecen servicio de transporte particular. Esta aplicación permite a los potenciales pasajeros: obtener estimaciones de costo un viaje antes de realizarlo, elegir al conductor que desean, solicitar al chofer y una vez que terminan el viaje realizar el pago utilizando cualquiera de los medios de pago disponibles. 
 
 Este sistema se basa en un diseño de 3 capas que permite el funcionamiento de la aplicación:
@@ -13,9 +12,15 @@ Este sistema se basa en un diseño de 3 capas que permite el funcionamiento de l
 
 Este proyecto provee una implementación para la capa de App Server del sistema. En el archivo *simpleAPI.yml* puede encontrarse documentación detallada sobre la interfaz provista por el servidor para comunicarse con una aplicación cliente. 
 
-## Casos de uso y diagramas de flujo
-
 ## Arquitectura y Diseño
+
+Para implementar esta aplicación se utilizó una arquitectura de 3 capas (3-Tier), donde el *App Server* representa la capa lógica o de negocios. La capa de datos es provista por el [Shared Server](https://github.com/fi-ubers/shared-server) y es allí donde se almacenan los datos de los usuarios de la aplicación, tanto conductores como pasajeros, los viajes y los servidores activos. La aplicación está pensada para permitir la coexistencia de múltiples *App Servers* que utilizan al *Shared Server* como servicio web para almacenar datos y como punto de acceso a la API de pagos, que se provee de forma externa.
+
+Diagrama general de capas:
+
+![alt text](https://github.com/fi-ubers/app-server/blob/master/docs/ArchDiagram.png)
+
+## Casos de uso y diagramas de flujo
 
 ## Módulos y paquetes
 
