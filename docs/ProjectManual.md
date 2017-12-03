@@ -13,12 +13,35 @@ Este sistema se basa en un diseño de 3 capas que permite el funcionamiento de l
 
 Este proyecto provee una implementación para la capa de App Server del sistema. En el archivo *simpleAPI.yml* puede encontrarse documentación detallada sobre la interfaz provista por el servidor para comunicarse con una aplicación cliente. 
 
+## Casos de uso y diagramas de flujo
+
 ## Arquitectura y Diseño
-
-
 
 ## Módulos y paquetes
 
+**TODO**: diagrama de paquetes/esquema(?)
+ 
++ *src/main/myApp.py* : aquí se encuentran definidos todos los *endpoints* definidos para la REST API y su vinculación a los *recursos* designados para cada uno.
+ 
++ *src/main/resources/* : es el directorio que contiene todos los *recursos* o *handlers* encargados de manejar los requests realizados a los endpoints definidos en *myApp.py*
+
++ *src/main/com/* : aquí residen los archivos que permiten la comunicación con otras aplicaciones. 
+  
+  + *ServerRequest.py* es el módulo que permite realizar requests al *Shared Server*.
+ 
+  + *NotificationManager.py* es el módulo que permite conectarse con el servicio de *Firebase* para enviar notificaciones a los clientes.
+	
+  + *TokenGenerator.py* es el módulo encargado de la validación de los *tokens* de seguridad utilizados en la comunicación entre las tres capas.
+	
++ *src/main/mongodb/* : 
+	
+  + *MongoController.py* : es el módulo encargado de la conexión con la base de datos remota o local, si la anterior no estuviera definida.
+ 
++ *src/main/model/* : en este directorio se encuentran los archivos encargados de modelar las estructuras de las entidades conceptuales importantes del sistema para garantizar la compatibilidad entre los datos intercambiados entre el *Cliente* y el *Shared Server*.
+ 
+  + *TripStates.py* : en este módulo se definen todos los estados posibles de un viaje. Permite mappear la información de un viaje desde el formato recibido desde el cliente al formato de viajes compatible con el *Shared Server*.
+ 
+  + *Client.py* : en este módulo se definen todos los estados posibles de un usuario (pasajero o chofer). Permite mappear los datos de los usuarios a un formato compatible con el utilizado por la base de datos local.
 
 
 ## Herramientas utilizadas
