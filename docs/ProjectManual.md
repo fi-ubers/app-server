@@ -136,6 +136,10 @@ Esta sección está destinada a mencionar las herramientas, librerías y APIs m�
 
 ## Bugs conocidos y puntos a mejorar
 
+Debido a restricciones temporales, existen algunos aspectos de este proyecto que requieren ser mejorados o concluidos. A continuación, realizamos una breve descripción de las falencias y bugs detectados hasta el momento:
+
++ **Controles de concurrencia en la base de datos:** actualmente no existen controles de concurrencia sobre la base de datos. Como se mencionó anteriormente, uno de los objetivos de esta aplicación es que puedan coexistir varias instancias de *App Server* trabajando sobre una misma base hosteada en la web (salvo que por algún motivo se trabaje sobre una base de datos instanciada en forma local). Debido a que en MONGODB no existe el concepto de transacción para garantizar la integridad de los datos, estos controles deben realizarse en forma manual. En nuestra implementación, estos controles no están implementados, pudiendo ocasionarse una *race condition* si varios usuarios quisieran realizar modificaciones sobre la base al mismo tiempo.
+
 
 
 
