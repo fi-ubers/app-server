@@ -1,300 +1,309 @@
-swagger: '2.0'
+swagger: "2.0"
 info:
-  description: This is the documentation for Fiuber app-server.
-  version: 1.0.0
-  title: FIUBER app-server REST API
+  description: "This is the documentation for Fiuber app-server."
+  version: "1.0.0"
+  title: "FIUBER app-server REST API"
 host: fiuber-app-server.herokuapp.com
+
 tags:
-  - name: trips
-    description: Management and creation of trips
-  - name: users
-    description: Management of users
+- name: "trips"
+  description: "Management and creation of trips"
+- name: "users"
+  description: "Management of users"
+
 schemes:
-  - https
+- "https"
+
 securityDefinitions:
   UserToken:
     type: apiKey
     in: header
     name: token
+
 paths:
-  '/users/{userId}/location':
+
+  /users/{userId}/location:
     get:
       tags:
-        - users
-      summary: Gets user location of an user
+      - "users"
+      summary: "Gets user location of an user"
       security:
-        - UserToken: []
+      - UserToken: []
       produces:
-        - application/json
+      - "application/json"
       parameters:
-        - description: User Id
-          in: path
-          name: userId
-          type: integer
-          required: true
+      - description: "User Id"
+        in: path
+        name: userId
+        type: integer
+        required: true
       responses:
-        '200':
-          description: OK
+        200:
+          description: "OK"
           schema:
             type: object
             properties:
               code:
                 type: integer
               location:
-                $ref: '#/definitions/Coords'
-        '401':
-          description: Unauthorized
+                $ref: "#/definitions/Coords"
+        401:
+          description: "Unauthorized"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '404':
-          description: User not found
+            $ref: "#/definitions/ApiResponse" 
+        404:
+          description: "User not found"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '500':
-          description: Internal server error (try again)
+            $ref: "#/definitions/ApiResponse" 
+        500:
+          description: "Internal server error (try again)"
           schema:
-            $ref: '#/definitions/ApiResponse'
+            $ref: "#/definitions/ApiResponse"
     put:
       tags:
-        - users
-      summary: Updates an user location
+      - "users"
+      summary: "Updates an user location"
       security:
-        - UserToken: []
+      - UserToken: []
       produces:
-        - application/json
+      - "application/json"
       parameters:
-        - description: User Id
-          in: path
-          name: userId
-          type: integer
-          required: true
-        - description: New coordinates
-          in: body
-          name: coords
-          schema:
-            properties:
-              coord:
-                $ref: '#/definitions/Coords'
-          required: true
+      - description: "User Id"
+        in: path
+        name: userId
+        type: integer
+        required: true
+      - description: "New coordinates"
+        in: body
+        name: coords
+        schema:
+          properties:
+            coord:
+              $ref: '#/definitions/Coords'
+        required: true
       responses:
-        '200':
-          description: OK
+        200:
+          description: "OK"
           schema:
             type: object
             properties:
               code:
                 type: integer
               location:
-                $ref: '#/definitions/Coords'
-        '401':
-          description: Unauthorized
+                $ref: "#/definitions/Coords"
+        401:
+          description: "Unauthorized"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '403':
-          description: Forbidden
+            $ref: "#/definitions/ApiResponse" 
+        403:
+          description: "Forbidden"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '404':
-          description: User not found
+            $ref: "#/definitions/ApiResponse" 
+        404:
+          description: "User not found"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '500':
-          description: Internal server error (try again)
+            $ref: "#/definitions/ApiResponse" 
+        500:
+          description: "Internal server error (try again)"
           schema:
-            $ref: '#/definitions/ApiResponse'
+            $ref: "#/definitions/ApiResponse"
+            
   /users/login:
     post:
       tags:
-        - users
-      summary: Login with an user
+      - "users"
+      summary: "Login with an user"
       produces:
-        - application/json
+      - "application/json"
       parameters:
-        - description: User credentials
-          in: body
-          name: UserCredentials
-          required: true
-          schema:
-            $ref: '#/definitions/UserCredentials'
+      - description: "User credentials"
+        in: body
+        name: UserCredentials
+        required: true
+        schema:
+          $ref: '#/definitions/UserCredentials'
       responses:
-        '200':
-          description: Successful login
+        200:
+          description: "Successful login"
           schema:
             properties:
               code:
                 type: integer
               token:
-                description: User token for future requests
+                description: "User token for future requests"
                 type: string
               user:
-                $ref: '#/definitions/User'
-        '400':
-          description: Bad request
+                $ref: '#/definitions/User' 
+        400:
+          description: "Bad request"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '401':
-          description: Unauthorized
+            $ref: "#/definitions/ApiResponse"
+        401:
+          description: "Unauthorized"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '500':
-          description: Internal server error (Google API error)
+            $ref: "#/definitions/ApiResponse"
+        500:
+          description: "Internal server error (Google API error)"
           schema:
-            $ref: '#/definitions/ApiResponse'
+            $ref: "#/definitions/ApiResponse"
+            
   /users/logout:
     post:
       tags:
-        - users
-      summary: 'User logout: set yourself as offline'
+      - "users"
+      summary: "User logout: set yourself as offline"
       security:
-        - UserToken: []
+      - UserToken: []
       produces:
-        - application/json
+      - "application/json"
       responses:
-        '200':
-          description: Succcessful logout
+        200:
+          description: "Succcessful logout"
           schema:
             $ref: '#/definitions/User'
-        '401':
-          description: Unauthorized
+        401:
+          description: "Unauthorized"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '500':
-          description: Internal server error (Google API error)
+            $ref: "#/definitions/ApiResponse"
+        500:
+          description: "Internal server error (Google API error)"
           schema:
-            $ref: '#/definitions/ApiResponse'
-  '/users/{userId}':
+            $ref: "#/definitions/ApiResponse"
+
+  /users/{userId}:
     get:
       tags:
-        - users
-      summary: Get information of a single user
+      - "users"
+      summary: "Get information of a single user"
       security:
-        - UserToken: []
+      - UserToken: []
       produces:
-        - application/json
+      - "application/json"
       parameters:
-        - description: User Id
-          in: path
-          name: userId
-          type: integer
-          required: true
+      - description: "User Id"
+        in: path
+        name: userId
+        type: integer
+        required: true
       responses:
-        '200':
-          description: OK
+        200:
+          description: "OK"
           schema:
             properties:
               code:
                 type: integer
               user:
                 $ref: '#/definitions/User'
-        '401':
-          description: Unauthorized
+        401:
+          description: "Unauthorized"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '404':
-          description: Not found
+            $ref: "#/definitions/ApiResponse"
+        404:
+          description: "Not found"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '500':
-          description: Internal server error
+            $ref: "#/definitions/ApiResponse"
+        500:
+          description: "Internal server error"
           schema:
-            $ref: '#/definitions/ApiResponse'
+            $ref: "#/definitions/ApiResponse"
     delete:
       tags:
-        - users
-      summary: Deletes an user
+      - "users"
+      summary: "Deletes an user"
       security:
-        - UserToken: []
+      - UserToken: []
       produces:
-        - application/json
+      - "application/json"
       parameters:
-        - description: User Id
-          in: path
-          name: userId
-          type: integer
-          required: true
+      - description: "User Id"
+        in: path
+        name: userId
+        type: integer
+        required: true
       responses:
-        '200':
-          description: OK
+        200:
+          description: "OK"
           schema:
             properties:
               code:
                 type: integer
               user:
                 $ref: '#/definitions/User'
-        '401':
-          description: Unauthorized
+        401:
+          description: "Unauthorized"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '403':
-          description: Forbidden
+            $ref: "#/definitions/ApiResponse"
+        403:
+          description: "Forbidden"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '404':
-          description: Not found
+            $ref: "#/definitions/ApiResponse"
+        404:
+          description: "Not found"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '500':
-          description: Internal server error
+            $ref: "#/definitions/ApiResponse"
+        500:
+          description: "Internal server error"
           schema:
-            $ref: '#/definitions/ApiResponse'
+            $ref: "#/definitions/ApiResponse"
     put:
       tags:
-        - users
-      summary: Modify users data
+      - "users"
+      summary: "Modify users data"
       security:
-        - UserToken: []
+      - UserToken: []
       produces:
-        - application/json
+      - "application/json"
       parameters:
-        - description: User Id
-          in: path
-          name: userId
-          type: integer
-          required: true
-        - description: New data
-          in: body
-          name: newInfo
-          required: true
-          schema:
-            $ref: '#/definitions/UserNew'
+      - description: "User Id"
+        in: path
+        name: userId
+        type: integer
+        required: true
+      - description: "New data"
+        in: body
+        name: newInfo
+        required: true
+        schema:
+          $ref: '#/definitions/UserNew'
       responses:
-        '200':
-          description: OK
+        200:
+          description: "OK"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '401':
-          description: Unauthorized
+            $ref: "#/definitions/ApiResponse"
+        401:
+          description: "Unauthorized"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '403':
-          description: Forbidden
+            $ref: "#/definitions/ApiResponse"
+        403:
+          description: "Forbidden"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '404':
-          description: Not found
+            $ref: "#/definitions/ApiResponse"
+        404:
+          description: "Not found"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '500':
-          description: Internal server error
+            $ref: "#/definitions/ApiResponse"
+        500:
+          description: "Internal server error"
           schema:
-            $ref: '#/definitions/ApiResponse'
-  '/users/{userId}/trips':
+            $ref: "#/definitions/ApiResponse"
+  
+  /users/{userId}/trips:
     get:
       tags:
-        - trips
-        - users
-      summary: Lists all completed trips for an user
+      - "trips"
+      - "users"
+      summary: "Lists all completed trips for an user"
       security:
-        - UserToken: []
+      - UserToken: []
       parameters:
-        - description: User Id
-          in: path
-          name: userId
-          type: integer
-          required: true
+      - description: "User Id"
+        in: path
+        name: userId
+        type: integer
+        required: true
       responses:
-        '200':
-          description: OK
+        200:
+          description: "OK"
           schema:
             properties:
               code:
@@ -302,39 +311,41 @@ paths:
               trips:
                 type: array
                 items:
-                  $ref: '#/definitions/TripCompleted'
-        '401':
-          description: Unauthorized
+                  $ref: "#/definitions/TripCompleted"
+        401:
+          description: "Unauthorized"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '403':
-          description: Forbidden
+            $ref: "#/definitions/ApiResponse"
+        403:
+          description: "Forbidden"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '404':
-          description: Not found
+            $ref: "#/definitions/ApiResponse"
+        404:
+          description: "Not found"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '500':
-          description: Internal server error
+            $ref: "#/definitions/ApiResponse"
+        500:
+          description: "Internal server error"
           schema:
-            $ref: '#/definitions/ApiResponse'
-  '/users/{userId}/transactions':
+            $ref: "#/definitions/ApiResponse"
+    
+    
+  /users/{userId}/transactions:
     get:
       tags:
-        - users
-      summary: Lists all completed trasactions for an user
+      - "users"
+      summary: "Lists all completed trasactions for an user"
       security:
-        - UserToken: []
+      - UserToken: []
       parameters:
-        - description: User Id
-          in: path
-          name: userId
-          type: integer
-          required: true
+      - description: "User Id"
+        in: path
+        name: userId
+        type: integer
+        required: true
       responses:
-        '200':
-          description: OK
+        200:
+          description: "OK"
           schema:
             properties:
               code:
@@ -342,51 +353,52 @@ paths:
               transactions:
                 type: array
                 items:
-                  $ref: '#/definitions/Transaction'
-        '401':
-          description: Unauthorized
+                  $ref: "#/definitions/Transaction"
+        401:
+          description: "Unauthorized"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '403':
-          description: Forbidden
+            $ref: "#/definitions/ApiResponse"
+        403:
+          description: "Forbidden"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '404':
-          description: Not found
+            $ref: "#/definitions/ApiResponse"
+        404:
+          description: "Not found"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '500':
-          description: Internal server error
+            $ref: "#/definitions/ApiResponse"
+        500:
+          description: "Internal server error"
           schema:
-            $ref: '#/definitions/ApiResponse'
+            $ref: "#/definitions/ApiResponse"
+    
   /users:
     get:
       tags:
-        - users
-      summary: Get a list of all users (with optional filter and sorting)
+      - "users"
+      summary: "Get a list of all users (with optional filter and sorting)"
       security:
-        - UserToken: []
+      - UserToken: []
       produces:
-        - application/json
+      - "application/json"
       parameters:
-        - description: Number of users to get
-          in: query
-          name: limit
-          type: integer
-          required: false
-        - description: Filter by type (e.g ?filter=passenger)
-          in: query
-          name: filter
-          type: string
-          required: false
-        - description: Sort by distance (e.g. ?sort=near)
-          in: query
-          name: sort
-          type: string
-          required: false
+      - description: "Number of users to get"
+        in: query
+        name: limit
+        type: integer
+        required: false
+      - description: "Filter by type (e.g ?filter=passenger)"
+        in: query
+        name: filter
+        type: string
+        required: false
+      - description: "Sort by distance (e.g. ?sort=near)"
+        in: query
+        name: sort
+        type: string
+        required: false
       responses:
-        '200':
-          description: OK
+        200:
+          description: "OK"
           schema:
             properties:
               code:
@@ -395,67 +407,69 @@ paths:
                 type: array
                 items:
                   $ref: '#/definitions/User'
-        '400':
-          description: Bad request
+        400:
+          description: "Bad request"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '401':
-          description: Unauthorized
+            $ref: "#/definitions/ApiResponse"
+        401:
+          description: "Unauthorized"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '500':
-          description: Internal server error
+            $ref: "#/definitions/ApiResponse"
+        500:
+          description: "Internal server error"
           schema:
-            $ref: '#/definitions/ApiResponse'
+            $ref: "#/definitions/ApiResponse"
+
     post:
       tags:
-        - users
-      summary: Register a new user
+      - "users"
+      summary: "Register a new user"
       produces:
-        - application/json
+      - "application/json"
       parameters:
-        - description: New user info
-          in: body
-          name: UserInfo
-          required: true
-          schema:
-            $ref: '#/definitions/UserNew'
+      - description: "New user info"
+        in: body
+        name: UserInfo
+        required: true
+        schema:
+          $ref: '#/definitions/UserNew'
       responses:
-        '201':
-          description: Created
+        201:
+          description: "Created"
           schema:
             properties:
               code:
                 type: integer
               users:
                 $ref: '#/definitions/User'
-        '400':
-          description: Bad request
+        400:
+          description: "Bad request"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '500':
-          description: Internal server error
+            $ref: "#/definitions/ApiResponse"
+        500:
+          description: "Internal server error"
           schema:
-            $ref: '#/definitions/ApiResponse'
+            $ref: "#/definitions/ApiResponse"
+      
   /directions:
     post:
       tags:
-        - trips
-      summary: Get path for a trip
+      - "trips"
+      summary: "Get path for a trip"
       security:
         - UserToken: []
       produces:
-        - application/json
+      - "application/json"
       parameters:
-        - description: Start and end points
-          in: body
-          name: coordinates
-          required: true
-          schema:
-            $ref: '#/definitions/DirectionsCoords'
+      - description: "Start and end points"
+        in: body
+        name: coordinates
+        required: true
+        schema:
+          $ref: "#/definitions/DirectionsCoords"
       responses:
-        '200':
-          description: OK
+        200:
+          description: "OK"
           schema:
             type: object
             properties:
@@ -463,46 +477,46 @@ paths:
                 $ref: '#/definitions/DirectionsResponse'
               code:
                 type: integer
-        '400':
-          description: Bad request
+        400:
+          description: "Bad request"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '401':
-          description: Unauthorized
+            $ref: "#/definitions/ApiResponse"
+        401:
+          description: "Unauthorized"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '500':
-          description: Internal server error (Google API error)
+            $ref: "#/definitions/ApiResponse"
+        500:
+          description: "Internal server error (Google API error)"
           schema:
-            $ref: '#/definitions/ApiResponse'
+            $ref: "#/definitions/ApiResponse"
   /trips:
     get:
       tags:
-        - trips
-      summary: Gets proposed and ongoing trips.
+      - "trips"
+      summary: "Gets proposed and ongoing trips."
       security:
-        - UserToken: []
+      - UserToken: []
       produces:
-        - application/json
+      - "application/json"
       parameters:
-        - description: Number of trips to get
-          in: query
-          name: limit
-          type: integer
-          required: false
-        - description: Filter by state (e.g ?filter=proposed)
-          in: query
-          name: filter
-          type: string
-          required: false
-        - description: Sort by distance (e.g. ?sort=near)
-          in: query
-          name: sort
-          type: string
-          required: false
+      - description: "Number of trips to get"
+        in: query
+        name: limit
+        type: integer
+        required: false
+      - description: "Filter by state (e.g ?filter=proposed)"
+        in: query
+        name: filter
+        type: string
+        required: false
+      - description: "Sort by distance (e.g. ?sort=near)"
+        in: query
+        name: sort
+        type: string
+        required: false
       responses:
-        '200':
-          description: OK
+        200:
+          description: "OK"
           schema:
             type: object
             properties:
@@ -512,71 +526,70 @@ paths:
                   $ref: '#/definitions/Trip'
               code:
                 type: integer
-        '500':
-          description: Internal server error (try again)
+        500:
+          description: "Internal server error (try again)"
           schema:
-            $ref: '#/definitions/ApiResponse'
+            $ref: "#/definitions/ApiResponse" 
     post:
       tags:
-        - trips
-      summary: Proposes a new trip for drivers to accept
+      - "trips"
+      summary: "Proposes a new trip for drivers to accept"
       security:
-        - UserToken: []
+      - UserToken: []
       produces:
-        - application/json
+      - "application/json"
       parameters:
-        - description: >-
-            DirectionsResponse (a.k.a. Trip path) as obtained through
-            /directions endpoint
-          in: body
-          name: directions
-          required: true
-          schema:
-            $ref: '#/definitions/DirectionsResponse'
+      - description: "DirectionsResponse (a.k.a. Trip path) as obtained through /directions endpoint"
+        in: body
+        name: directions
+        required: true
+        schema:
+          $ref: '#/definitions/DirectionsResponse'
       responses:
-        '200':
-          description: OK - Trip proposed
+        200:
+          description: "OK - Trip proposed"
           schema:
             type: object
             properties:
-              trip:
+              trip: 
                 $ref: '#/definitions/Trip'
               code:
                 type: integer
-        '400':
-          description: Bad request
+        400:
+          description: "Bad request"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '401':
-          description: Unauthorized
+            $ref: "#/definitions/ApiResponse"
+        401:
+          description: "Unauthorized"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '403':
-          description: Forbidden - not a passenger
+            $ref: "#/definitions/ApiResponse"
+        403:
+          description: "Forbidden - not a passenger"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '500':
-          description: Internal server error (try again)
+            $ref: "#/definitions/ApiResponse"
+        500:
+          description: "Internal server error (try again)"
           schema:
-            $ref: '#/definitions/ApiResponse'
-  '/trips/{tripId}':
+            $ref: "#/definitions/ApiResponse"
+            
+  /trips/{tripId}:
     get:
       tags:
-        - trips
-      summary: Gets a trip by Id
+      - "trips"
+      summary: "Gets a trip by Id"
       security:
-        - UserToken: []
+      - UserToken: []
       produces:
-        - application/json
+      - "application/json"
       parameters:
-        - description: Trip Uuid
-          in: path
-          name: tripId
-          type: string
-          required: true
+      - description: "Trip Uuid"
+        in: path
+        name: tripId
+        type: string
+        required: true
       responses:
-        '200':
-          description: OK
+        200:
+          description: "OK"
           schema:
             type: object
             properties:
@@ -586,56 +599,59 @@ paths:
                 type: integer
               message:
                 type: string
-        '403':
-          description: Forbidden
+        403:
+          description: "Forbidden"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '404':
-          description: Trip not found
+            $ref: "#/definitions/ApiResponse" 
+        404:
+          description: "Trip not found"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '500':
-          description: Internal server error (try again)
+            $ref: "#/definitions/ApiResponse" 
+        500:
+          description: "Internal server error (try again)"
           schema:
-            $ref: '#/definitions/ApiResponse'
-  '/trips/{tripId}/action':
+            $ref: "#/definitions/ApiResponse" 
+
+  /trips/{tripId}/action:
     post:
-      summary: Perform an action or state-change on a trip
+      summary: "Perform an action or state-change on a trip"
       tags:
-        - trips
+      - "trips"
       security:
-        - UserToken: []
+      - UserToken: []
       produces:
-        - application/json
+      - "application/json"
       parameters:
-        - description: Trip Uuid
-          in: path
-          name: tripId
-          type: string
-          required: true
-        - description: Action to perform
-          in: body
-          name: action
-          required: true
-          schema:
-            $ref: '#/definitions/TripAction'
+      - description: "Trip Uuid"
+        in: path
+        name: tripId
+        type: string
+        required: true
+      - description: "Action to perform"
+        in: body
+        name: action
+        required: true
+        schema:
+          $ref: '#/definitions/TripAction'
       responses:
-        '200':
-          description: OK
+        200:
+          description: "OK"
           schema:
             $ref: '#/definitions/TripActionResponse'
-        '403':
-          description: Forbidden
+        403:
+          description: "Forbidden"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '404':
-          description: Trip not found
+            $ref: "#/definitions/ApiResponse" 
+        404:
+          description: "Trip not found"
           schema:
-            $ref: '#/definitions/ApiResponse'
-        '500':
-          description: Internal server error (try again)
+            $ref: "#/definitions/ApiResponse" 
+        500:
+          description: "Internal server error (try again)"
           schema:
-            $ref: '#/definitions/ApiResponse'
+            $ref: "#/definitions/ApiResponse" 
+  
+
 definitions:
   UserCredentials:
     properties:
@@ -707,14 +723,14 @@ definitions:
         type: string
       tripId:
         type: string
-        description: A reference to the ongoing trip (if any)
-      type:
+        description: "A reference to the ongoing trip (if any)"
+      "type":
         type: string
-        description: 'The user type, either passenger or driver'
+        description: "The user type, either passenger or driver"
       username:
         type: string
   Car:
-    description: Properties of a car
+    description: "Properties of a car"
     type: string
   Currency:
     type: object
@@ -724,7 +740,7 @@ definitions:
       value:
         type: integer
   Coords:
-    description: Coordinates of point on map
+    description: "Coordinates of point on map"
     properties:
       lat:
         type: number
@@ -733,66 +749,66 @@ definitions:
         type: number
         format: float
   DirectionsCoords:
-    description: Coordinates for directions API
+    description: "Coordinates for directions API"
     properties:
       origin:
-        $ref: '#/definitions/Coords'
+        $ref: "#/definitions/Coords"
       destination:
-        $ref: '#/definitions/Coords'
+        $ref: "#/definitions/Coords"
   DirectionsResponse:
-    description: Response with the path
+    description: "Response with the path"
     properties:
       origin:
-        $ref: '#/definitions/Coords'
+        $ref: "#/definitions/Coords"
       origin_name:
-        description: The name given by Google Places
+        description: "The name given by Google Places"
         type: string
       destination:
-        $ref: '#/definitions/Coords'
+        $ref: "#/definitions/Coords"
       destination_name:
         type: string
       distance:
-        description: Distances always in meters
+        description: "Distances always in meters"
         type: integer
       duration:
-        description: Duration always in seconds
+        description: "Duration always in seconds"
         type: integer
       path:
-        type: array
+        type: "array"
         items:
-          type: object
+          type: "object"
           properties:
             duration:
               type: integer
             distance:
               type: integer
             coords:
-              $ref: '#/definitions/Coords'
+              $ref: "#/definitions/Coords"
       status:
         type: string
   Trip:
-    description: A pending or ongoing trip
+    description: "A pending or ongoing trip"
     properties:
-      _id:
-        description: The id of the trip.
+      "_id":
+        description: "The id of the trip."
         type: string
       state:
         type: string
-        description: The state of the trip.
+        description: "The state of the trip."
       directions:
-        description: Same as /directions response. Just ignore status
+        description: "Same as /directions response. Just ignore status"
         $ref: '#/definitions/DirectionsResponse'
       passengerId:
-        description: The ID of the passenger
+        description: "The ID of the passenger"
         type: integer
       driverId:
-        description: The ID of the driver - May be missing!!
+        description: "The ID of the driver - May be missing!!"
         type: integer
       cost:
-        description: The estimated cost. Ignore if unknown.
+        description: "The estimated cost. Ignore if unknown."
         $ref: '#/definitions/Currency'
   Endpoint:
-    description: An location marker for completed trips (with timestamps)
+    description: "An location marker for completed trips (with timestamps)"
     properties:
       timestamp:
         type: string
@@ -809,86 +825,80 @@ definitions:
           name:
             type: string
   TripCompleted:
-    description: A pending or ongoing trip
+    description: "A pending or ongoing trip"
     properties:
-      id:
-        description: The id of the trip (in shared server).
+      "id":
+        description: "The id of the trip (in shared server)."
         type: string
       applicationOwner:
         type: string
-        description: Owner of the appserver who created the trip entry
+        description: "Owner of the appserver who created the trip entry"
       distance:
         type: integer
       cost:
-        description: The estimated cost. Ignore if unknown.
+        description: "The estimated cost. Ignore if unknown."
         $ref: '#/definitions/Currency'
       driver:
         type: integer
-        description: Id of the driver involved
+        description: "Id of the driver involved"
       end:
-        description: Where the trip ended
+        description: "Where the trip ended"
         $ref: '#/definitions/Endpoint'
       start:
-        description: Where the trip started
+        description: "Where the trip started"
         $ref: '#/definitions/Endpoint'
       passenger:
-        description: The ID of the passenger
+        description: "The ID of the passenger"
         type: integer
       paymethod:
-        description: How the trip was paid
+        description: "How the trip was paid"
         $ref: '#/definitions/Paymethod'
       route:
         type: array
         items:
           $ref: '#/definitions/Endpoint'
       totalTime:
-        description: 'Total trip time, since accepted'
+        description: "Total trip time, since accepted"
         type: integer
       waitTime:
         type: integer
       travelTime:
         type: integer
   TripAction:
-    description: Represents an action to perform over a trip
+    description: "Represents an action to perform over a trip"
     properties:
       action:
-        description: >-
-          The action to perform. Currently supported: cancel, accept, confirm,
-          reject, start, finish, rate, pay.
+        description: "The action to perform. Currently supported: cancel, accept, confirm, reject, start, finish, rate, pay."
         type: string
       rating:
         type: integer
-        description: >-
-          The drive rating. Used only in action 'rate', ignored in any other
-          case.
+        description: "The drive rating. Used only in action 'rate', ignored in any other case."
       paymethod:
-        description: Payment info to pass to Payments API. Used only for 'pay' acction.
+        description: "Payment info to pass to Payments API. Used only for 'pay' acction."
         $ref: '#/definitions/Paymethod'
   TripActionResponse:
-    description: >-
-      Response to a Trip action. Some parameters may be missing, depends on the
-      action.
+    description: "Response to a Trip action. Some parameters may be missing, depends on the action."
     properties:
       action:
-        description: The requested action
+        description: "The requested action"
         type: string
       message:
-        description: A brief message explaining the changes
+        description: "A brief message explaining the changes"
         type: string
       code:
         type: integer
       trip:
-        description: The target trip after the changes (or the deleted trip)
+        description: "The target trip after the changes (or the deleted trip)"
         $ref: '#/definitions/Trip'
   Paymethod:
     type: object
     properties:
       paymethod:
         type: string
-        description: 'Paymethod type: either ''card'' or ''cash'''
+        description: "Paymethod type: either 'card' or 'cash'"
       parameters:
         type: object
-        description: Key-value pairs for payment parameters. Specific of each type.
+        description: "Key-value pairs for payment parameters. Specific of each type."
         properties:
           ccvv:
             type: string
@@ -898,7 +908,7 @@ definitions:
             type: string
           number:
             type: string
-          type:
+          "type":
             type: string
   Transaction:
     properties:
@@ -906,23 +916,23 @@ definitions:
         $ref: '#/definitions/Currency'
       data:
         type: string
-      description:
+      "description":
         type: string
       id:
         type: integer
-        description: The transaction ID
+        description: "The transaction ID"
       user:
         type: integer
-        description: The user who made the transaction
+        description: "The user who made the transaction"
       trip:
         type: integer
-        description: The trip that was paid via the transaction
+        description: "The trip that was paid via the transaction"
       timestamp:
         type: string
   ApiResponse:
-    type: object
+    type: "object"
     properties:
       code:
         type: integer
       message:
-        type: string
+        type: "string"
