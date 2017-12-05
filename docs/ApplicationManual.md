@@ -193,7 +193,7 @@ Todos los *Users* en la base de datos local tienen un flag que indica si están 
 
 El proceso de logout sólo borra al usuario de la base de datos local en caso de que el estado del mismo sea *Idle*, en caso contrario sólo se lo marca como _offline_.
 
-[Diagrama de secuencia del login](https://github.com/fi-ubers/app-server/blob/master/docs/BasicSeqDiagram.png)
+![Diagrama de secuencia del login](https://github.com/fi-ubers/app-server/blob/master/docs/BasicSeqDiagram.png)
 
 ## Dependencias y herramientas
 
