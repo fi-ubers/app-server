@@ -101,9 +101,21 @@ Los estados de un *Driver* son los siguientes:
 * *Travelling*: cuando el viaje inició tanto *Passengers* como *Drivers* entrarán en este estado, que representa el viaje en sí. Ver el estado homónimo del *Passenger*.
 * *Waiting Finish*: es el análogo a *Waiting Finish* pero si el *Driver* es el primero en terminar el viaje.
 
+Los *Trips* tienen una referencia tanto al *Passenger* como al *Driver* (cuando lo haya), y una serie de estados que acompaña a los estados de los *Users*. Los estados posibles de un *Trip* son los siguientes.
+
+* *Proposed*: corresponde a un *Trip* recién creado como producto de la acción de un *Passenger* (POST a /trips). Este estado es el único que tiene una referencia a *Driver* inválida, puesto que todavía no ha sido tomado por ningún conductor.
+* *Accepted*: un *Trip* que haya sido tomado por un *Driver* pero aún no esté confirmado por el *Passenger* está en este estado.
+* *Confirmed*: un *Trip* pasa a este estado cuando el *Passenger* confirma al *Driver*. Ambos *Users* pueden ahora iniciar el *two-way handshake* para dar inicio al *Trip*.
+* *Started*, *Passenger Started* y *Driver Started*: son los tres estadíos del *two-way handshake* para iniciar un viaje. *Passenger Started* corresponde al estado en que el pasajero indicó que quiere comenzar el viaje, pero el conductor todavía no. El caso contrario es el del estado *Driver Started*. El estado *Started* corresponde a un viaje ya comenzado, y que se está llevando a cabo en este momento.
+* *Finished*, *Passenger Finished* y *Driver Finished*: son los estados análogos al comienzo del viaje, pero para la finalización del mismo.
+* *Finished Rated*: este es un estado de post-finalización que indica que el *Passenger* ha decidido dejar un rating al *Driver*. Sólo se puede puntuar al conductor si el viaje está en estado *Finished* y para evitar que haya más de un rating por *Trip* una vez hecha la puntuación el mismo pasa a este estado. Este estado no es parte del flujo de estados obligatorio de un *Trip*.
+* *Completed* (a.k.a. *Payed*): este es un estado tácito puesto que los viajes finazliados y pagos no se almacenan el la base de datos propia del *Application Server*, sino que se realiza la alta apropiada en el *Shared Server*. Así, lógicamente todos los *Trips* que estén guardados en el *Shared Server* tendrán implícitamente este estado.
+
 Las posibles transiciones entre los estados puede resumirse en el siguiente diagrama:
 
 _Acá viene la imágen_
+
+
 
 ## Dependencias y herramientas
 
