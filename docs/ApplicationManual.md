@@ -180,6 +180,8 @@ Las posibles transiciones entre los estados puede resumirse en el siguiente diag
 
 _Acá viene la imágen_
 
+![Diagrama de secuencias del ciclo de vida de un viaje](https://github.com/fi-ubers/app-server/blob/master/docs/TripSeqDiagram.png)
+
 ### Login y Logout de *Users*
 
 Todos los *Users* en la base de datos local tienen un flag que indica si están logueados o no. Esto permite mantener registro del estado de los usuarios incluso si se desconectan. Los pasos a seguir en caso del login de un *User* son:
@@ -190,6 +192,8 @@ Todos los *Users* en la base de datos local tienen un flag que indica si están 
 4. Marcar al user como _online_
 
 El proceso de logout sólo borra al usuario de la base de datos local en caso de que el estado del mismo sea *Idle*, en caso contrario sólo se lo marca como _offline_.
+
+[Diagrama de secuencia del login](https://github.com/fi-ubers/app-server/blob/master/docs/BasicSeqDiagram.png)
 
 ## Dependencias y herramientas
 
