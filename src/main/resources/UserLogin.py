@@ -5,9 +5,9 @@ Should allow creation and login of users with validation of credentials..
 
 from flask_restful import Resource
 from flask import jsonify, abort, request, make_response
-from src.main.com import ResponseMaker, ServerRequest, TokenGenerator
-
+from src.main.com import ResponseMaker, ServerRequest, TokenGenerator, Distances
 from src.main.mongodb import MongoController
+from src.main.model import User
 import config.constants as constants
 
 import os
@@ -32,34 +32,41 @@ class UserLogin(Resource):
 	def post(self):
 		logger.getLogger().debug("POST at /users/login")
 		logger.getLogger().debug(request.json)
-
-		# (shared-server) First ask shared server for credentials validation
-		(valid, response) = ServerRequest.validateUser(request.json)
-
 		try:
+			# (shared-server) First ask shared server for credentials validation
+			(valid, response) = ServerRequest.validateUser(request.json)
+		
 			if not valid:
 				logger.getLogger().debug('Error 418: I\' m a teapot and your credentials are not valid!')
 				return ResponseMaker.response_error(response.status_code, "Shared server error")
 			logger.getLogger().debug("Credentials are valid, server responsed with user")
 
-			user_js = response;
-			user_js['_id'] = user_js.pop('id')
+			user_js = User.UserJSON(response)
 
 			# (token-generation) Generate a new UserToken for that user
 			token = TokenGenerator.generateToken(response);
-			# user_js["token"] = token
-
-			# (mongodb) If credentials are valid, add user to active users table
 
 			users_online = MongoController.getCollection("online")
+
+			# (mongodb) If credentials are valid, and user is not here, add it
 			for user in users_online.find():
-				if user["_id"] == response["_id"]:
-					users_online.delete_many({"_id" : user["_id"]})
-			users_online.insert_one(response)
+				if user_js["_id"] == user["_id"]:
+					# Found it! Checking refs!
+					logger.getLogger().debug("User trying to log in already found in the local db")
+					if user_js["_ref"] != user["_ref"]:
+						logger.getLogger().debug("Login of an user already in bdd. _ref is old")
+						user_js = User.UserUpdateDedicatedFields(user_js, user)
+					else:
+						user_js = user
+					break
+
+			user_js["online"] = True
+			users_online.update( { "_id" : user_js["_id"] }, user_js, upsert=True )
 
 			return ResponseMaker.response_object(constants.SUCCESS, ['user', 'token'], [user_js, token])
 		except Exception as e:
 			logger.getLogger().exception(str(e))
+			print(str(e))
 			return ResponseMaker.response_error(500, "Internal Error")
 
 class UsersList(Resource):
@@ -108,10 +115,12 @@ class UsersList(Resource):
 
 		if (status != constants.CREATE_SUCCESS):
 			return ResponseMaker.response_error(status, response['message'])
-		user = response
-		user['_id'] = user.pop('id')
+		
+		user_js = User.UserJSON(response)
+		users_online = MongoController.getCollection("online")
+		users_online.insert_one(user_js)
 
-		return ResponseMaker.response_object(status, ['user'], [user])
+		return ResponseMaker.response_object(status, ['user'], [user_js])
 
 	""" Handler to get a list of all users.
 	Requieres: user token in the header.
@@ -142,11 +151,30 @@ class UsersList(Resource):
 		if not valid:
 			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
 
-		print(response)
 
 		# (mongodb) Return all logged in users.
 		users_online = MongoController.getCollection("online")
-		aux = [user for user in users_online.find()]
+		aux = [User.UserJSON(user) for user in users_online.find()]
+		user = list(users_online.find({ "_id" : response["_id"]}))
+		if len(user) == 0:
+			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - you may not be loged in")
+
+		user = user[0]
+
+
+		## Aditional params (only supporting "sort")
+		params = request.args
+
+		if "filter" in params:
+			aux = [u for u in aux if u["type"] == params["filter"]]
+
+		if "sort" in params and params["sort"] == "near":
+			aux.sort(key = lambda x: Distances.computeDistance(user["coord"], x["coord"]))
+
+		if "limit" in params:
+			limit = int(params["limit"])
+			if limit > 0:
+				aux = aux[:(limit)]
 
 		return ResponseMaker.response_object(constants.SUCCESS, ['users'], [aux])
 
@@ -166,12 +194,13 @@ class UserLogout(Resource):
 		# (mongodb) Return all logged in users.
 		users_online = MongoController.getCollection("online")
 
-		user = [user for user in users_online.find() if (user['username'] == result[1]['username'])]
-		print(user)
+		user = [User.UserJSON(user) for user in users_online.find() if (user['username'] == result[1]['username'])]
+
 		if (len(user) == 0):
 			return ResponseMaker.response_error(constants.NOT_FOUND, "User not found")
 
-		users_online.delete_many(user[0]);
+		#users_online.delete_many(user[0]);
+		users_online.update({"_id" : user[0]["_id"]}, {"$set":{"online":False}})
 
 		return ResponseMaker.response_object(constants.SUCCESS, ['user'], [user[0]] )
 
@@ -193,9 +222,6 @@ class UserById(Resource):
 
 		(valid, decoded) = TokenGenerator.validateToken(token)
 
-		if not valid or (decoded['_id'] != id):
-			return ResponseMaker.response_error(constants.FORBIDDEN, "Forbidden")
-
 		print("GET at /user/id")
 		candidates = [user for user in self.users.find() if user['_id'] == id]
 
@@ -207,15 +233,14 @@ class UserById(Resource):
 				return ResponseMaker.response_error(status, response["message"])
 
 			candidates = [ response ]
-			candidates[0]['_id'] = candidates[0].pop('id')
-			self.users.insert_one(candidates[0])
+			user = candidates[0]
+			self.users.insert_one(user)
 
 		if len(candidates) == 0:
 			logger.getLogger().error("Attempted to retrieve user with non-existent id.")
 			return ResponseMaker.response_error(constants.NOT_FOUND, "User id not found:" + str(e))
 
-		print(candidates)
-		return ResponseMaker.response_object(constants.SUCCESS, ['user'], [candidates[0]])
+		return ResponseMaker.response_object(constants.SUCCESS, ['user'], [User.UserJSON(candidates[0])])
 
 
 	def put(self, id):
@@ -236,7 +261,7 @@ class UserById(Resource):
 			success, updated_user = ServerRequest.updateUser(request.json)
 			if success:
 				#Update in local data-base
-				self.users.update({'_id':updated_user['id']}, updated_user,  upsert= True)
+				self.users.update({'_id':updated_user['id']}, User.UserJSON(updated_user),  upsert= True)
 				logger.getLogger().info("Successfully updated user")
 				return ResponseMaker.response_error(constants.SUCCESS, "User updated successfully!")
 			return ResponseMaker.response_error(constants.NOT_FOUND, "User not found!")
@@ -269,7 +294,7 @@ class UserById(Resource):
 		delete_success, status_code = ServerRequest.deleteUser(id)
 		if delete_success:
 			#Delete in local data-base
-			candidates = [user for user in self.users.find() if user['_id'] == id]
+			candidates = [User.UserJSON(user) for user in self.users.find() if user['_id'] == id]
 			self.users.delete_many({"_id" : id })
 			logger.getLogger().info("Successfully deleted user.")
 		else:
@@ -277,3 +302,5 @@ class UserById(Resource):
 			return ResponseMaker.response_error(status_code, "Delete error")
 
 		return ResponseMaker.response_object(constants.DELETE_SUCCESS, ['user'], candidates)
+
+

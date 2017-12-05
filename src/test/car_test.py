@@ -4,13 +4,14 @@ import jwt
 
 V1_URL = '/v1/api'
 MOCK_URL = 'http://172.17.0.2:80'
-MOCK_TOKEN = '?token=untokendementira'
+MOCK_TOKEN = '?token='
 MOCK_TOKEN_VALIDATION_1 = (True, {"username" : "juan", "_id" : 1})
 MOCK_TOKEN_VALIDATION_2 = (True, {"username" : "juanpi", "_id" : 2})
 MOCK_TOKEN_VALIDATION_3 = (True, {"username" : "euge", "_id" : 3})
 MOCK_TOKEN_VALIDATION_7 = (True, {"username" : "luis", "_id" : 7})
 
 os.environ['SS_URL'] = MOCK_URL
+os.environ["APP_TOKEN"] = "untokendementira"
 
 from mock import Mock, patch
 from CollectionMock import UserCollectionMock, default_db
@@ -45,10 +46,10 @@ class FakeGet(object):
 		elif (self.url == MOCK_URL + '/users/3'):
 			self.status_code = 500
 			self.response = {"code" : 500, 'message' : 'Unexpected error'}
-		elif (self.url == MOCK_URL + '/users/1/cars/12' + MOCK_TOKEN):
+		elif (self.url == MOCK_URL + '/users/1/cars/12' + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			self.status_code = 200
 			self.response = {'code' : self.status_code, "car" : self.db[0]["cars"][0]}
-		elif (self.url == MOCK_URL + '/users/3/cars/17' + MOCK_TOKEN):
+		elif (self.url == MOCK_URL + '/users/3/cars/17' + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			self.status_code = 500
 			self.response = {'code' : self.status_code, "message" : "Unexpected error"}
 		else:
@@ -64,10 +65,10 @@ class FakePost(object):
 		self.db = default_db
 		self.data = data
 		self.status_code = 0
-		if (self.url == MOCK_URL + "/users/1/cars" + MOCK_TOKEN):
+		if (self.url == MOCK_URL + "/users/1/cars" + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			self.status_code = 201
 			self.response = {"code" : self.status_code, "car" : json.loads(self.data)}
-		elif (self.url == MOCK_URL + "/users/2/cars" + MOCK_TOKEN):
+		elif (self.url == MOCK_URL + "/users/2/cars" + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			self.status_code = 500
 			self.response = {"code" : self.status_code, "message" : "Unexpected error"}
 		else:
@@ -84,13 +85,13 @@ class FakeDelete(object):
 		self.headers = headers
 		self.status_code = 0
 
-		if (self.url == MOCK_URL + '/users/1/cars/12' + MOCK_TOKEN):
+		if (self.url == MOCK_URL + '/users/1/cars/12' + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			self.status_code = 204
 			self.response = { "code" : self.status_code, 'message' : 'delete successful'}
-		elif (self.url == MOCK_URL + '/users/2/cars/13' + MOCK_TOKEN):
+		elif (self.url == MOCK_URL + '/users/2/cars/13' + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			self.status_code = 404
 			self.response = { "code" : self.status_code, 'message' : 'non-existent id'}
-		elif (self.url == MOCK_URL + "/users/2/cars/14" + MOCK_TOKEN):
+		elif (self.url == MOCK_URL + "/users/2/cars/14" + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			self.status_code = 500
 			self.response = {"code" : self.status_code, "message" : "Unexpected error"}
 		else:
