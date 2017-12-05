@@ -79,7 +79,31 @@ El estado de un viaje se codifica en un campo especial dentro de su estructura, 
 
 ### Diagramas de estados
 
+Cada entidad tiene su propio set de estados, que indican las acciones que pueden efectuar y el punto en el que se encuentran dentro del flujo de eventos principal.
 
+Los estados de un *Passenger* son los siguientes:
+
+* *Idle*: el pasajero está recien logueado en la aplicación, puede ver conductores cercanos (GET a /users), averiguar por el costo de un viaje (POST /directions) o bien proponer un viaje nuevo y esperar por conductores (POST /trips)
+* *Waiting Accept*: un pasajero que acaba de postear un *Trip* está en este estado, y representa la espera hasta que un *Driver* decida tomar el viaje. En cualquier momento se puede cancelar el viaje (POST a /trip/tripId/action, *'cancel'*)
+* *Selecting Driver*: cuando un *Driver* acepte el *Trip* propuesto por un *Passenger*, éste último entrará en este estado. En este momento podrá ver la información del *Driver* (GET a /users/userId) y decidir si le parece bien (POS a /trip/tripId/action, *'confirm'*) o bien prefiere rechazarlo y esperar a otro *Driver* (POST a /trip/tripId/action, *'reject'*)
+* *Waiting Driver*: el *Passenger* que haya aceptado a un *Driver* estará en este estado, e indica que está esperando a que lo pasen a buscar. Durante este estado se puede todavía cancelar el viaje (de la misma manera que se describió en *Waiting Accept*), o bien iniciarlo mediante un *two-way handshake* (POST a /trip/tripId/action, 'start').
+* *Waiting Start*: para iniciar un viaje se necesita que tanto el *Driver* como el *Passenger* expresen que quieren iniciar el viaje a través del endpoint apropiado (/trip/tripId/action). Si fuera el *Passenger* el primero en querer iniciar el viaje, entra en este estado en el cual estará esperando a que el *Driver* también lo inicie. Esta es el último momento en que se puede cacelar un viaje sin que se realicen transferencias monetarias.
+* *Travelling*: cuando el viaje inició tanto *Passengers* como *Drivers* entrarán en este estado, que representa el viaje en sí. Se trackearán las posiciones de ambos *Users* para definir el camino real del *Trip*. La única acción permitida en este estado es la de finalizar el viaje (POST a /trip/tripId/action, *'finish'*). Al igual que en el mecanismo de inicio del viaje, se hace a través de un *two-way handshake*, teniendo ambos *Users* que estar de acuerdo en la finalización del *Trip*.
+* *Waiting Finish*: es el análogo a *Waiting Start* pero para la finalización del viaje: se da sólo si el *Passenger* es el primero en terminar el *Trip* y debe esperar a que el *Driver* haga lo propio.
+* *Arrived*: este es el estado final del *Passenger* en un viaje. Representa que el viaje terminó y que debe efectuar el pago del mismo. En este momento se permite realizar una reseña del conductor (POST a /trip/tripId/action, *'rate'*). El ciclo de vida del viaje termina cuando el *Passenger* efectúa el pago (POST a /trip/tripId/action, *'pay'*), volviendo al estado *Idle*.
+
+Los estados de un *Driver* son los siguientes:
+
+* *Idle*: un *Driver* en este estado no está asociado a ningún viaje. Puede ver otros *Users* cercanos (GET /users), y obtener una lista de *Trips* propuestos que requieren de un conductor (GET /trips). Viendo la lista de viajes puede elegir tomar uno (POST /trips/tripId/action, *'accept'*).
+* *Waiting Confirmation*: un *Driver* que decida aceptar un *Trip* todavía no estará asociado al mismo, debe esperar a que el *Passenger* que propuso el viaje le de su aprovación (ver estado *Selecting Driver* del pasajero). Este estado representa la espera del *Driver* a ser confirmado para tomar el viaje.
+* *Going To Pickup*: cuando el *Driver* es confirmado, debe ir al punto de encuentro establecido al proponerse el *Trip*. Una vez ahí, deberá comenzar el viaje mediante el *two-way handshake* explicado en los estados del *Passenger* (POST a /trip/tripId/action, *'start'*.
+* *Waiting Start*: si el *Driver* fue el primero en querer iniciar el viaje, entra en este estado en el cual estará esperando a que el *Passenger* también lo inicie.
+* *Travelling*: cuando el viaje inició tanto *Passengers* como *Drivers* entrarán en este estado, que representa el viaje en sí. Ver el estado homónimo del *Passenger*.
+* *Waiting Finish*: es el análogo a *Waiting Finish* pero si el *Driver* es el primero en terminar el viaje.
+
+Las posibles transiciones entre los estados puede resumirse en el siguiente diagrama:
+
+_Acá viene la imágen_
 
 ## Dependencias y herramientas
 
