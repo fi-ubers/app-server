@@ -1,9 +1,5 @@
 # Manual del Application Server
 
-## Contenidos
-
-[TOC]
-
 ## Introducción
 
 Este proyecto consiste de un servidor Web HTTP accesible a través de una REST API para la aplicación **FIUBER**. **FIUBER** es una aplicación intencionada para conectar a los pasajeros con los conductores de vehículos que ofrecen servicio de transporte particular. Esta aplicación permite a los potenciales pasajeros: obtener estimaciones de costo un viaje antes de realizarlo, elegir al conductor que desean, solicitar al chofer y una vez que terminan el viaje realizar el pago utilizando cualquiera de los medios de pago disponibles. 
@@ -99,7 +95,51 @@ Los *Trips* representan un viaje en cualquiera de sus estadíos: desde un viaje 
 El estado de un viaje se codifica en un campo especial dentro de su estructura, y éste a su vez indica la validez y o necesidad de incluir los otros campos. La estructura completa de un viaje es la siguiente:
 
 ```json
-
+{
+    "_id": "9b568ad2-d5f6-11e7-b2af-be5f70b87d11",
+    "driverId": 4,
+    "cost": {
+        "currency": "ARS",
+        "value": 70.95
+    },
+    "state": "finished_rated",
+    "directions": {
+        "duration": 740,
+        "origin_name": "Ramón Franco 4142-4198, Remedios de Escalada, Buenos Aires, Argentina",
+        "origin": {
+            "lng": -58.4110197,
+            "lat": -34.7313204
+        },
+        "path": [
+            {
+                "distance": 33,
+                "duration": 6,
+                "coords": {
+                    "lng": -58.41132769999999,
+                    "lat": -34.7314771
+                }
+            }
+        ],
+        "destination_name": "Yapeyú 801-899, B1828BBK Banfield, Buenos Aires, Argentina",
+        "status": "OK",
+        "destination": {
+            "lng": -58.3801311,
+            "lat": -34.7473679
+        },
+        "distance": 4300
+    },
+    "passengerId": 2,
+    "time_start": "2017-11-30T17:48:55.104382",
+    "time_start_waiting": "2017-11-30T17:48:55.108341",
+    "real_route": [
+        {
+            "lng": -58.4110484,
+            "timestamp": "2017-11-30T17:48:58.045657",
+            "lat": -34.7316897
+        }
+    ],
+    "time_finish": "2017-11-30T17:49:06.580658"
+}
 ```
 
 ### Diagramas de estados
