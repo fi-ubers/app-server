@@ -3,6 +3,8 @@ This module contains all the handlers for /server/ping endpoint.
 Should allow the user to verify that the AppServer is alive.
 """
 import os
+import json
+import requests
 import logging as logger
 import config.constants as constants
 
@@ -44,7 +46,7 @@ class ServerTokenUpdater(object):
 			os.environ["APP_TOKEN"] = token["token"]
 			logger.getLogger().debug("Successfully updated App Server Token.")
 			return request["server"]
-		except Exception as e:
+		except Exception, e:
 			logger.getLogger().error("Unexpected Error." + str(e))
 			return {"error" : str(e)}
 
@@ -71,3 +73,8 @@ class ServerTokenUpdater(object):
 			logger.getLogger("Shared Server returned error: %d"%(r.status_code))
 			return (r.status_code, r.json())		
 		return (r.status_code, r.json()["ping"])
+
+
+
+
+

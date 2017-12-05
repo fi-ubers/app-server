@@ -18,3 +18,4 @@ def validateToken(token):
 	except Exception as e:
 		return (False, "Invalid token: " + str(e))
 	return (True, decoded)
+

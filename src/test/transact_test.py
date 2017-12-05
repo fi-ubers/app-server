@@ -5,11 +5,12 @@ import jwt
 V1_URL = "/v1/api"
 
 MOCK_URL = "http://172.17.0.2:80"
-MOCK_TOKEN = "?token=untokendementira"
+MOCK_TOKEN = "?token="
 MOCK_TOKEN_VALIDATION_1 = (True, {"username" : "juan", "_id" : 1})
 MOCK_TOKEN_VALIDATION_2 = (True, {"username" : "juanpi", "_id" : 2})
 
 os.environ["SS_URL"] = MOCK_URL
+os.environ["APP_TOKEN"] = "untokendementira"
 
 from mock import Mock, patch
 from CollectionMock import UserCollectionMock, default_db
@@ -35,7 +36,7 @@ class FakeGet(object):
 		self.db = default_db
 		self.status_code = 0
 
-		if (self.url == MOCK_URL + '/users/1/transactions' + MOCK_TOKEN):
+		if (self.url == MOCK_URL + '/users/1/transactions' + MOCK_TOKEN + os.environ["APP_TOKEN"]):
 			self.status_code = 200
 			self.response = {'code' : self.status_code, 'transactions' : self.db[0]["transactions"] }
 		else:
