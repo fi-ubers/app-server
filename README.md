@@ -1,4 +1,4 @@
-# app-server
+# Application Server - Manual de Instalación
 
 [![Build Status](https://travis-ci.org/fi-ubers/app-server.svg?branch=master)](https://travis-ci.org/fi-ubers/app-server)
 [![Coverage Status](https://coveralls.io/repos/github/fi-ubers/app-server/badge.svg?branch=master)](https://coveralls.io/github/fi-ubers/app-server?branch=master)
@@ -6,8 +6,6 @@
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
 Aplicación en python (flask + gunicorn) con API RESTful para el app-server de Fiuber App.
-
-Leer los issues para una lista de tareas que realizar.
 
 Connect to... [https://fiuber-app-server.herokuapp.com/](https://fiuber-app-server.herokuapp.com/)
 
@@ -31,9 +29,19 @@ Estando en el entorno virtual con las dependencias instaladas, se puede levantar
 
 Nota: alternativamente a levantar una base de datos local, se puede setear una variable de entorno `MONGODB_URL` con la dirección de un base de datos remota (e.g. mlab), incluyendo en la misma la autenticación.
 
+#### Conexión con el Shared Server
+
+Por defecto la aplicación intenta conectarse a la API del Shared Server en la URL `http://localhost:5000/api`. Se puede cambiar este comportamiento mediante la variable de entorno `SS_URL`. Las conexiones con tal servidor utilizan un mecanismo de autenticación mediante un token. Antes de levantar una instancia del Application Server se tiene que estar autorizado previamente: solicitar un token al bussiness user pertienente (ver documentación del Shared server).
+
+Una vez se tenga el token, se debe indicar el mismo a la aplicación mediante la variable de entonro `APP_TOKEN`.
+
+
+
 ### Levantar el servidor en Heroku
 
 Sencillamente se debe hacer `git push heroku +HEAD:master` para deployear en heroku la branch actual. Nótese que se utiliza _heroku_ como remote, por lo tanto deberá estar configurado como tal. Usar `git remote -v` para ver la lista de remotes, y `git remote add` para agregar el remote con nombre heroku.
+
+La applicación en heroku sobre la que deployar debe tener definidas todas las variables de entorno que se describieron en la sección de levantar el servidor localmente.
 
 ## Para realizar requests por consolas
 
@@ -41,7 +49,7 @@ Para poder probar los distintos endpoints de la API se puede utilizar un navegad
 
 `curl -X _tipo_ -d _data_ http://someURL:somePort/someEndpoint`
 
-Donde _tipo_ es POST, GET, etc; _data_ son los datos a mandar en la request (un string representando un .json o '' para no enviar nada). 
+Donde _tipo_ es POST, GET, etc; _data_ son los datos a mandar en la request (un string representando un .json o '' para no enviar nada).
 
 ## Para generar la documentación del código fuente
 
@@ -50,8 +58,6 @@ Ingresar el siguiente comando en la consola, desde el directorio raíz de la apl
 $ make
 
 Los archivos de documentación se generarán automáticamente en la carpeta docs/documentation. Allí se podrá encontrar el subdirectorio correspondiente a cada formato disponible para visualizar la documentación (latex, html, etc.). Para visualizar la documentación en formato html, se debe ingresar a docs/documentation/html y seleccionar el archivo index.html. Para la documentación en latex, ingresar al directorio docs/documentation/latex y nuevamente ingresar el comando $make en la consola. Se generará un archivo .pdf con la documentación de la aplicación.
-
-
 
 ### Uso de docker
 
