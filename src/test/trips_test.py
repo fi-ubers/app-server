@@ -136,6 +136,7 @@ class TestUsertrips(object):
 		assert(response.status_code == 401)
 
 
+	"""
 	@patch("src.main.com.TokenGenerator.validateToken", return_value=MOCK_TOKEN_VALIDATION_1)
 	@patch("src.main.com.ServerRequest.requests.get", side_effect=FakeGet)
 	def test_get_trip_by_id_success(self, validateTokenMock, FakeGet):
@@ -183,7 +184,7 @@ class TestUsertrips(object):
 		response_parsed = json.loads(response.get_data())
 		assert(response.status_code == 201)
 		assert(response_parsed["trip"] == expected)
-
+	"""
 	@patch("src.main.com.TokenGenerator.validateToken", return_value=MOCK_TOKEN_VALIDATION_1)
 	@patch("src.main.com.ServerRequest.requests.post", side_effect=FakePost)
 	def test_estimate_trip_success(self,validateTokenMock, FakePost):
