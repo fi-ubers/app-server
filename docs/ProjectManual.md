@@ -1,4 +1,4 @@
-# Manual de Proyecto
+# Manual del Application Server
 
 ## Contenidos
 
@@ -62,8 +62,33 @@ Todo el diseño del *App Server* gira en torno a las dos entidades principales d
 Los *Users* dentro de la aplicación representan a una persona que utiliza un cliente en su teléfono. Así pues distinguimos dos roles dentro de los *Users*: los *Passengers* (pasajeros) y los *Drivers* (conductores). Ambos tienen la misma información básica (i.e. datos personales), pero se diferencian en algunos atributos y en cómo se relacionan con el resto de las entidades. El esquema de datos de un *User* tal y como se lo maneja en la aplicación y se lo guarda en la base de datos es el siguiente.
 
 ```json
-{
-  Hey:"Hola"
+"user": {
+  "_id": 7,
+  "_ref": "74f3270c-f453-4fae-8eda-ac7f7a04a9ff",
+  "applicationOwner": "1",
+  "balance": [],
+  "birthdate": "29-2-1971",
+  "cars": [],
+  "coord": {
+    "lat": 34.161,
+    "lng": 58.96
+  },
+  "country": "France",
+  "email": "cosmefulanito3@thebest.com",
+  "images": [
+    "No tengo imagen"
+  ],
+  "name": "Cosme",
+  "online": true,
+  "rating": {
+    "rate": 4,
+    "rateCount": 2
+  },
+  "state": 11,
+  "surname": "Fulanito",
+  "tripId": "",
+  "type": "driver",
+  "username": "cosme_fulanito3"
 }
 ```
 
@@ -115,7 +140,16 @@ Las posibles transiciones entre los estados puede resumirse en el siguiente diag
 
 _Acá viene la imágen_
 
+### Login y Logout de *Users*
 
+Todos los *Users* en la base de datos local tienen un flag que indica si están logueados o no. Esto permite mantener registro del estado de los usuarios incluso si se desconectan. Los pasos a seguir en caso del login de un *User* son:
+
+1. Verificar las credenciales del usuario con el *Shared Server*, y obtener los datos del mismo.
+2. Buscar el usuario en la base de datos y comparar los __ref_, actualizar los campos en caso de ser necesario.
+3. Si el usuario existía, recuperar su estado, sino ponerlo en estado *Idle*.
+4. Marcar al user como _online_
+
+El proceso de logout sólo borra al usuario de la base de datos local en caso de que el estado del mismo sea *Idle*, en caso contrario sólo se lo marca como _offline_.
 
 ## Dependencias y herramientas
 
