@@ -185,3 +185,16 @@ class TestUsertrips(object):
 		assert(response.status_code == 403)
 		assert(response_parsed["message"] == "Forbidden")
 
+	@patch("src.main.com.TokenGenerator.validateToken", return_value=MOCK_TOKEN_VALIDATION_1)
+	@patch("src.main.com.ServerRequest.requests.post", side_effect=FakePost)
+	def test_new_trip_success_offline(self, validateTokenMock):
+		directions = {}
+		self.app = app.test_client()
+		response = self.app.post(V1_URL + "/trips", headers={"UserToken" : "A fake token"}, data = json.dumps(directions), content_type='application/json')
+		response_parsed = json.loads(response.get_data())
+		assert(response.status_code == 400)
+		assert("Bad request" in response_parsed["message"])
+	
+
+
+	
