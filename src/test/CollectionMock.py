@@ -25,14 +25,20 @@ user2 = {"_id": 2, "online": False, "birthdate": "6-10-1996", "country": "Norway
 user3 = {"_id": 3,  "birthdate": "17-10-1993", "country": "Georgia", "email": "euge@euge.com", "images": [ "No tengo imagen"	], "name": "Euge", "surname": "Mariotti", "type": "driver", "username": "euge","cars":carList3, "transactions": transacList3, "trips" : tripList3, "rating":{"rate":0, "rateCount":0}, "online": False} 
 user4 = {"_id": 10, "birthdate": "3-1-1997", "country": "Italy", "email": "corneliusf@gmail.com", "images": [ "No tengo imagen" ],"name": "Cornelius", "surname": "Fudge", "type": "driver","username": "cornelius999", "cars": carList1, "transactions": transacList1, "trips" : tripList1, "coord":{"lat":"0", "lng":"0"}, "online":True}
 
+
+
+### These users have a special numbering scheme: 1xx is a passenger, 2xx is a driver. The last two digits represents realtive state (e.g. 0 == Idle, 1 == waiting_accept | waiting_confirm, etc)
 user100 = {"_id" : 100, "username" : "user100", "online" : True, "type" : "passenger", "state" : User.USER_PSG_IDLE}
 user101 = {"_id" : 101, "username" : "user101", "online" : True, "type" : "passenger", "state" : User.USER_PSG_WAITING_ACCEPT}
 
-default_db = [user1, user2, user3, user4, user100, user101]
+user200 = {"_id" : 200, "username" : "user200", "online" : True, "type" : "driver", "state" : User.USER_DRV_IDLE}
+
+default_db = [user1, user2, user3, user4, user100, user101, user200]
 
 
 trip1 = { "_id" : "1", "state" : TripStates.TRIP_PROPOSED }
-trips_db = [ trip1 ]
+trip2 = { "_id" : "2", "state" : TripStates.TRIP_PROPOSED, "passengerId" : user101["_id"] }
+trips_db = [ trip1, trip2 ]
 
 
 class CollectionMock(object):
@@ -42,11 +48,9 @@ class CollectionMock(object):
 		if collection == "online":
 			for u in default_db:
 				self.source.append(User.UserJSON(u))
-
 		elif collection == "active_trips":
 			for t in trips_db:
 				self.source.append(t)
-
 		self.reset()
 
 	def reset(self):
@@ -77,7 +81,7 @@ class CollectionMock(object):
 	def update(self, cond, params):
 		for key in cond.keys():
 			for doc in self.docs:
-				if (doc.has_key(key) or doc[key] == cond[key]):
+				if (doc.has_key(key) and doc[key] == cond[key]):
 					if params.has_key('$push') and doc.has_key(params['$push'].keys()[0]):
 						parameters = params['$push']
 						listname = parameters.keys()[0]
@@ -93,4 +97,7 @@ class CollectionMock(object):
 						for item in alist:
 							if item[filterName] == filterValue:
 								alist.remove(item)
-
+					if params.has_key('$set'):
+						parameters = params['$set']
+						print(parameters)
+						doc[parameters.keys()[0]] = parameters[parameters.keys()[0]]
