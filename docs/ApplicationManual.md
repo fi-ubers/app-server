@@ -176,6 +176,10 @@ Los *Trips* tienen una referencia tanto al *Passenger* como al *Driver* (cuando 
 * *Finished Rated*: este es un estado de post-finalización que indica que el *Passenger* ha decidido dejar un rating al *Driver*. Sólo se puede puntuar al conductor si el viaje está en estado *Finished* y para evitar que haya más de un rating por *Trip* una vez hecha la puntuación el mismo pasa a este estado. Este estado no es parte del flujo de estados obligatorio de un *Trip*.
 * *Completed* (a.k.a. *Payed*): este es un estado tácito puesto que los viajes finazliados y pagos no se almacenan el la base de datos propia del *Application Server*, sino que se realiza la alta apropiada en el *Shared Server*. Así, lógicamente todos los *Trips* que estén guardados en el *Shared Server* tendrán implícitamente este estado.
 
+![Diagrama de estados de los pasajeros](https://github.com/fi-ubers/app-server/blob/master/docs/PassStateDiag.png)
+
+![Diagrama de estados de los conductores](https://github.com/fi-ubers/app-server/blob/master/docs/DriverStateDiag.png)
+
 Las posibles transiciones entre los estados puede resumirse en el siguiente diagrama:
 
 ![Diagrama de secuencias del ciclo de vida de un viaje](https://github.com/fi-ubers/app-server/blob/master/docs/TripSeqDiagram.png)
