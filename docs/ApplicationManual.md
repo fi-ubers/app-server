@@ -49,7 +49,7 @@ La división del código en distintos módulos y paquetes se resume a continuaci
   + *Client.py* : en este módulo se definen todos los estados posibles de un usuario (tanto para pasajero como para chofer). Permite mappear los datos de los usuarios a un formato compatible con el utilizado por la base de datos local.
 
 
-##Arquitectura y diseño
+## Arquitectura y diseño
 
 Todo el diseño del *App Server* gira en torno a las dos entidades principales dentro del dominio de negocios: los *Users* (Usuarios) y los *Trips* (Viajes). Ambas entidades son modeladas dentro del *App Server* como diccionarios, con una sierie de campos requeridos y otras opcionales. Las razones detrás de esta decisión radican en 1) la facilidad del manejo de estos objetos en python y 2) la cercanía de los mismos al formato de comunicación con el *Shared Server*.
 
