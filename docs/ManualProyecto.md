@@ -20,17 +20,17 @@ Un esquema de la arquitectura completa se muestra a continuación. Más adelante
 
 Esta aplicación ofrece al usuario los siguientes servicios:
 
-  + Servicio de Login de Usuarios.
-  + Edición y consulta de los datos de cuenta.
-  + Estimación de costo de viajes.
-  + Selección y solicitud de ruta de viaje.
-  + Selección y solicitud de conductor y vehículo para realizar un viaje.
-  + Tracking de posición de pasajeros y conductores en tiempo real (vía Google Maps).
-  + Servicio de pago de viaje realizado en función de la distancia recorrida.
-  + Consulta de historial de viajes.
-  + Data analytics.
-  + Administración de servidores y permisos de usuarios.
-  + Posibilidad de introducción de reglas para flexibilizar el cálculo de costos de viaje.
+- Servicio de Login de Usuarios.
+- Edición y consulta de los datos de cuenta.
+- Estimación de costo de viajes.
+- Selección y solicitud de ruta de viaje.
+- Selección y solicitud de conductor y vehículo para realizar un viaje.
+- Tracking de posición de pasajeros y conductores en tiempo real (vía Google Maps).
+- Servicio de pago de viaje realizado en función de la distancia recorrida.
+- Consulta de historial de viajes.
+- Data analytics.
+- Administración de servidores y permisos de usuarios.
+- Posibilidad de introducción de reglas para flexibilizar el cálculo de costos de viaje.
   
 ## Cliente
 
