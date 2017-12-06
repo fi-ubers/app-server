@@ -34,60 +34,80 @@ user5 = {"_id": 11, "birthdate": "3-1-1997", "country": "England", "email": "sh@
 
 default_db = [user1, user2, user3, user4, user5]
 
-class UserCollectionMock(object):
-	def __init__(self):
-		self.users = []
-		for u in default_db[0:4]:
-			self.users.append(User.UserJSON(u))
+class CollectionMock(object):
+	def __init__(self, collection):
+		self.docs = []
+		self.source = []
+		if collection == "online":
+			for u in default_db[0:4]:
+				self.source.append(User.UserJSON(u))
+
+		self.reset()
 
 	def reset(self):
-		self.users = default_db[0:4]
+		self.docs = []
+		for d in self.source:
+			self.docs.append(d)
 
 	def find(self, match={}):
 		if not "_id" in match:
-			return self.users
-		for u in self.users:
+			return self.docs
+		for u in self.docs:
 			if u["_id"] == match["_id"]:
 				return [u]
 		return [] 
 
 	def insert_one(self, new):
-		self.users.append(new)
+		self.docs.append(new)
 
 	def delete_many(self, cond):
 		for key in cond.keys():
-			for user in self.users:
-				if (user.has_key(key) or user[key] == cond[key]):
-					self.users.remove(user)
-
-	def update2(self, cond, update, upsert):
-		for key in cond.keys():
-			for i in range(len(self.users)):
-				user = self.users[i]
-				if (user.has_key(key) and user[key] == cond[key]):
-					updated_field = update["$set"].keys()[0]
-					user[updated_field] = update["$set"][updated_field]
-				self.users[i] = user
-
-
-
+			for doc in self.docs:
+				if (doc.has_key(key) or doc[key] == cond[key]):
+					self.docs.remove(doc)
 
 	def update(self, cond, params):
 		for key in cond.keys():
-			for user in self.users:
-				if (user.has_key(key) or user[key] == cond[key]):
-					if params.has_key('$push') and user.has_key(params['$push'].keys()[0]):
+			for doc in self.docs:
+				if (doc.has_key(key) or doc[key] == cond[key]):
+					if params.has_key('$push') and doc.has_key(params['$push'].keys()[0]):
 						parameters = params['$push']
 						listname = parameters.keys()[0]
-						alist = user[listname]
+						alist = doc[listname]
 						alist.append(parameters[listname])
-					if params.has_key('$pull') and user.has_key(params['$pull'].keys()[0]):
+					if params.has_key('$pull') and doc.has_key(params['$pull'].keys()[0]):
 						parameters = params['$pull']
 						listname = parameters.keys()[0]
 						filterName = parameters[listname].keys()[0]
 						filterValue = parameters[listname][filterName]
 						print("filter " + str(filterName) + " value " + str(filterValue)+ " list " + str(listname) )
-						alist = user[listname]
+						alist = doc[listname]
 						for item in alist:
 							if item[filterName] == filterValue:
 								alist.remove(item)
+
+
+"""
+class CollectionMock(object):
+	def __init__(self, collection):
+		print("Someone wants collection " + collection)
+		if collection == "online":
+			self.collection = UserCollectionMock(default_db)
+		else:
+			self.collection = TripsCollectionMock() 
+
+	def update(self, cond, params):
+		return self.collection.update(cond, params)
+
+	def reset(self):
+		return self.collection.reset()
+
+	def find(self, match={}):
+		return self.collection.find(match)
+
+	def insert_one(self, new):
+		return self.collection.insert_one(new)
+
+	def delete_many(self, cond):
+		return self.collection.delete_many(cond)
+"""

@@ -15,9 +15,9 @@ os.environ["SS_URL"] = MOCK_URL
 os.environ["APP_TOKEN"] = "untokendementira"
 
 from mock import Mock, patch
-from CollectionMock import UserCollectionMock, default_db
+from CollectionMock import default_db, CollectionMock
 from src.main.mongodb import MongoController
-MongoController.getCollection = Mock(return_value = UserCollectionMock())
+MongoController.getCollection = Mock(side_effect = CollectionMock)
 
 from src.main.com import ServerRequest, TokenGenerator
 from src.main.resources import Trips
@@ -136,7 +136,6 @@ class TestUsertrips(object):
 		assert(response.status_code == 401)
 
 
-	"""
 	@patch("src.main.com.TokenGenerator.validateToken", return_value=MOCK_TOKEN_VALIDATION_1)
 	@patch("src.main.com.ServerRequest.requests.get", side_effect=FakeGet)
 	def test_get_trip_by_id_success(self, validateTokenMock, FakeGet):
@@ -147,6 +146,7 @@ class TestUsertrips(object):
 		assert(response.status_code == 200)
 		assert(response_parsed["trip"] == expected["trips"][0])
 
+	"""
 	@patch("src.main.com.TokenGenerator.validateToken", return_value=MOCK_TOKEN_VALIDATION_1)
 	@patch("src.main.com.ServerRequest.requests.get", side_effect=FakeGet)
 	def test_get_trip_by_id_nonexistent(self, validateTokenMock, FakeGet):
