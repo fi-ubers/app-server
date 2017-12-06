@@ -48,8 +48,16 @@ Un servidor web HTTP implementado en Javascript usando nodeJs. También presenta
 
 El desarrollo de este proyecto fue realizado en forma incremental, de forma tal que las funcionalidades fueron incorporadas de acuerdo con los siguientes hitos:
 
+|  CP  | Fecha | Cliente |  App Server  |  Shared Server  |  Común  |
+|:---:|:---:|:----|:----------|:-----------|:-----|
+|   **#1**    | 14/09 | <ul><li>Pantalla Login</li><li>Logs</li></ul> | <ul><li>REST API</li><li>Deploy en Keroku</li><li>Generación de documentación</li><li>Logs</li><li>Unit Tests</li><li>Integración con Travis</li></ul>|<ul><li>Deploy en Keroku</li><li>Generación de documentación</li><li>Servicio de gestión de App Servers</li><li>Logs</li><li>Unit Tests</li><li>Integración con Travis</li></ul>| <ul><li>Mockups</li><li>Reporte de coverage</li></ul> |
+|   **#2**    | 12/10 |<ul><li>Pantalla principal</li><li>Vista perfil de usuario</li><li>Modificación perfil de usuario</li><li>Signup + Login contra App Server</li></ul>|<ul><li>Servicio de autenticación</li><li>Modificación de datos de perfil de usuario</li><li> Servicio de choferes disponibles</li><li>Modelo de datos Mongodb de perfiles/choferes</li></ul>|<ul><li>Servicio de gestión de usuarios de negocio</li><li>Servicio de gestión de datos de usuario</li><li>Modelo de datos de PostgreSql</li><li>Docker</li><li>Listado de Usuarios(backoffice)</li></ul>| <ul><li>Diseño</li><li>Modelo de datos</li></ul> |
+|   **#3**    | 09/11 | <ul><li>Notificaciones push</li><li>Generación de documentación de código</li><li>Unit tests</li></ul> |  <ul><li>Servicio de posicionamiento</li><li> Servicio de viajes disponibles</li><li>Modelo de datos Mongodb completo</li></ul>  | <ul><li>Servicio de viajes</li><li>Servicio de cotización de viaje</li><li>Servicio de estado actual</li><li>Modelo de datos Postgresql completo</li><li>Estado actual (backoffice)></li><li>Historial de viajes (backoffice)></li></ul>  | <ul><li>Manual de instalación y configuración</li></ul> |
+| **Entrega** | 07/12 |   -     |    -    |    -    |  <ul><li>Documentación actualizada</li><li>Funcionalidad completa</li></ul> |
 
 ## Diagrama de estados de los usuarios
+
+Al hacer uso de la aplicación el usuario puede encontrarse en distintos estados según el punto del ciclo de uso en el cual se encuentre. A continuación, mostramos los estados posibles, tanto para pasajeros como para conductores, en los que se encuentran los usuarios al utilizar la aplicación y las posibles transiciones entre dichos estados.
 
 ![Diagrama de estados de los pasajeros](https://github.com/fi-ubers/app-server/blob/master/docs/PassStateDiag.png)
 
