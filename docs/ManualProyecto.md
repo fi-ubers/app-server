@@ -57,4 +57,14 @@ El desarrollo de este proyecto fue realizado en forma incremental, de forma tal 
 |   **#3**    | 09/11 | <ul><li>Notificaciones push</li><li>Generación de documentación de código</li><li>Unit tests</li></ul> |  <ul><li>Servicio de posicionamiento</li><li> Servicio de viajes disponibles</li><li>Modelo de datos Mongodb completo</li></ul>  | <ul><li>Servicio de viajes</li><li>Servicio de cotización de viaje</li><li>Servicio de estado actual</li><li>Modelo de datos Postgresql completo</li><li>Estado actual (backoffice)></li><li>Historial de viajes (backoffice)></li></ul>  | <ul><li>Manual de instalación y configuración</li></ul> |
 | **Entrega** | 07/12 |   -     |    -    |    -    |  <ul><li>Documentación actualizada</li><li>Funcionalidad completa</li></ul> |
 
+## Puntos a mejorar, bugs conocidos y features pendientes
+
+|  Feature / Upgrade  | Must Have | Should Have | Nice to Have |
+|:---------:|:---------:|:-----------:|:------------:|
+|Sistema de recomendación de choferes| | | <font color="green">X</font> |
+|Servicio de reporte de denuncias| | | <font color="green">X</font> |
+|Botón de pánico| | | <font color="green">X</font> |
+|Proceso *User Friendly* de inicio/fin de viajes | | <font color="yellow">X</font> |  |
+
+
 
