@@ -19,11 +19,11 @@ tripList3 = []
 
 
 user1 = {"_id": 1, "birthdate": "18-7-1994", "country": "Norway", "email": "juanma@mail.jm", "images": [ "No tengo imagen" ],"name": "Juan", "surname": "Fresia", "type": "passenger","username": "juan", "cars": carList1,
-"transactions": transacList1, "trips" : tripList1}
+"transactions": transacList1, "trips" : tripList1, "online": True}
 user2 = {"_id": 2, "online": False, "birthdate": "6-10-1996", "country": "Norway", "email": "juanpa@mail.jp", "images": ["No tengo imagen"], "name": "Pablo", "surname": "Fresia", "type": "passenger", "username": "juanpi",
 "cars": carList2 ,"transactions":transacList2, "trips" : tripList2}
-user3 = {"_id": 3,  "birthdate": "17-10-1993", "country": "Georgia", "email": "euge@euge.com", "images": [ "No tengo imagen"	], "name": "Euge", "surname": "Mariotti", "type": "driver", "username": "euge","cars":carList3, "transactions": transacList3, "trips" : tripList3, "rating":{"rate":0, "rateCount":0}}
-user4 = {"_id": 10, "birthdate": "3-1-1997", "country": "Italy", "email": "corneliusf@gmail.com", "images": [ "No tengo imagen" ],"name": "Cornelius", "surname": "Fudge", "type": "passenger","username": "cornelius999", "cars": carList1, "transactions": transacList1, "trips" : tripList1, "coord":{"lat":"0", "lng":"0"}, "online":True}
+user3 = {"_id": 3,  "birthdate": "17-10-1993", "country": "Georgia", "email": "euge@euge.com", "images": [ "No tengo imagen"	], "name": "Euge", "surname": "Mariotti", "type": "driver", "username": "euge","cars":carList3, "transactions": transacList3, "trips" : tripList3, "rating":{"rate":0, "rateCount":0}, "online": False} 
+user4 = {"_id": 10, "birthdate": "3-1-1997", "country": "Italy", "email": "corneliusf@gmail.com", "images": [ "No tengo imagen" ],"name": "Cornelius", "surname": "Fudge", "type": "driver","username": "cornelius999", "cars": carList1, "transactions": transacList1, "trips" : tripList1, "coord":{"lat":"0", "lng":"0"}, "online":True}
 user5 = {"_id": 11, "birthdate": "3-1-1997", "country": "England", "email": "sh@holmes.com", "images": [ "No tengo imagen" ],"name": "Sherlock", "surname": "Holmes", "type": "passenger","username": "sherlockholmes", "cars": carList1, "transactions": transacList1, "trips" : tripList1, "coord":{"lat":"0", "lng":"0"}, "online":True}
 default_db = [user1, user2, user3, user4, user5]
 
@@ -68,6 +68,9 @@ class CollectionMock(object):
 			for doc in self.docs:
 				if (doc.has_key(key) or doc[key] == cond[key]):
 					self.docs.remove(doc)
+
+	def update_one(self, cond, params):
+		return self.update(cond, params)
 
 	def update(self, cond, params):
 		for key in cond.keys():

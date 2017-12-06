@@ -90,10 +90,12 @@ class Trips(Resource):
 		logger.getLogger().debug("Created trip with uudi: " + new_trip["_id"])
 
 		# (shared) Ask shared for a trip cost estimation
+		(status, response) = ServerRequest.estimateTrip(TripStates.trip_to_shared(new_trip))
 		try:
 			(status, response) = ServerRequest.estimateTrip(TripStates.trip_to_shared(new_trip))
 		except Exception as e:
 			logger.getLogger().exception("No cost estimation from server: " + str(e))
+			return ResponseMaker.response_error(constants.ERROR, "Internal server error - there is no estimation")
 
 		if not status == constants.SUCCESS:
 			logger.getLogger().exception("No cost estimation from server: " + str(e))
