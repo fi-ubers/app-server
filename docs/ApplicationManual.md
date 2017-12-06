@@ -178,8 +178,6 @@ Los *Trips* tienen una referencia tanto al *Passenger* como al *Driver* (cuando 
 
 Las posibles transiciones entre los estados puede resumirse en el siguiente diagrama:
 
-_Acá viene la imágen_
-
 ![Diagrama de secuencias del ciclo de vida de un viaje](https://github.com/fi-ubers/app-server/blob/master/docs/TripSeqDiagram.png)
 
 ### Login y Logout de *Users*
