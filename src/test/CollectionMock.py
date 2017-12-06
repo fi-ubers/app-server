@@ -24,12 +24,14 @@ user2 = {"_id": 2, "online": False, "birthdate": "6-10-1996", "country": "Norway
 "cars": carList2 ,"transactions":transacList2, "trips" : tripList2}
 user3 = {"_id": 3,  "birthdate": "17-10-1993", "country": "Georgia", "email": "euge@euge.com", "images": [ "No tengo imagen"	], "name": "Euge", "surname": "Mariotti", "type": "driver", "username": "euge","cars":carList3, "transactions": transacList3, "trips" : tripList3, "rating":{"rate":0, "rateCount":0}, "online": False} 
 user4 = {"_id": 10, "birthdate": "3-1-1997", "country": "Italy", "email": "corneliusf@gmail.com", "images": [ "No tengo imagen" ],"name": "Cornelius", "surname": "Fudge", "type": "driver","username": "cornelius999", "cars": carList1, "transactions": transacList1, "trips" : tripList1, "coord":{"lat":"0", "lng":"0"}, "online":True}
-user5 = {"_id": 11, "birthdate": "3-1-1997", "country": "England", "email": "sh@holmes.com", "images": [ "No tengo imagen" ],"name": "Sherlock", "surname": "Holmes", "type": "passenger","username": "sherlockholmes", "cars": carList1, "transactions": transacList1, "trips" : tripList1, "coord":{"lat":"0", "lng":"0"}, "online":True}
-default_db = [user1, user2, user3, user4, user5]
+
+user100 = {"_id" : 100, "username" : "user100", "online" : True, "type" : "passenger", "state" : User.USER_PSG_IDLE}
+user101 = {"_id" : 101, "username" : "user101", "online" : True, "type" : "passenger", "state" : User.USER_PSG_WAITING_ACCEPT}
+
+default_db = [user1, user2, user3, user4, user100, user101]
 
 
-
-trip1 = { "_id" : "1" }
+trip1 = { "_id" : "1", "state" : TripStates.TRIP_PROPOSED }
 trips_db = [ trip1 ]
 
 
@@ -38,7 +40,7 @@ class CollectionMock(object):
 		self.docs = []
 		self.source = []
 		if collection == "online":
-			for u in default_db[0:4]:
+			for u in default_db:
 				self.source.append(User.UserJSON(u))
 
 		elif collection == "active_trips":
@@ -92,28 +94,3 @@ class CollectionMock(object):
 							if item[filterName] == filterValue:
 								alist.remove(item)
 
-
-"""
-class CollectionMock(object):
-	def __init__(self, collection):
-		print("Someone wants collection " + collection)
-		if collection == "online":
-			self.collection = UserCollectionMock(default_db)
-		else:
-			self.collection = TripsCollectionMock() 
-
-	def update(self, cond, params):
-		return self.collection.update(cond, params)
-
-	def reset(self):
-		return self.collection.reset()
-
-	def find(self, match={}):
-		return self.collection.find(match)
-
-	def insert_one(self, new):
-		return self.collection.insert_one(new)
-
-	def delete_many(self, cond):
-		return self.collection.delete_many(cond)
-"""

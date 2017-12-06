@@ -138,7 +138,7 @@ class TestUsersLogin(object):
 
 	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
 	def test_getall_users_authorized(self, validateTokenMock):
-		expected = default_db[0:4]
+		expected = default_db
 
 		self.app = app.test_client()
 		response = self.app.get(V1_URL + '/users', headers={"UserToken" : "A fake token"})

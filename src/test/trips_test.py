@@ -26,6 +26,7 @@ MongoController.getCollection = Mock(side_effect = CollectionMock)
 from src.main.com import ServerRequest, TokenGenerator
 from src.main.resources import Trips
 from src.main.myApp import application as app
+from src.main.model import TripStates
 
 ServerRequest.QUERY_TOKEN = MOCK_TOKEN
 
@@ -215,3 +216,13 @@ class TestUsertrips(object):
 		print(response_parsed)
 		assert(response.status_code == 200)
 		assert("Trip created" in response_parsed["message"])
+
+	@patch("src.main.com.TokenGenerator.validateToken", return_value=MOCK_TOKEN_VALIDATION_DRV_ONLINE)
+	@patch("src.main.com.ServerRequest.requests.get", side_effect=FakeGet)
+	def test_get_proposed_trips_success(self, validateTokenMock, FakeGet):
+		expected = [trip for trip in trips_db if trip["state"] == TripStates.TRIP_PROPOSED ]
+		self.app = app.test_client()
+		response = self.app.get(V1_URL + "/trips", headers={"UserToken" : "A fake token"}, content_type='application/json')
+		response_parsed = json.loads(response.get_data())
+		assert(response.status_code == 200)
+		assert(expected == response_parsed["trips"])
