@@ -15,7 +15,7 @@ os.environ["SS_URL"] = MOCK_URL
 os.environ["APP_TOKEN"] = "untokendementira"
 
 from mock import Mock, patch
-from CollectionMock import default_db, CollectionMock
+from CollectionMock import default_db, CollectionMock, trips_db
 from src.main.mongodb import MongoController
 MongoController.getCollection = Mock(side_effect = CollectionMock)
 
@@ -139,14 +139,13 @@ class TestUsertrips(object):
 	@patch("src.main.com.TokenGenerator.validateToken", return_value=MOCK_TOKEN_VALIDATION_1)
 	@patch("src.main.com.ServerRequest.requests.get", side_effect=FakeGet)
 	def test_get_trip_by_id_success(self, validateTokenMock, FakeGet):
-		expected = default_db[0]
+		expected = trips_db[0]
 		self.app = app.test_client()
 		response = self.app.get(V1_URL + "/trips/1", headers={"UserToken" : "A fake token"})
 		response_parsed = json.loads(response.get_data())
 		assert(response.status_code == 200)
-		assert(response_parsed["trip"] == expected["trips"][0])
+		assert(response_parsed["trip"] == expected)
 
-	"""
 	@patch("src.main.com.TokenGenerator.validateToken", return_value=MOCK_TOKEN_VALIDATION_1)
 	@patch("src.main.com.ServerRequest.requests.get", side_effect=FakeGet)
 	def test_get_trip_by_id_nonexistent(self, validateTokenMock, FakeGet):
@@ -154,37 +153,8 @@ class TestUsertrips(object):
 		response = self.app.get(V1_URL + "/trips/12555", headers={"UserToken" : "A fake token"})
 		response_parsed = json.loads(response.get_data())
 		assert(response.status_code == 404)
-		assert(response_parsed['message'] == "NOT FOUND")
-
-	@patch("src.main.com.TokenGenerator.validateToken", return_value=MOCK_TOKEN_VALIDATION_1)
-	@patch("src.main.com.ServerRequest.requests.get", side_effect=FakeGet)
-	def test_get_trip_by_id_error(self, validateTokenMock, FakeGet):
-		self.app = app.test_client()
-		response = self.app.get(V1_URL + "/trips/2", headers={"UserToken" : "A fake token"})
-		response_parsed = json.loads(response.get_data())
-		assert(response.status_code == 500)
-		assert(response_parsed["message"] == "Unknown Error")
-
-	@patch("src.main.com.TokenGenerator.validateToken", return_value=MOCK_TOKEN_VALIDATION_1)
-	@patch("src.main.com.ServerRequest.requests.post", side_effect=FakePost)
-	def test_new_trip_error(self, validateTokenMock, FakePost):
-		expected = default_db[0]["trips"][0]
-		self.app = app.test_client()
-		response = self.app.post(V1_URL + "/trips", headers={"UserToken" : "A fake token"}, data = json.dumps(expected), content_type='application/json')
-		response_parsed = json.loads(response.get_data())
-		assert(response.status_code == 500)
-		assert(response_parsed["message"] == "Unknown Error")
-	
-	@patch("src.main.com.TokenGenerator.validateToken", return_value=MOCK_TOKEN_VALIDATION_1)
-	@patch("src.main.com.ServerRequest.requests.post", side_effect=FakePost)
-	def test_new_trip_success(self,validateTokenMock, FakePost):
-		expected = default_db[1]["trips"][0]
-		self.app = app.test_client()
-		response = self.app.post(V1_URL + "/trips", headers={"UserToken" : "A fake token"}, data = json.dumps(expected), content_type='application/json')
-		response_parsed = json.loads(response.get_data())
-		assert(response.status_code == 201)
-		assert(response_parsed["trip"] == expected)
-	"""
+		assert(response_parsed['message'] == "Not found")
+		
 	@patch("src.main.com.TokenGenerator.validateToken", return_value=MOCK_TOKEN_VALIDATION_1)
 	@patch("src.main.com.ServerRequest.requests.post", side_effect=FakePost)
 	def test_estimate_trip_success(self,validateTokenMock, FakePost):
