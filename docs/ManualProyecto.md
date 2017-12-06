@@ -40,6 +40,8 @@ Consiste en una aplicación mobile para Android.
 
 Un servidor web HTTP implementado en Python usando Gunicorn y Flask como frameworks.
 
+El *Application Server* cumple la función de almacenar todos los datos pertinentes a los servicios provistos por la aplicación. Por ejemplo, los estados actuales de los usuarios y los viajes en curso se almacenan en esta capa. El *App Server* también funciona como gestor de transacciones contra el *Shared Server*, que es donde se almacenan todos los datos historicos de usuarios y viajes. Además de almacenar los datos de las operaciones en curso, el *App Server* provee la lógica de transición entre estados de los usuarios y el servicio de posicionamiento de choferes y pasajeros.
+
 ## Shared Server
 
 Un servidor web HTTP implementado en Javascript usando nodeJs. También presenta una interfaz gráfica implementada con Angular.
@@ -54,14 +56,5 @@ El desarrollo de este proyecto fue realizado en forma incremental, de forma tal 
 |   **#2**    | 12/10 |<ul><li>Pantalla principal</li><li>Vista perfil de usuario</li><li>Modificación perfil de usuario</li><li>Signup + Login contra App Server</li></ul>|<ul><li>Servicio de autenticación</li><li>Modificación de datos de perfil de usuario</li><li> Servicio de choferes disponibles</li><li>Modelo de datos Mongodb de perfiles/choferes</li></ul>|<ul><li>Servicio de gestión de usuarios de negocio</li><li>Servicio de gestión de datos de usuario</li><li>Modelo de datos de PostgreSql</li><li>Docker</li><li>Listado de Usuarios(backoffice)</li></ul>| <ul><li>Diseño</li><li>Modelo de datos</li></ul> |
 |   **#3**    | 09/11 | <ul><li>Notificaciones push</li><li>Generación de documentación de código</li><li>Unit tests</li></ul> |  <ul><li>Servicio de posicionamiento</li><li> Servicio de viajes disponibles</li><li>Modelo de datos Mongodb completo</li></ul>  | <ul><li>Servicio de viajes</li><li>Servicio de cotización de viaje</li><li>Servicio de estado actual</li><li>Modelo de datos Postgresql completo</li><li>Estado actual (backoffice)></li><li>Historial de viajes (backoffice)></li></ul>  | <ul><li>Manual de instalación y configuración</li></ul> |
 | **Entrega** | 07/12 |   -     |    -    |    -    |  <ul><li>Documentación actualizada</li><li>Funcionalidad completa</li></ul> |
-
-## Diagrama de estados de los usuarios
-
-Al hacer uso de la aplicación el usuario puede encontrarse en distintos estados según el punto del ciclo de uso en el cual se encuentre. A continuación, mostramos los estados posibles, tanto para pasajeros como para conductores, en los que se encuentran los usuarios al utilizar la aplicación y las posibles transiciones entre dichos estados.
-
-![Diagrama de estados de los pasajeros](https://github.com/fi-ubers/app-server/blob/master/docs/PassStateDiag.png)
-
-![Diagrama de estados de los conductores](https://github.com/fi-ubers/app-server/blob/master/docs/DriverStateDiag.png)
-
 
 
