@@ -48,6 +48,16 @@ Un servidor web HTTP implementado en Javascript usando nodeJs. También presenta
 
 El *Shared Server* es el servidor que almacena los datos de usuarios y viajes a largo plazo. Está encargado de manejar y validar cualquier modificación realizada sobre el set de datos, garantizar su integridad y proveer seguridad sobre las transacciones. El *Shared Server* también provee una interfaz para interactuar con los usuarios administradores, para permitir la definición de permisos y reglas sobre los pagos.
 
+## Herramientas utilizadas
+
+En el diagrama de arquitectura se presentó una visión general de las herramientas principales utilizadas en cada capa. El lector podrá optar por indagar sobre las herramientas específicas utilizadas en cada nivel, acudiendo a los manuales de cada uno (links en la introducción). Existen, sin embargo, algunas herramientas cruciales que fueron utilizadas en los 3 niveles, facilitando el desarrollo en paralelo continuo e incremental.
+
++ Travis CI: la integración continua con Travis fue fundamental para el desarrollo del proyecto. Además de permitir una evolución progresiva y ordenada, Travis posibilita la ejecución de numerosa cantidad de comandos para automatizar tareas como el *deploy* en Heroku, la generación de reportes de coverage y la corrida de tests.
+
++ Heroku: tanto para el *Cliente*, como para el *App Server* y el *Shared Server* procuramos mantener una versión funcional siempre corriendo en Heroku para poder permitir a las otras capas realizar pruebas y tener acceso a los logs. 
+
++ Docker: una de las primeras prioridades del proyecto consistió en incorporar Docker en todos los niveles para garantizar la compatibilidad y la consistencia en el comportamiento de cada aplicación.
+
 ## Hitos de desarrollo
 
 El desarrollo de este proyecto fue realizado en forma incremental, de forma tal que las funcionalidades fueron incorporadas de acuerdo con los siguientes hitos:
