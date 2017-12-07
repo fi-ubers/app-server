@@ -36,6 +36,8 @@ Esta aplicación ofrece al usuario los siguientes servicios:
 
 Consiste en una aplicación mobile para Android.
 
+El *Cliente Android* representa la aplicación en sí para los usuarios finales (pasajeros y choferes). Su función es brindarle a los mismos un punto de entrada al resto del sistema, ofreciéndoles la posibilidad de crear o aceptar viajes de forma eficiente e intuitiva. Para una mayor performance y un diseño más estructurado, el *Cliente Android* delega una buena parte de la lógica de la aplicación en el *Application Server*, contra el cual se comunica constantemente.
+
 ## Application Server
 
 Un servidor web HTTP implementado en Python usando Gunicorn y Flask como frameworks.
