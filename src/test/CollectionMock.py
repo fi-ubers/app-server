@@ -72,7 +72,8 @@ trip10 = { "_id" : "10", "state" : TripStates.TRIP_FINISHED_DRIVER, "passengerId
 trip11 = { "_id" : "11", "state" : TripStates.TRIP_STARTED, "passengerId" : user110["_id"], "driverId" : user209["_id"] }
 trip12 = { "_id" : "12", "state" : TripStates.TRIP_FINISHED_PASSENGER, "passengerId" : user111["_id"], "driverId" : user210["_id"] }
 trip13 = { "_id" : "13", "state" : TripStates.TRIP_FINISHED, "passengerId" : user112["_id"], "driverId" : user210["_id"] }
-trip14 = { "_id" : "14", "state" : TripStates.TRIP_FINISHED, "passengerId" : user113["_id"], "driverId" : user210["_id"] }
+trip14 = { "_id" : "14", "state" : TripStates.TRIP_FINISHED, "passengerId" : user113["_id"], "driverId" : user210["_id"],
+		"directions" : { "origin" : {"lat" : 10, "lng" : 14}, "destination" : {"lat" : 11, "lng" : 15}, "distance" : 20, "duration" : 10, "path" : [], "status" : "OK" } }
 trips_db = [ trip1, trip2, trip3, trip4, trip5, trip6, trip7, trip8, trip9, trip10, trip11, trip12, trip13, trip14 ]
 
 class CollectionMock(object):
@@ -135,3 +136,6 @@ class CollectionMock(object):
 						parameters = params['$set']
 						print(parameters)
 						doc[parameters.keys()[0]] = parameters[parameters.keys()[0]]
+
+	def remove(self, cond):
+		pass
