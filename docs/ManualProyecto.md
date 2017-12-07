@@ -52,7 +52,7 @@ El *Shared Server* es el servidor que almacena los datos de usuarios y viajes a 
 
 ## Herramientas utilizadas
 
-En el diagrama de arquitectura se presentó una visión general de las herramientas principales utilizadas en cada capa. El lector podrá optar por indagar sobre las herramientas específicas utilizadas en cada nivel, acudiendo a los manuales de cada uno (links en la introducción). Existen, sin embargo, algunas herramientas cruciales que fueron utilizadas en los 3 niveles, facilitando el desarrollo en paralelo continuo e incremental.
+En el diagrama de arquitectura se presentó una visión general de las herramientas principales utilizadas en cada capa. El lector podrá optar por indagar sobre las herramientas específicas utilizadas en cada nivel, acudiendo a los manuales de cada uno (links en la introducción). Existen, sin embargo, algunas herramientas que resultaron ser más cruciales que otras, facilitando el desarrollo en paralelo continuo e incremental.
 
 + Travis CI: la integración continua con Travis fue fundamental para el desarrollo del proyecto. Además de permitir una evolución progresiva y ordenada, Travis posibilita la ejecución de numerosa cantidad de comandos para automatizar tareas como el *deploy* en Heroku, la generación de reportes de coverage y la corrida de tests.
 
@@ -71,7 +71,7 @@ El desarrollo de este proyecto fue realizado en forma incremental, de forma tal 
 |   **#3**    | 09/11 | <ul><li>Notificaciones push</li><li>Generación de documentación de código</li><li>Unit tests</li></ul> |  <ul><li>Servicio de posicionamiento</li><li> Servicio de viajes disponibles</li><li>Modelo de datos Mongodb completo</li></ul>  | <ul><li>Servicio de viajes</li><li>Servicio de cotización de viaje</li><li>Servicio de estado actual</li><li>Modelo de datos Postgresql completo</li><li>Estado actual (backoffice)></li><li>Historial de viajes (backoffice)></li></ul>  | <ul><li>Manual de instalación y configuración</li></ul> |
 | **Entrega** | 07/12 |   -     |    -    |    -    |  <ul><li>Documentación actualizada</li><li>Funcionalidad completa</li></ul> |
 
-## Puntos a mejorar, bugs conocidos y features pendientes
+## Puntos a mejorar y features pendientes
 
 En general, se lograron alcanzar todos los puntos claves para cubrir el alcance definido inicialmente para el proyecto. Existen algunos elementos que nos hubiera gustado agregar pero que por restricciones temporales no nos fue posible incluir. Esta sección está destinada a enumerar algunos de esos aspectos.
 
@@ -80,7 +80,9 @@ En general, se lograron alcanzar todos los puntos claves para cubrir el alcance 
 |Sistema de recomendación de choferes| | | <font color="green">X</font> |
 |Servicio de reporte de denuncias| | | <font color="green">X</font> |
 |Botón de pánico| | | <font color="green">X</font> |
-|Proceso *User Friendly* de inicio/fin de viajes | | <font color="yellow">X</font> |  |
+|Notificaciones configurables| | | <font color="green">X</font> |
+|Más características de vehículos| | | <font color="green">X</font> |
+|Inicio y fin de viajes *User Friendly*| | <font color="yellow">X</font> |  |
 
 
 
