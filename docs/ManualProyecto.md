@@ -46,6 +46,8 @@ El *Application Server* cumple la función de almacenar todos los datos pertinen
 
 Un servidor web HTTP implementado en Javascript usando nodeJs. También presenta una interfaz gráfica implementada con Angular.
 
+El *Shared Server* es el servidor que almacena los datos de usuarios y viajes a largo plazo. Está encargado de manejar y validar cualquier modificación realizada sobre el set de datos, garantizar su integridad y proveer seguridad sobre las transacciones. El *Shared Server* también provee una interfaz para interactuar con los usuarios administradores, para permitir la definición de permisos y reglas sobre los pagos.
+
 ## Hitos de desarrollo
 
 El desarrollo de este proyecto fue realizado en forma incremental, de forma tal que las funcionalidades fueron incorporadas de acuerdo con los siguientes hitos:
@@ -58,6 +60,8 @@ El desarrollo de este proyecto fue realizado en forma incremental, de forma tal 
 | **Entrega** | 07/12 |   -     |    -    |    -    |  <ul><li>Documentación actualizada</li><li>Funcionalidad completa</li></ul> |
 
 ## Puntos a mejorar, bugs conocidos y features pendientes
+
+En general, se lograron alcanzar todos los puntos claves para cubrir el alcance definido inicialmente para el proyecto. Existen algunos elementos que nos hubiera gustado agregar pero que por restricciones temporales no nos fue posible incluir. Esta sección está destinada a enumerar algunos de esos aspectos.
 
 |  Feature / Upgrade  | Must Have | Should Have | Nice to Have |
 |:---------:|:---------:|:-----------:|:------------:|
