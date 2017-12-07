@@ -14,9 +14,9 @@ os.environ['SS_URL'] = MOCK_URL
 os.environ["APP_TOKEN"] = "untokendementira"
 
 from mock import Mock, patch
-from CollectionMock import UserCollectionMock, default_db
+from CollectionMock import CollectionMock, default_db
 from src.main.mongodb import MongoController
-MongoController.getCollection = Mock(return_value = UserCollectionMock())
+MongoController.getCollection = Mock(side_effect = CollectionMock)
 
 
 from src.main.com import ServerRequest, TokenGenerator

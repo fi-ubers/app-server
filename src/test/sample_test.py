@@ -17,9 +17,9 @@ os.environ['SS_URL'] = MOCK_URL
 os.environ["APP_TOKEN"] = "untokendementira"
 
 from mock import Mock, patch
-from CollectionMock import UserCollectionMock, default_db
+from CollectionMock import CollectionMock, default_db
 from src.main.mongodb import MongoController
-MongoController.getCollection = Mock(return_value = UserCollectionMock())
+MongoController.getCollection = Mock(side_effect = CollectionMock)
 
 from src.main.com import ServerRequest, TokenGenerator
 from src.main.resources import UserLogin
@@ -138,7 +138,7 @@ class TestUsersLogin(object):
 
 	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
 	def test_getall_users_authorized(self, validateTokenMock):
-		expected = default_db[0:4]
+		expected = default_db
 
 		self.app = app.test_client()
 		response = self.app.get(V1_URL + '/users', headers={"UserToken" : "A fake token"})
@@ -342,11 +342,11 @@ class TestUsersLogin(object):
 		response = self.app.get(V1_URL + '/users/3/rating', headers={"UserToken" : "A fake token"})
 		assert(response.status_code == 403)
 
-	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_10)
+	@patch('src.main.com.TokenGenerator.validateToken', return_value=MOCK_TOKEN_VALIDATION_1)
 	@patch('src.main.com.ServerRequest.requests.get', side_effect=FakeGet)
 	def test_get_passengerrate_error(self, validateTokenMock, FakeGet):
 		self.app = app.test_client()
-		response = self.app.get(V1_URL + '/users/10/rating', headers={"UserToken" : "A fake token"})
+		response = self.app.get(V1_URL + '/users/1/rating', headers={"UserToken" : "A fake token"})
 		response_parsed = json.loads(response.get_data())
 		assert(response.status_code == 400)
 		assert(response_parsed["message"] == "The requested user is not a driver. Only drivers receive ratings.")
