@@ -40,6 +40,8 @@ user108 = {"_id" : 108, "username" : "user108", "online" : True, "type" : "passe
 user109 = {"_id" : 109, "username" : "user109", "online" : True, "type" : "passenger", "state" : User.USER_PSG_TRAVELING}
 user110 = {"_id" : 110, "username" : "user110", "online" : True, "type" : "passenger", "state" : User.USER_PSG_TRAVELING}
 user111 = {"_id" : 111, "username" : "user111", "online" : True, "type" : "passenger", "state" : User.USER_PSG_WAITING_FINISH}
+user112 = {"_id" : 112, "username" : "user112", "online" : True, "type" : "passenger", "state" : User.USER_PSG_ARRIVED}
+user113 = {"_id" : 113, "username" : "user113", "online" : True, "type" : "passenger", "state" : User.USER_PSG_ARRIVED}
 
 user200 = {"_id" : 200, "username" : "user200", "online" : True, "type" : "driver", "state" : User.USER_DRV_IDLE}
 user201 = {"_id" : 201, "username" : "user201", "online" : True, "type" : "driver", "state" : User.USER_DRV_WAITING_CONFIRMATION}
@@ -54,7 +56,7 @@ user209 = {"_id" : 209, "username" : "user209", "online" : True, "type" : "drive
 user210 = {"_id" : 210, "username" : "user210", "online" : True, "type" : "driver", "state" : User.USER_DRV_TRAVELING}
 
 default_db = [user1, user2, user3, user4, user100, user101, user102, user103, user104, user105, user106, user107,
-		user108, user109, user110, user111, user200, user201, user202, user203, user204, user205, user206,
+		user108, user109, user110, user111, user112, user113, user200, user201, user202, user203, user204, user205, user206,
 		user207, user208, user209, user210 ]
 
 trip1 = { "_id" : "1", "state" : TripStates.TRIP_PROPOSED }
@@ -69,7 +71,9 @@ trip9 = { "_id" : "9", "state" : TripStates.TRIP_STARTED, "passengerId" : user10
 trip10 = { "_id" : "10", "state" : TripStates.TRIP_FINISHED_DRIVER, "passengerId" : user109["_id"], "driverId" : user208["_id"] }
 trip11 = { "_id" : "11", "state" : TripStates.TRIP_STARTED, "passengerId" : user110["_id"], "driverId" : user209["_id"] }
 trip12 = { "_id" : "12", "state" : TripStates.TRIP_FINISHED_PASSENGER, "passengerId" : user111["_id"], "driverId" : user210["_id"] }
-trips_db = [ trip1, trip2, trip3, trip4, trip5, trip6, trip7, trip8, trip9, trip10, trip11, trip12 ]
+trip13 = { "_id" : "13", "state" : TripStates.TRIP_FINISHED, "passengerId" : user112["_id"], "driverId" : user210["_id"] }
+trip14 = { "_id" : "14", "state" : TripStates.TRIP_FINISHED, "passengerId" : user113["_id"], "driverId" : user210["_id"] }
+trips_db = [ trip1, trip2, trip3, trip4, trip5, trip6, trip7, trip8, trip9, trip10, trip11, trip12, trip13, trip14 ]
 
 class CollectionMock(object):
 	def __init__(self, collection):
