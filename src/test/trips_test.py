@@ -221,6 +221,7 @@ class TestUsertrips(object):
 	@patch("src.main.com.ServerRequest.requests.get", side_effect=FakeGet)
 	def test_get_proposed_trips_success(self, validateTokenMock, FakeGet):
 		expected = [ trip for trip in trips_db if trip["state"] == TripStates.TRIP_PROPOSED ]
+		print(trips_db)
 		self.app = app.test_client()
 		response = self.app.get(V1_URL + "/trips?limit=10&filter=proposed", headers={"UserToken" : "A fake token"}, content_type='application/json')
 		response_parsed = json.loads(response.get_data())

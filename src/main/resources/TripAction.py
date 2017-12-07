@@ -221,6 +221,8 @@ class TripActions(Resource):
 		if not passenger["state"] == User.USER_PSG_SELECTING_DRIVER:
 			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - wrong passenger state")
 
+		driver = list(users.find({ "_id" : trip["driverId"]}))[0]
+
 		active_trips = MongoController.getCollection("active_trips")
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "state" : TripStates.TRIP_PROPOSED } } )
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "driverId" : -1 } })
@@ -228,10 +230,10 @@ class TripActions(Resource):
 		users.update( { "_id" : trip["driverId"] }, { "$set" : { "state" : User.USER_DRV_IDLE } } ) 
 		users.update( { "_id" : trip["driverId"] }, { "$set" : { "tripId" : "" } } ) 
 
-		driver = list(users.find({ "_id" : trip["driverId"]}))[0]
 		NotificationSender().notifyUser(driver["username"], "Trip rejected")
 		NotificationSender().notifyUser(passenger["username"], "Driver rejected!")
 
+		trip = list(active_trips.find({"_id" : trip["_id"]}))[0]
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was updated.", action["action"], trip])
 
 	def start_handler_any(self, action, trip, user):
@@ -259,6 +261,7 @@ class TripActions(Resource):
 		# Send notification to the other user 
 		NotificationSender().notifyUser(theother["username"], user["username"] + " is ready to start the trip!")
 
+		trip = list(active_trips.find({"_id" : trip["_id"]}))[0]
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip was updated.", action["action"], trip])
 
 	def start_handler_passenger(self, action, trip, user):
@@ -275,6 +278,8 @@ class TripActions(Resource):
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "time_start" :  datetime.datetime.now().isoformat() } } )
 		users.update( { "_id" : user["_id"] }, { "$set" : { "state" : User.USER_PSG_TRAVELING} } ) 
 		users.update( { "_id" : driver["_id"] }, { "$set" : { "state" : User.USER_DRV_TRAVELING} } ) 
+
+		trip = list(active_trips.find({"_id" : trip["_id"]}))[0]
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip just started.", action["action"], trip])
 
 
@@ -292,6 +297,8 @@ class TripActions(Resource):
 		active_trips.update( { "_id" : trip["_id"] }, { "$set" : { "time_start" :  datetime.datetime.now().isoformat() } } )
 		users.update( { "_id" : user["_id"]}, { "$set" : { "state" : User.USER_DRV_TRAVELING} } ) 
 		users.update( { "_id" : passenger["_id"] }, { "$set" : { "state" : User.USER_PSG_TRAVELING} } ) 
+
+		trip = list(active_trips.find({"_id" : trip["_id"]}))[0]
 		return ResponseMaker.response_object(constants.SUCCESS, ["message", "action", "trip"], ["Trip just started.", action["action"], trip])
 
 	def start_handler(self, action, trip, userId):
@@ -310,10 +317,10 @@ class TripActions(Resource):
 			return ResponseMaker.response_error(constants.PARAMERR, "Bad request - user not found")
 		user = user[0]
 
-		dist = Distances.computeDistance(user["coord"], trip["directions"]["origin"])
-		logger.getLogger().debug("Distance from user [" + user["username"] + "] to starting point is " + str(dist))
-		if dist > MAXIMUM_USER_DISTANCE:
-				return ResponseMaker.response_error(constants.PARAMERR, "Bad request - you are too far away from the starting point")
+		#dist = Distances.computeDistance(user["coord"], trip["directions"]["origin"])
+		#logger.getLogger().debug("Distance from user [" + user["username"] + "] to starting point is " + str(dist))
+		#if dist > MAXIMUM_USER_DISTANCE:
+		#		return ResponseMaker.response_error(constants.PARAMERR, "Bad request - you are too far away from the starting point")
 
 		# Anyone can accept first
 		if trip["state"] == TripStates.TRIP_CONFIRMED:

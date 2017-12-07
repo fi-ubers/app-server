@@ -30,16 +30,46 @@ user4 = {"_id": 10, "birthdate": "3-1-1997", "country": "Italy", "email": "corne
 ### These users have a special numbering scheme: 1xx is a passenger, 2xx is a driver. The last two digits represents realtive state (e.g. 0 == Idle, 1 == waiting_accept | waiting_confirm, etc)
 user100 = {"_id" : 100, "username" : "user100", "online" : True, "type" : "passenger", "state" : User.USER_PSG_IDLE}
 user101 = {"_id" : 101, "username" : "user101", "online" : True, "type" : "passenger", "state" : User.USER_PSG_WAITING_ACCEPT}
+user102 = {"_id" : 102, "username" : "user102", "online" : True, "type" : "passenger", "state" : User.USER_PSG_SELECTING_DRIVER}
+user103 = {"_id" : 103, "username" : "user103", "online" : True, "type" : "passenger", "state" : User.USER_PSG_SELECTING_DRIVER}
+user104 = {"_id" : 104, "username" : "user104", "online" : True, "type" : "passenger", "state" : User.USER_PSG_WAITING_DRIVER}
+user105 = {"_id" : 105, "username" : "user105", "online" : True, "type" : "passenger", "state" : User.USER_PSG_WAITING_DRIVER}
+user106 = {"_id" : 106, "username" : "user106", "online" : True, "type" : "passenger", "state" : User.USER_PSG_WAITING_DRIVER}
+user107 = {"_id" : 107, "username" : "user107", "online" : True, "type" : "passenger", "state" : User.USER_PSG_WAITING_START}
+user108 = {"_id" : 108, "username" : "user108", "online" : True, "type" : "passenger", "state" : User.USER_PSG_TRAVELING}
+user109 = {"_id" : 109, "username" : "user109", "online" : True, "type" : "passenger", "state" : User.USER_PSG_TRAVELING}
+user110 = {"_id" : 110, "username" : "user110", "online" : True, "type" : "passenger", "state" : User.USER_PSG_TRAVELING}
+user111 = {"_id" : 111, "username" : "user111", "online" : True, "type" : "passenger", "state" : User.USER_PSG_WAITING_FINISH}
 
 user200 = {"_id" : 200, "username" : "user200", "online" : True, "type" : "driver", "state" : User.USER_DRV_IDLE}
+user201 = {"_id" : 201, "username" : "user201", "online" : True, "type" : "driver", "state" : User.USER_DRV_WAITING_CONFIRMATION}
+user202 = {"_id" : 202, "username" : "user202", "online" : True, "type" : "driver", "state" : User.USER_DRV_WAITING_CONFIRMATION}
+user203 = {"_id" : 203, "username" : "user203", "online" : True, "type" : "driver", "state" : User.USER_DRV_GOING_TO_PICKUP}
+user204 = {"_id" : 204, "username" : "user204", "online" : True, "type" : "driver", "state" : User.USER_DRV_WAITING_START}
+user205 = {"_id" : 205, "username" : "user205", "online" : True, "type" : "driver", "state" : User.USER_DRV_GOING_TO_PICKUP}
+user206 = {"_id" : 206, "username" : "user206", "online" : True, "type" : "driver", "state" : User.USER_DRV_GOING_TO_PICKUP}
+user207 = {"_id" : 207, "username" : "user207", "online" : True, "type" : "driver", "state" : User.USER_DRV_TRAVELING}
+user208 = {"_id" : 208, "username" : "user208", "online" : True, "type" : "driver", "state" : User.USER_DRV_WAITING_FINISH}
+user209 = {"_id" : 209, "username" : "user209", "online" : True, "type" : "driver", "state" : User.USER_DRV_TRAVELING}
+user210 = {"_id" : 210, "username" : "user210", "online" : True, "type" : "driver", "state" : User.USER_DRV_TRAVELING}
 
-default_db = [user1, user2, user3, user4, user100, user101, user200]
-
+default_db = [user1, user2, user3, user4, user100, user101, user102, user103, user104, user105, user106, user107,
+		user108, user109, user110, user111, user200, user201, user202, user203, user204, user205, user206,
+		user207, user208, user209, user210 ]
 
 trip1 = { "_id" : "1", "state" : TripStates.TRIP_PROPOSED }
 trip2 = { "_id" : "2", "state" : TripStates.TRIP_PROPOSED, "passengerId" : user101["_id"] }
-trips_db = [ trip1, trip2 ]
-
+trip3 = { "_id" : "3", "state" : TripStates.TRIP_ACCEPTED, "passengerId" : user102["_id"], "driverId" : user201["_id"] }
+trip4 = { "_id" : "4", "state" : TripStates.TRIP_ACCEPTED, "passengerId" : user103["_id"], "driverId" : user202["_id"] }
+trip5 = { "_id" : "5", "state" : TripStates.TRIP_CONFIRMED, "passengerId" : user104["_id"], "driverId" : user203["_id"] }
+trip6 = { "_id" : "6", "state" : TripStates.TRIP_STARTED_DRIVER, "passengerId" : user105["_id"], "driverId" : user204["_id"] }
+trip7 = { "_id" : "7", "state" : TripStates.TRIP_CONFIRMED, "passengerId" : user106["_id"], "driverId" : user205["_id"] }
+trip8 = { "_id" : "8", "state" : TripStates.TRIP_STARTED_PASSENGER, "passengerId" : user107["_id"], "driverId" : user206["_id"] }
+trip9 = { "_id" : "9", "state" : TripStates.TRIP_STARTED, "passengerId" : user108["_id"], "driverId" : user207["_id"] }
+trip10 = { "_id" : "10", "state" : TripStates.TRIP_FINISHED_DRIVER, "passengerId" : user109["_id"], "driverId" : user208["_id"] }
+trip11 = { "_id" : "11", "state" : TripStates.TRIP_STARTED, "passengerId" : user110["_id"], "driverId" : user209["_id"] }
+trip12 = { "_id" : "12", "state" : TripStates.TRIP_FINISHED_PASSENGER, "passengerId" : user111["_id"], "driverId" : user210["_id"] }
+trips_db = [ trip1, trip2, trip3, trip4, trip5, trip6, trip7, trip8, trip9, trip10, trip11, trip12 ]
 
 class CollectionMock(object):
 	def __init__(self, collection):

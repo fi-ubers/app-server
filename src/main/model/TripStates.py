@@ -80,7 +80,6 @@ def trip_to_shared(trip):
 	new_trip["cost"] = trip["cost"] if "cost" in trip else {}
 	new_trip.pop("cost") 
 
-	print(new_trip)
 	return new_trip
 
 
